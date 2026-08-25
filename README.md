@@ -71,6 +71,9 @@ Người dùng chọn ghế trực tiếp trên **sơ đồ chỗ ngồi**.
 - Hiển thị giá của ghế hoặc khu vực.
 - Tự động cập nhật số lượng ghế và tổng tiền.
 
+Phạm vi hiện tại chỉ hỗ trợ vé có ghế đánh số. Vé khu vực đứng (General
+Admission) theo số lượng chưa được hỗ trợ và nằm ngoài phạm vi phiên bản này.
+
 ### 3.4. Temporary Seat Reservation
 
 Sau khi người dùng chọn ghế:
@@ -142,6 +145,9 @@ Sau khi đăng nhập, người dùng có thể:
   - Pending
   - Paid
   - Cancelled
+- Người dùng có thể hủy đơn theo chính sách của concert.
+- Đơn đủ điều kiện được ghi nhận yêu cầu hoàn tiền qua mock payment và cập nhật
+  trạng thái hoàn tiền.
 
 ### 3.8. Admin Dashboard
 
@@ -176,25 +182,45 @@ Hiển thị một số chỉ số cơ bản:
 - Total Revenue.
 - Upcoming Concerts.
 
+### 3.9. Cancellation & Refund
+
+- Người dùng gửi yêu cầu hủy từ Order Detail khi đơn còn đủ điều kiện.
+- Hệ thống hiển thị chính sách và yêu cầu xác nhận trước khi hủy.
+- Đơn chuyển sang Cancelled; nếu đã thanh toán, mock payment mô phỏng hoàn tiền.
+- Không thực hiện giao dịch tiền thật.
+
 ---
 
 ## 4. Các màn hình dự kiến
 
 ### User
 
-1. **Home**
+1. **Register**
+   Mục đích: Tạo tài khoản khách hàng mới.
+
+- Họ tên
+- Email
+- Mật khẩu
+
+2. **Login**
+   Mục đích: Đăng nhập tài khoản khách hàng để xem vé và đơn hàng.
+
+- Email
+- Mật khẩu
+
+3. **Home**
    Mục đích: Giúp người dùng khám phá nhanh các concert nổi bật.
    - Concert nổi bật
    - Trending
    - Upcoming concerts
 
-2. **Explore Concerts**
+4. **Explore Concerts**
    Mục đích: Tìm kiếm và lọc concert.
    - Search
    - Filter
    - Danh sách concert
 
-3. **Concert Detail**
+5. **Concert Detail**
    Mục đích: Cung cấp thông tin chi tiết trước khi mua vé.
    - Thông tin concert
    - Line-up
@@ -202,48 +228,76 @@ Hiển thị một số chỉ số cơ bản:
    - Giá vé
    - Seat map
 
-4. **Seat Selection**
+6. **Seat Selection**
    Mục đích: Cho phép người dùng chọn ghế trực tiếp.
    - Interactive seat map
    - Chọn ghế
    - Countdown giữ vé
    - Tổng tiền
 
-5. **Checkout**
+7. **Checkout**
    Mục đích: Xác nhận thông tin đơn hàng và mô phỏng thanh toán.
    - Thông tin vé
    - Ghế đã chọn
    - Tổng tiền
    - Phương thức thanh toán
-   - Xác nhận đơn hàng
-   - Payment Success
-   - Mã đơn hàng
-   - Link tới vé
 
-6. **My Tickets**
-   Mục đích: Quản lý các vé đã mua.
-   - Danh sách vé
-   - QR Code
-   - Thông tin concert
-   - Mã vé
+- Nút xác nhận thanh toán
 
-7. **Profile & Orders**
-   Mục đích: Quản lý tài khoản và lịch sử mua vé.
-   - Thông tin cá nhân
-   - Lịch sử đơn hàng
-   - Trạng thái thanh toán
+8. **Session Expired**
+   Mục đích: Thông báo phiên giữ ghế đã hết hạn.
 
-### Admin
+- Thông báo ghế đã được trả lại
+- Nút quay lại Seat Selection
 
-8. **Admin Dashboard**
-   Mục đích: Tổng quan và quản lý hệ thống.
-   - Tổng quan doanh thu
-   - Vé đã bán
-   - Concert đang hoạt động
-   - Quản lý concert
-   - Quản lý khu vực / ghế
-   - Quản lý đơn hàng
-   - Check-in và xác thực QR Code
+9. **Order Confirmation**
+   Mục đích: Xác nhận đặt vé thành công sau khi thanh toán.
+
+- Payment Success
+- Mã đơn hàng
+- Link tới vé
+
+10. **My Tickets**
+    Mục đích: Quản lý các vé đã mua.
+
+- Danh sách vé
+- QR Code
+- Thông tin concert
+- Mã vé
+
+11. **Profile & Orders**
+    Mục đích: Quản lý tài khoản và lịch sử mua vé.
+
+- Thông tin cá nhân
+- Lịch sử đơn hàng
+- Trạng thái thanh toán
+
+12. **Order Detail**
+    Mục đích: Xem chi tiết một đơn hàng và thao tác hủy nếu đủ điều kiện.
+
+- Thông tin concert, vé và tổng tiền
+- Trạng thái thanh toán / đơn hàng
+- Chính sách hủy và hoàn tiền
+- Nút hủy đơn
+
+### Authentication & Admin
+
+13. **Admin Login**
+    Mục đích: Xác thực quản trị viên trước khi vào khu vực quản trị.
+
+- Tài khoản quản trị
+- Mật khẩu
+
+14. **Admin Dashboard**
+    Mục đích: Tổng quan và quản lý hệ thống.
+
+- Tổng quan doanh thu
+- Vé đã bán
+- Concert đang hoạt động
+- Quản lý concert
+- Quản lý khu vực / ghế
+- Quản lý đơn hàng
+- Check-in và xác thực QR Code
 
 ---
 
@@ -266,7 +320,7 @@ Checkout
   ↓
 Mock Payment
   ↓
-Payment Success
+Order Confirmation
   ↓
 My Tickets
   ↓
@@ -285,6 +339,16 @@ Select Ticket
 Digital Ticket
   ↓
 View QR Code
+```
+
+**5.2a. Customer — Register & Login**
+
+```text
+Register
+  ↓
+Login
+  ↓
+Home
 ```
 
 **5.3. Customer — View Order History**
@@ -344,3 +408,35 @@ Validate Ticket
   ↓
 Valid → Mark as Used
 ```
+
+**5.7. Customer — Reservation Timeout**
+
+```text
+Checkout
+  ↓ (hết 5 phút giữ chỗ)
+Session Expired
+  ↓
+Seat Selection
+```
+
+Khi phiên hết hạn, hệ thống trả ghế về Available và người dùng phải chọn lại
+ghế trước khi tiếp tục checkout.
+
+**5.8. Customer — Cancel Order & Refund**
+
+```text
+Login
+  ↓
+Profile & Orders
+  ↓
+Order Detail
+  ↓
+Cancel Order
+  ↓
+Refund Processing (Mock)
+  ↓
+Cancelled
+```
+
+Nếu đơn chưa thanh toán, bước hoàn tiền được bỏ qua. Nếu đơn đã thanh toán,
+mock payment cập nhật kết quả hoàn tiền theo chính sách của concert.
