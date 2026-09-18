@@ -14,15 +14,25 @@ function initHeroCarousel() {
   const prevBtn = document.getElementById("hero-prev");
   const nextBtn = document.getElementById("hero-next");
 
-  let currentIndex = 0;
+  // Only feature a handful of slides in the hero (not the whole catalogue) —
+  // keeps the dots readable and the banner feeling curated.
+  const MAX_HERO_SLIDES = 5;
+  const slides = concerts.slice(0, MAX_HERO_SLIDES);
+  const slideCount = slides.length;
+
+  // True infinite loop: clone the last slide to the front and the first
+  // slide to the end, so "next" from the last real slide and "prev" from
+  // the first real slide both animate smoothly in one direction instead of
+  // snapping/rewinding backwards across the whole track.
+  let currentIndex = 1; // index 0 is the cloned last slide
   let autoTimer = null;
   let isDragging = false;
   let startX = 0;
   let currentTranslate = 0;
   let prevTranslate = 0;
+  let isSnapping = false;
 
-  // Render slides into the track
-  track.innerHTML = concerts.map((concert) => {
+  function renderSlide(concert) {
     const bannerUrl = concert.banner || concert.image || concert.poster || concert.cover || '';
     const descText = concert.description || concert.desc || 'Experience world-class concerts live on stage.';
     const categoryText = concert.category || 'World Tour';
@@ -37,22 +47,25 @@ function initHeroCarousel() {
           <p class="hero-desc">${descText}</p>
           <div class="hero-actions">
             <a href="pages/concerts/detail.html?id=${concert.id}" class="btn btn-primary">Book Tickets</a>
-            <a href="pages/concerts/index.html" class="btn btn-secondary">Explore All Tours</a>
           </div>
         </div>
       </div>
     `;
-  }).join("");
+  }
 
-  // Render pagination dots
+  // Render slides into the track, with clones at each end for the loop
+  const slidesMarkup = [slides[slideCount - 1], ...slides, slides[0]].map(renderSlide);
+  track.innerHTML = slidesMarkup.join("");
+
+  // Render pagination dots (only for the real slides)
   if (heroDots) {
-    heroDots.innerHTML = concerts.map((_, idx) => 
+    heroDots.innerHTML = slides.map((_, idx) =>
       `<span class="carousel-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></span>`
     ).join("");
 
     heroDots.querySelectorAll(".carousel-dot").forEach(dot => {
       dot.addEventListener("click", (e) => {
-        currentIndex = parseInt(e.target.dataset.index, 10);
+        currentIndex = parseInt(e.target.dataset.index, 10) + 1;
         setPositionByIndex();
         resetTimer();
       });
@@ -63,32 +76,52 @@ function initHeroCarousel() {
     track.style.transform = `translateX(${currentTranslate}px)`;
   }
 
-  function setPositionByIndex() {
-    currentTranslate = currentIndex * -wrapper.offsetWidth;
-    prevTranslate = currentTranslate;
-    track.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)';
-    setSliderPosition();
-
-    if (heroDots) {
-      heroDots.querySelectorAll(".carousel-dot").forEach((dot, idx) => {
-        dot.classList.toggle("active", idx === currentIndex);
-      });
-    }
+  function updateDots() {
+    if (!heroDots) return;
+    const realIndex = (currentIndex - 1 + slideCount) % slideCount;
+    heroDots.querySelectorAll(".carousel-dot").forEach((dot, idx) => {
+      dot.classList.toggle("active", idx === realIndex);
+    });
   }
 
+  function setPositionByIndex(withTransition = true) {
+    currentTranslate = currentIndex * -wrapper.offsetWidth;
+    prevTranslate = currentTranslate;
+    track.style.transition = withTransition ? 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)' : 'none';
+    setSliderPosition();
+    updateDots();
+  }
+
+  // After the slide animation into a cloned edge finishes, jump instantly
+  // (no transition) to the matching real slide so the loop feels seamless.
+  track.addEventListener('transitionend', () => {
+    if (isSnapping) return;
+    if (currentIndex === 0) {
+      isSnapping = true;
+      currentIndex = slideCount;
+      setPositionByIndex(false);
+      requestAnimationFrame(() => { isSnapping = false; });
+    } else if (currentIndex === slideCount + 1) {
+      isSnapping = true;
+      currentIndex = 1;
+      setPositionByIndex(false);
+      requestAnimationFrame(() => { isSnapping = false; });
+    }
+  });
+
   function nextSlide() {
-    currentIndex = (currentIndex + 1) % concerts.length;
+    currentIndex += 1;
     setPositionByIndex();
   }
 
   function prevSlide() {
-    currentIndex = (currentIndex - 1 + concerts.length) % concerts.length;
+    currentIndex -= 1;
     setPositionByIndex();
   }
 
   function resetTimer() {
     clearInterval(autoTimer);
-    autoTimer = setInterval(nextSlide, 2800); // 2.8-second auto-slide interval
+    autoTimer = setInterval(nextSlide, 4500); // auto-slide interval
   }
 
   if (nextBtn) nextBtn.addEventListener("click", () => { nextSlide(); resetTimer(); });
@@ -115,9 +148,9 @@ function initHeroCarousel() {
     track.classList.remove('dragging');
 
     const movedBy = currentTranslate - prevTranslate;
-    if (movedBy < -100 && currentIndex < concerts.length - 1) {
+    if (movedBy < -100) {
       currentIndex += 1;
-    } else if (movedBy > 100 && currentIndex > 0) {
+    } else if (movedBy > 100) {
       currentIndex -= 1;
     }
 
@@ -134,10 +167,19 @@ function initHeroCarousel() {
   track.addEventListener('touchmove', dragMove, { passive: true });
   track.addEventListener('touchend', dragEnd);
 
-  window.addEventListener('resize', setPositionByIndex);
+  window.addEventListener('resize', () => setPositionByIndex(false));
 
-  setPositionByIndex();
+  setPositionByIndex(false);
   resetTimer();
+}
+
+// Map a concert's status text to a clean color-coded tag (no emoji)
+function getStatusTagClass(status) {
+  const s = (status || '').toLowerCase();
+  if (s.includes('selling')) return 'selling-fast';
+  if (s.includes('hot')) return 'hot';
+  if (s.includes('high demand')) return 'high-demand';
+  return 'default';
 }
 
 // 2. Generate HTML markup for a concert card
@@ -147,12 +189,16 @@ function createConcertCardHTML(show, isHome = false) {
     : `detail.html?id=${show.id}`;
 
   const posterUrl = show.poster || show.image || show.banner || '';
+  const statusClass = getStatusTagClass(show.status);
 
   return `
     <article class="card">
-      <img src="${posterUrl}" alt="${show.artist || show.title}" class="card-img" style="object-position: top center;" loading="lazy">
+      <div class="card-media">
+        <img src="${posterUrl}" alt="${show.artist || show.title}" class="card-img" style="object-position: top center;" loading="lazy">
+        <span class="status-tag ${statusClass}">${show.status || 'Available'}</span>
+      </div>
       <div class="card-body">
-        <span class="card-badge">${show.category || 'Concert'} • ${show.status || 'Available'}</span>
+        <span class="card-badge">${show.category || 'Concert'}</span>
         <a href="${detailLink}" class="card-title">${show.title}</a>
         <div class="card-meta">${show.artist} | ${show.date}</div>
         <div class="card-footer">
