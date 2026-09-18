@@ -139,7 +139,7 @@
 
   <!-- Navigation -->
   <header class="container" style="padding: var(--space-md) 0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="index.html" style="font-size: var(--font-lg); font-weight: 800; color: var(--color-primary); text-decoration: none; letter-spacing: -1px;">CONCERTLY.</a>
+    <a href="index.html" style="font-size: var(--font-lg); font-weight: 800; color: var(--color-primary); text-decoration: none; letter-spacing: -1px;">CONCERTLY</a>
     <nav style="display: flex; gap: var(--space-lg); align-items: center;">
       <a href="index.html" style="color: var(--color-text); text-decoration: none; font-weight: 600;">Home</a>
       <a href="pages/concerts/index.html" style="color: var(--color-text-secondary); text-decoration: none;">Explore</a>
@@ -171,30 +171,12 @@
     </div>
 
     <div class="concert-grid" id="concert-list">
-      <!-- Injected via JavaScript from MOCK_CONCERTS -->
+      <!-- Dynamically injected via js/main.js -->
     </div>
   </main>
 
   <!-- Scripts -->
   <script src="js/mock-data.js"></script>
-  <script>
-    const listContainer = document.getElementById('concert-list');
-    if (typeof MOCK_CONCERTS !== 'undefined' && listContainer) {
-      listContainer.innerHTML = MOCK_CONCERTS.map(c => `
-        <article class="card">
-          <img src="${c.poster}" alt="${c.artist}" class="card-img" loading="lazy">
-          <div class="card-body">
-            <span class="card-badge">${c.category} • ${c.status}</span>
-            <a href="pages/concerts/detail.html?id=${c.id}" class="card-title">${c.title}</a>
-            <div class="card-meta">${c.artist} | ${c.date}</div>
-            <div class="card-footer">
-              <span class="card-price">${c.priceRange}</span>
-              <a href="pages/concerts/detail.html?id=${c.id}" class="btn btn-primary" style="padding: 6px 14px; font-size: var(--font-xs);">Details</a>
-            </div>
-          </div>
-        </article>
-      `).join('');
-    }
-  </script>
+  <script src="js/main.js"></script>
 </body>
 </html>
