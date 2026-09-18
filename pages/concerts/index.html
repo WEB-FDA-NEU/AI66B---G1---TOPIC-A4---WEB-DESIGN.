@@ -47,9 +47,19 @@
       max-width: 400px;
       position: relative;
     }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      pointer-events: none;
+    }
     .search-input {
       width: 100%;
-      padding: 10px 16px;
+      padding: 10px 16px 10px 40px;
       background-color: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-md);
@@ -156,13 +166,15 @@
 <body>
 
   <!-- Navigation -->
-  <header class="container" style="padding: var(--space-md) 0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="../../index.html" style="font-size: var(--font-lg); font-weight: 800; color: var(--color-primary); text-decoration: none; letter-spacing: -1px;">CONCERTLY.</a>
-    <nav style="display: flex; gap: var(--space-lg); align-items: center;">
-      <a href="../../index.html" style="color: var(--color-text-secondary); text-decoration: none;">Home</a>
-      <a href="index.html" style="color: var(--color-text); text-decoration: none; font-weight: 600;">Explore</a>
-      <a href="../404.html" style="color: var(--color-text-secondary); text-decoration: none;">Support</a>
-    </nav>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="site-logo">CONCERTLY</a>
+      <nav class="site-nav">
+        <a href="../../index.html">Home</a>
+        <a href="index.html" class="active">Explore</a>
+        <a href="../404.html">Support</a>
+      </nav>
+    </div>
   </header>
 
   <!-- Page Header -->
@@ -184,6 +196,10 @@
         <button class="pill-btn" data-category="K-Pop">K-Pop</button>
       </div>
       <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
         <input type="text" id="search-input" class="search-input" placeholder="Search artist, tour or city...">
       </div>
     </section>
@@ -196,6 +212,7 @@
 
   <!-- Scripts -->
   <script src="../../js/mock-data.js"></script>
+  <script src="../../js/navbar.js"></script>
   <script>
     let activeCategory = 'all';
     let searchQuery = '';
@@ -226,11 +243,21 @@
         return;
       }
 
-      grid.innerHTML = filtered.map(c => `
+      grid.innerHTML = filtered.map(c => {
+        const s = (c.status || '').toLowerCase();
+        const statusClass = s.includes('selling') ? 'selling-fast'
+          : s.includes('hot') ? 'hot'
+          : s.includes('high demand') ? 'high-demand'
+          : 'default';
+
+        return `
         <article class="card">
-          <img src="${c.poster}" alt="${c.artist}" class="card-img" loading="lazy">
+          <div class="card-media">
+            <img src="${c.poster}" alt="${c.artist}" class="card-img" loading="lazy">
+            <span class="status-tag ${statusClass}">${c.status}</span>
+          </div>
           <div class="card-body">
-            <span class="card-badge">${c.category} • ${c.status}</span>
+            <span class="card-badge">${c.category}</span>
             <a href="detail.html?id=${c.id}" class="card-title">${c.title}</a>
             <div class="card-meta">${c.artist} | ${c.date}</div>
             <div class="card-footer">
@@ -239,7 +266,8 @@
             </div>
           </div>
         </article>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // Category button click listener

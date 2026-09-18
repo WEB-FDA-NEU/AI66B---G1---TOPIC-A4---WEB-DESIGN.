@@ -13,6 +13,7 @@
     --color-bg-secondary: #121217;
     --color-bg-card: #18181F;
     --color-bg-hover: #22222A;
+    --color-surface: #18181F; /* alias used by cards, inputs, pill filters */
 
 
     /* TEXT */
