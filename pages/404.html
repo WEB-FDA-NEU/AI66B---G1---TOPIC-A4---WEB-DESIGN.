@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | Concertly</title>
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/utilitites.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <style>
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-family);
+      margin: 0;
+    }
+    .error-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-xl) var(--space-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .error-wrapper::before {
+      content: "";
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(255, 79, 154, 0.15) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .error-code {
+      font-size: clamp(6rem, 18vw, 11rem);
+      font-weight: 800;
+      line-height: 1;
+      color: var(--color-primary);
+      text-shadow: var(--shadow-pink);
+      margin-bottom: var(--space-sm);
+      letter-spacing: -3px;
+    }
+    .error-title {
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: var(--space-sm);
+    }
+    .error-desc {
+      max-width: 480px;
+      color: var(--color-text-secondary);
+      font-size: var(--font-md);
+      line-height: 1.6;
+      margin-bottom: var(--space-xl);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="error-wrapper">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Stage Not Found</h1>
+      <p class="error-desc">The concert page or resource you are looking for has been rescheduled, removed, or never existed. Let's get you back to the main stage.</p>
+      <a href="../index.html" class="btn btn-primary">Back to Home</a>
+    </section>
+  </main>
+</body>
+</html>
