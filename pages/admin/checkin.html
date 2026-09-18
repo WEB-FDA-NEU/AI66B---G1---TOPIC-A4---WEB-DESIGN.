@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check-in · Concertly Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/utilitites.css" />
+    <link rel="stylesheet" href="../../css/responsive.css" />
+    <link rel="stylesheet" href="../../css/admin.css" />
+  </head>
+  <body class="admin-body">
+    <!-- ============ ADMIN TOPBAR (shared across /admin, /admin/concerts, /admin/check-in) ============ -->
+    <header class="admin-topbar">
+      <a href="index.html" class="admin-logo">
+        <span class="logo">CONCERTLY</span>
+      </a>
+
+      <nav class="admin-nav">
+        <a href="index.html" class="admin-nav-link"
+          ><i class="fa-solid fa-grip"></i> Dashboard</a
+        >
+        <a href="concerts.html" class="admin-nav-link"
+          ><i class="fa-solid fa-music"></i> Concerts</a
+        >
+        <a href="checkin.html" class="admin-nav-link active"
+          ><i class="fa-solid fa-qrcode"></i> Check-in</a
+        >
+      </nav>
+
+      <div class="admin-topbar-right">
+        <a href="../../index.html" class="admin-view-site" target="_self"
+          >View site <i class="fa-solid fa-arrow-up-right-from-square"></i
+        ></a>
+        <button
+          class="admin-icon-btn"
+          aria-label="Notifications"
+          aria-expanded="false"
+          aria-controls="notification-dropdown"
+        >
+          <i class="fa-regular fa-bell"></i>
+          <span class="dot"></span>
+          <span
+            class="notification-count"
+            id="notification-count"
+            hidden
+          ></span>
+        </button>
+        <div class="notification-dropdown" id="notification-dropdown" hidden>
+          <div class="notification-header">
+            <strong>Notifications</strong>
+            <button
+              type="button"
+              class="notification-mark-read"
+              id="mark-notifications-read"
+            >
+              Mark all as read
+            </button>
+          </div>
+          <div class="notification-list" id="notification-list"></div>
+        </div>
+        <button
+          class="admin-account-button"
+          type="button"
+          aria-label="Admin account"
+          aria-expanded="false"
+          aria-controls="admin-account-dropdown"
+        >
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Admin account</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="admin-account-dropdown" id="admin-account-dropdown" hidden>
+          <div class="admin-account-label">
+            <i class="fa-solid fa-user-shield"></i> Admin account
+          </div>
+          <button type="button" class="admin-account-action" id="admin-logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-wrapper">
+      <div class="admin-page-header">
+        <div>
+          <h1 class="admin-page-title">Check-in</h1>
+          <p class="admin-page-subtitle">
+            Scan tickets or search attendees as they arrive at the venue
+          </p>
+        </div>
+      </div>
+
+      <div class="checkin-toolbar">
+        <div class="form-group event-select">
+          <label class="form-label" for="event">Checking in for</label>
+          <select class="form-input" id="event">
+            <!-- rendered from MOCK_CONCERTS by js/admin/checkin.js -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Live counts for the selected event -->
+      <div class="checkin-stats" style="margin-bottom: 24px">
+        <div class="card mini-stat">
+          <span class="mini-stat-value" id="total-attendees-count">0</span>
+          <span class="mini-stat-label">Total attendees</span>
+        </div>
+        <div class="card mini-stat">
+          <span class="mini-stat-value" style="color: var(--color-success)"
+            ><span id="checked-in-count">0</span></span
+          >
+          <span class="mini-stat-label">Checked in</span>
+        </div>
+        <div class="card mini-stat">
+          <span class="mini-stat-value" style="color: var(--color-warning)"
+            ><span id="not-checked-in-count">0</span></span
+          >
+          <span class="mini-stat-label">Not checked in</span>
+        </div>
+      </div>
+
+      <div class="checkin-scan-grid">
+        <!-- Quick scan -->
+        <div class="card scan-card">
+          <div class="scan-frame"><i class="fa-solid fa-qrcode"></i></div>
+          <div>
+            <p
+              style="
+                font-weight: 600;
+                color: var(--color-text);
+                margin-bottom: 4px;
+              "
+            >
+              Quick Scan
+            </p>
+            <p>
+              Point the camera at a ticket's QR code to check the attendee in
+              instantly.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" style="width: 100%">
+            <i class="fa-solid fa-camera"></i> Open Scanner
+          </button>
+        </div>
+
+        <!-- Attendee list -->
+        <div class="card table-card">
+          <div class="table-toolbar">
+            <div class="table-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                class="form-input"
+                id="attendee-search"
+                placeholder="Search by name or ticket code..."
+              />
+            </div>
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-status="all">All</button>
+              <button class="filter-tab" data-status="checked">
+                Checked in
+              </button>
+              <button class="filter-tab" data-status="pending">
+                Not checked in
+              </button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ticket code</th>
+                <th>Attendee</th>
+                <th>Ticket type</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="attendee-table-body"></tbody>
+          </table>
+          <div class="table-pagination">
+            <span class="pagination-info" id="attendee-count-caption"></span>
+            <div class="pagination-controls" id="attendee-pagination">
+              <button
+                class="page-btn"
+                data-page-action="previous"
+                aria-label="Previous page"
+              >
+                <i class="fa-solid fa-angle-left"></i>
+              </button>
+              <button class="page-btn active" data-page="1">1</button>
+              <button
+                class="page-btn"
+                data-page-action="next"
+                aria-label="Next page"
+              >
+                <i class="fa-solid fa-angle-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../../js/mock-data.js"></script>
+    <script src="../../js/utils.js"></script>
+    <script src="../../js/noti.js"></script>
+    <script src="../../js/admin-account.js"></script>
+    <script src="../../js/checkin.js"></script>
+  </body>
+</html>

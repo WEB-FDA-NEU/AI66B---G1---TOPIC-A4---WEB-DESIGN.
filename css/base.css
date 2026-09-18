@@ -1,0 +1,25 @@
+body {
+    font-family: var(--font-family);
+
+    background: var(--color-bg);
+    color: var(--color-text);
+
+    line-height: 1.5;
+}
+
+h1 {
+    font-size: var(--font-3xl);
+    line-height: 1.1;
+}
+
+h2 {
+    font-size: var(--font-2xl);
+}
+
+h3 {
+    font-size: var(--font-xl);
+}
+
+p {
+    color: var(--color-text-secondary);
+}

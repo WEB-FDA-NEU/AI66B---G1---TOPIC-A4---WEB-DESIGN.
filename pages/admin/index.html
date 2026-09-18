@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard · Concertly Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/utilitites.css" />
+    <link rel="stylesheet" href="../../css/responsive.css" />
+    <link rel="stylesheet" href="../../css/admin.css" />
+  </head>
+  <body class="admin-body">
+    <!-- ============ ADMIN TOPBAR (shared across /admin, /admin/concerts, /admin/check-in) ============ -->
+    <header class="admin-topbar">
+      <a href="index.html" class="admin-logo">
+        <span class="logo">CONCERTLY</span>
+      </a>
+
+      <nav class="admin-nav">
+        <a href="index.html" class="admin-nav-link active"
+          ><i class="fa-solid fa-grip"></i> Dashboard</a
+        >
+        <a href="concerts.html" class="admin-nav-link"
+          ><i class="fa-solid fa-music"></i> Concerts</a
+        >
+        <a href="checkin.html" class="admin-nav-link"
+          ><i class="fa-solid fa-qrcode"></i> Check-in</a
+        >
+      </nav>
+
+      <div class="admin-topbar-right">
+        <a href="../../index.html" class="admin-view-site" target="_self"
+          >View site <i class="fa-solid fa-arrow-up-right-from-square"></i
+        ></a>
+        <button
+          class="admin-icon-btn"
+          aria-label="Notifications"
+          aria-expanded="false"
+          aria-controls="notification-dropdown"
+        >
+          <i class="fa-regular fa-bell"></i>
+          <span class="dot"></span>
+          <span
+            class="notification-count"
+            id="notification-count"
+            hidden
+          ></span>
+        </button>
+        <div class="notification-dropdown" id="notification-dropdown" hidden>
+          <div class="notification-header">
+            <strong>Notifications</strong>
+            <button
+              type="button"
+              class="notification-mark-read"
+              id="mark-notifications-read"
+            >
+              Mark all as read
+            </button>
+          </div>
+          <div class="notification-list" id="notification-list"></div>
+        </div>
+        <button
+          class="admin-account-button"
+          type="button"
+          aria-label="Admin account"
+          aria-expanded="false"
+          aria-controls="admin-account-dropdown"
+        >
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Admin account</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="admin-account-dropdown" id="admin-account-dropdown" hidden>
+          <div class="admin-account-label">
+            <i class="fa-solid fa-user-shield"></i> Admin account
+          </div>
+          <button type="button" class="admin-account-action" id="admin-logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-wrapper">
+      <div class="admin-page-header">
+        <div>
+          <h1 class="admin-page-title">Dashboard</h1>
+          <p class="admin-page-subtitle">
+            Overview of concerts, ticket sales and check-ins
+          </p>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="card stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+          <div>
+            <span class="stat-label">Total Revenue</span>
+            <span class="stat-value">$482,650</span>
+            <span class="stat-change up"
+              ><i class="fa-solid fa-arrow-trend-up"></i> 12.4% vs last
+              month</span
+            >
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-ticket"></i></div>
+          <div>
+            <span class="stat-label">Tickets Sold</span>
+            <span class="stat-value">8,214</span>
+            <span class="stat-change up"
+              ><i class="fa-solid fa-arrow-trend-up"></i> 6.8% vs last
+              month</span
+            >
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon amber">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div>
+            <span class="stat-label">Upcoming Concerts</span>
+            <span class="stat-value" id="stat-upcoming-count">12</span>
+            <span class="stat-change neutral" id="upcoming-month-count"></span>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-qrcode"></i></div>
+          <div>
+            <span class="stat-label">Check-ins Today</span>
+            <span class="stat-value" id="stat-checkins-today">0</span>
+            <span
+              class="stat-change neutral"
+              id="checkins-today-context"
+            ></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + upcoming concerts -->
+      <div class="dashboard-grid">
+        <div class="card panel">
+          <div class="panel-header">
+            <span class="panel-title">Revenue by concert</span>
+            >
+          </div>
+          <div class="bar-chart" id="concert-revenue-chart"></div>
+        </div>
+
+        <div class="card panel">
+          <div class="panel-header">
+            <span class="panel-title">Upcoming Concerts</span>
+            <a href="concerts.html" class="panel-link">View all</a>
+          </div>
+          <div class="mini-list" id="upcoming-concerts-list">
+            <!-- rendered from MOCK_CONCERTS by js/admin/dashboard.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="card table-card">
+        <div class="table-toolbar">
+          <span class="panel-title">Recent Orders</span>
+          <button type="button" class="panel-link" id="recent-orders-view-all">
+            View all
+          </button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Concert</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-orders-body"></tbody>
+        </table>
+        <div class="table-pagination">
+          <span class="pagination-info" id="recent-orders-caption"></span>
+          <div class="pagination-controls" id="recent-orders-pagination">
+            <button
+              class="page-btn"
+              data-page-action="previous"
+              aria-label="Previous page"
+            >
+              <i class="fa-solid fa-angle-left"></i>
+            </button>
+            <button class="page-btn active" data-page="1">1</button>
+            <button
+              class="page-btn"
+              data-page-action="next"
+              aria-label="Next page"
+            >
+              <i class="fa-solid fa-angle-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../../js/mock-data.js"></script>
+    <script src="../../js/utils.js"></script>
+    <script src="../../js/orders.js"></script>
+    <script src="../../js/noti.js"></script>
+    <script src="../../js/admin-account.js"></script>
+    <script src="../../js/dashboard.js"></script>
+  </body>
+</html>
