@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Concert Management · Concertly Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/utilitites.css" />
+    <link rel="stylesheet" href="../../css/responsive.css" />
+    <link rel="stylesheet" href="../../css/admin.css" />
+  </head>
+  <body class="admin-body">
+    <!-- ============ ADMIN TOPBAR (shared across /admin, /admin/concerts, /admin/check-in) ============ -->
+    <header class="admin-topbar">
+      <a href="index.html" class="admin-logo">
+        <span class="logo">CONCERTLY</span>
+      </a>
+
+      <nav class="admin-nav">
+        <a href="index.html" class="admin-nav-link"
+          ><i class="fa-solid fa-grip"></i> Dashboard</a
+        >
+        <a href="concerts.html" class="admin-nav-link active"
+          ><i class="fa-solid fa-music"></i> Concerts</a
+        >
+        <a href="checkin.html" class="admin-nav-link"
+          ><i class="fa-solid fa-qrcode"></i> Check-in</a
+        >
+      </nav>
+
+      <div class="admin-topbar-right">
+        <a href="../../index.html" class="admin-view-site" target="_self"
+          >View site <i class="fa-solid fa-arrow-up-right-from-square"></i
+        ></a>
+        <button
+          class="admin-icon-btn"
+          aria-label="Notifications"
+          aria-expanded="false"
+          aria-controls="notification-dropdown"
+        >
+          <i class="fa-regular fa-bell"></i>
+          <span class="dot"></span>
+          <span
+            class="notification-count"
+            id="notification-count"
+            hidden
+          ></span>
+        </button>
+        <div class="notification-dropdown" id="notification-dropdown" hidden>
+          <div class="notification-header">
+            <strong>Notifications</strong>
+            <button
+              type="button"
+              class="notification-mark-read"
+              id="mark-notifications-read"
+            >
+              Mark all as read
+            </button>
+          </div>
+          <div class="notification-list" id="notification-list"></div>
+        </div>
+        <button
+          class="admin-account-button"
+          type="button"
+          aria-label="Admin account"
+          aria-expanded="false"
+          aria-controls="admin-account-dropdown"
+        >
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Admin account</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="admin-account-dropdown" id="admin-account-dropdown" hidden>
+          <div class="admin-account-label">
+            <i class="fa-solid fa-user-shield"></i> Admin account
+          </div>
+          <button type="button" class="admin-account-action" id="admin-logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-wrapper">
+      <div class="admin-page-header">
+        <div>
+          <h1 class="admin-page-title">Concert Management</h1>
+          <p class="admin-page-subtitle">
+            Create, edit and manage every concert listed on Concertly
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="openNewConcertForm()"
+        >
+          <i class="fa-solid fa-plus"></i> Add/Edit New Concert
+        </button>
+      </div>
+
+      <!-- Concert list -->
+      <div class="card table-card">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+              type="text"
+              class="form-input"
+              id="concert-search"
+              placeholder="Search by concert or artist..."
+            />
+          </div>
+          <div class="table-filters">
+            <select class="form-input" id="concert-status-filter">
+              <option value="all">All statuses</option>
+              <option value="Draft">Draft</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="On Sale">On Sale</option>
+              <option value="Sold Out">Sold Out</option>
+              <option value="Ended">Ended</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Concert</th>
+              <th>Artist</th>
+              <th>Date &amp; Time</th>
+              <th>Venue</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="concert-table-body">
+            <!-- rendered from MOCK_CONCERTS by js/admin/concerts.js -->
+          </tbody>
+        </table>
+        <div class="table-pagination">
+          <span class="pagination-info" id="concert-count-caption"
+            >Showing 1–6 of 19 concerts</span
+          >
+          <div class="pagination-controls" id="concert-pagination">
+            <button
+              class="page-btn"
+              data-page-action="previous"
+              aria-label="Previous page"
+            >
+              <i class="fa-solid fa-angle-left"></i>
+            </button>
+            <button class="page-btn active" data-page="1">1</button>
+            <button
+              class="page-btn"
+              data-page-action="next"
+              aria-label="Next page"
+            >
+              <i class="fa-solid fa-angle-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create / Edit form — one shared form for both actions -->
+      <div
+        class="card form-card"
+        id="concert-form"
+        style="margin-top: 24px"
+        hidden
+      >
+        <div class="form-card-header">
+          <div class="form-card-title" id="form-card-title">
+            Add New Concert
+          </div>
+          <p class="form-card-subtitle">
+            This same form is used to edit an existing concert — clicking
+            <i class="fa-solid fa-pen" style="font-size: 11px"></i> on a row
+            loads its details here.
+          </p>
+        </div>
+
+        <form>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="concert-name">Concert name</label>
+              <input
+                class="form-input"
+                type="text"
+                id="concert-name"
+                placeholder="e.g. Eternal Sunshine Tour 2026"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="artist-name"
+                >Artist / Performer</label
+              >
+              <input
+                class="form-input"
+                type="text"
+                id="artist-name"
+                placeholder="e.g. Ariana Grande"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="concert-date">Date</label>
+              <input class="form-input" type="date" id="concert-date" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="concert-time">Time</label>
+              <input class="form-input" type="time" id="concert-time" />
+            </div>
+
+            <div class="form-group form-span-2">
+              <label class="form-label" for="venue">Venue / Location</label>
+              <input
+                class="form-input"
+                type="text"
+                id="venue"
+                placeholder="e.g. My Dinh National Stadium, Hanoi"
+              />
+            </div>
+
+            <div class="form-group form-span-2">
+              <label class="form-label">Cover image</label>
+              <div class="cover-upload">
+                <div class="cover-upload-preview" id="cover-preview">
+                  <i class="fa-solid fa-image"></i>
+                </div>
+                <div class="cover-upload-info">
+                  <button type="button" class="btn btn-secondary">
+                    <i class="fa-solid fa-upload"></i> Upload image
+                  </button>
+                  <p>Recommended size 1200×800px, JPG or PNG, up to 5MB.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group form-span-2">
+              <label class="form-label" for="description">Description</label>
+              <textarea
+                class="form-input"
+                id="description"
+                placeholder="Tell fans what to expect from this show..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-section-title">Ticket types</div>
+
+          <div id="ticket-type-list">
+            <div class="ticket-type-row">
+              <div class="form-group">
+                <label class="form-label">Type name</label>
+                <input class="form-input" type="text" value="VIP" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price (USD)</label>
+                <input class="form-input" type="number" value="350" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input class="form-input" type="number" value="200" />
+              </div>
+              <button
+                type="button"
+                class="ticket-type-remove"
+                aria-label="Remove ticket type"
+                onclick="this.closest('.ticket-type-row').remove()"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div class="ticket-type-row">
+              <div class="form-group">
+                <label class="form-label">Type name</label>
+                <input class="form-input" type="text" value="Standard" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price (USD)</label>
+                <input class="form-input" type="number" value="120" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input class="form-input" type="number" value="1500" />
+              </div>
+              <button
+                type="button"
+                class="ticket-type-remove"
+                aria-label="Remove ticket type"
+                onclick="this.closest('.ticket-type-row').remove()"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn-add-row"
+            onclick="addEmptyTicketRow()"
+          >
+            <i class="fa-solid fa-plus"></i> Add ticket type
+          </button>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="resetConcertForm()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Save Concert</button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script src="../../js/mock-data.js"></script>
+    <script src="../../js/utils.js"></script>
+    <script src="../../js/noti.js"></script>
+    <script src="../../js/admin-account.js"></script>
+    <script src="../../js/concerts.js"></script>
+  </body>
+</html>
