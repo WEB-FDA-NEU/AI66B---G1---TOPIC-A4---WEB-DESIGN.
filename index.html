@@ -60,8 +60,10 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid var(--color-border);
+      background: rgba(11, 11, 15, 0.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
       font-size: 1.5rem;
       width: 44px;
@@ -142,8 +144,9 @@
       padding-top: var(--space-xl);
     }
     .section-title {
-      font-size: var(--font-xl);
-      font-weight: 700;
+      font-size: clamp(28px, 3.2vw, 36px);
+      font-weight: 800;
+      margin-bottom: 6px;
     }
     .concert-grid {
       display: grid;
@@ -213,13 +216,15 @@
 <body>
 
   <!-- Navigation -->
-  <header class="container" style="padding: var(--space-md) 0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="index.html" style="font-size: var(--font-lg); font-weight: 800; color: var(--color-primary); text-decoration: none; letter-spacing: -1px;">CONCERTLY</a>
-    <nav style="display: flex; gap: var(--space-lg); align-items: center;">
-      <a href="index.html" style="color: var(--color-text); text-decoration: none; font-weight: 600;">Home</a>
-      <a href="pages/concerts/index.html" style="color: var(--color-text-secondary); text-decoration: none;">Explore</a>
-      <a href="pages/404.html" style="color: var(--color-text-secondary); text-decoration: none;">Support</a>
-    </nav>
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="site-logo">CONCERTLY</a>
+      <nav class="site-nav">
+        <a href="index.html" class="active">Home</a>
+        <a href="pages/concerts/index.html">Explore</a>
+        <a href="pages/404.html">Support</a>
+      </nav>
+    </div>
   </header>
 
   <!-- Hero Slider Section with Drag/Swipe Support -->
@@ -250,5 +255,6 @@
   <!-- Scripts -->
   <script src="js/mock-data.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/navbar.js"></script>
 </body>
 </html>
