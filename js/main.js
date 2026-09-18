@@ -30,7 +30,7 @@ function initHeroCarousel() {
     const titleText = concert.title || concert.name || 'Concert Tour';
 
     return `
-      <div class="hero-slide" style="background-image: linear-gradient(rgba(11, 11, 15, 0.75), rgba(11, 11, 15, 0.95)), url('${bannerUrl}');">
+      <div class="hero-slide" style="background-image: linear-gradient(rgba(11, 11, 15, 0.75), rgba(11, 11, 15, 0.95)), url('${bannerUrl}'); background-position: center 20%;">
         <div class="container">
           <span class="hero-tag">${categoryText} • ${statusText}</span>
           <h1 class="hero-title">${titleText}</h1>
@@ -88,7 +88,7 @@ function initHeroCarousel() {
 
   function resetTimer() {
     clearInterval(autoTimer);
-    autoTimer = setInterval(nextSlide, 2800); // 1-second auto-slide interval
+    autoTimer = setInterval(nextSlide, 2800); // 2.8-second auto-slide interval
   }
 
   if (nextBtn) nextBtn.addEventListener("click", () => { nextSlide(); resetTimer(); });
