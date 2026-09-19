@@ -11,6 +11,14 @@
     padding: var(--space-2xl) 0 var(--space-3xl);
 }
 
+.admin-footer {
+    padding: 18px 5%;
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
 /* --- Topbar ---------------------------------------------------------------
    Shared across /admin, /admin/concerts, /admin/check-in.
    -------------------------------------------------------------------------- */

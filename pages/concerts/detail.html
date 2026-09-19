@@ -1,376 +1,361 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concert Details | Concertly</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Concert Details | Concertly</title>
 
-  <link rel="stylesheet" href="../../css/reset.css">
-  <link rel="stylesheet" href="../../css/variables.css">
-  <link rel="stylesheet" href="../../css/base.css">
-  <link rel="stylesheet" href="../../css/layout.css">
-  <link rel="stylesheet" href="../../css/components.css">
-  <link rel="stylesheet" href="../../css/utilitites.css">
-  <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/utilitites.css" />
+    <link rel="stylesheet" href="../../css/responsive.css" />
 
-  <style>
-    body {
-      background-color: var(--color-bg);
-      color: var(--color-text);
-      font-family: var(--font-family);
-      margin: 0;
-    }
+    <style>
+      body {
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-family);
+        margin: 0;
+      }
 
-    .detail-hero {
-      position: relative;
-      min-height: 58vh;
-      display: flex;
-      align-items: flex-end;
-      padding: var(--space-2xl) 0 var(--space-xl);
-      background-size: cover;
-      background-position: center 15%;
-    }
+      .detail-hero {
+        position: relative;
+        min-height: 58vh;
+        display: flex;
+        align-items: flex-end;
+        padding: var(--space-2xl) 0 var(--space-xl);
+        background-size: cover;
+        background-position: center 15%;
+      }
 
-    .detail-hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      /* Soft ombre: mostly transparent up top so the artist's face reads
+      .detail-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        /* Soft ombre: mostly transparent up top so the artist's face reads
          clearly, fading into the exact page background color at the
          bottom so it blends into "About The Show" with no hard seam */
-      background: linear-gradient(
-        180deg,
-        rgba(11, 11, 15, 0.05) 0%,
-        rgba(11, 11, 15, 0.25) 45%,
-        rgba(11, 11, 15, 0.75) 75%,
-        var(--color-bg) 100%
-      );
-    }
+        background: linear-gradient(
+          180deg,
+          rgba(11, 11, 15, 0.05) 0%,
+          rgba(11, 11, 15, 0.25) 45%,
+          rgba(11, 11, 15, 0.75) 75%,
+          var(--color-bg) 100%
+        );
+      }
 
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      /* NOTE: no width:100% here — this div also has the shared .container
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        /* NOTE: no width:100% here — this div also has the shared .container
          class, which centers it at max 1200px. Overriding width here was
          stretching the badges/title flush to the browser edge. */
-    }
-
-    .badge-wrap {
-      display: flex;
-      gap: var(--space-xs);
-      margin-bottom: var(--space-sm);
-    }
-
-    .badge {
-      padding: 4px 12px;
-      border-radius: var(--radius-full);
-      font-size: var(--font-xs);
-      font-weight: 600;
-      background-color: rgba(255, 79, 154, 0.2);
-      color: var(--color-primary);
-      border: 1px solid var(--color-primary);
-    }
-
-    .detail-title {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: var(--space-xs);
-    }
-
-    .detail-artist {
-      font-size: var(--font-lg);
-      color: var(--color-text-secondary);
-      font-weight: 600;
-      margin-bottom: var(--space-md);
-    }
-
-    .main-layout {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: var(--space-2xl);
-      padding: var(--space-2xl) 0;
-    }
-
-    @media (max-width: 860px) {
-      .main-layout {
-        grid-template-columns: 1fr;
       }
-    }
 
-    .info-card {
-      background-color: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-lg);
-      margin-bottom: var(--space-xl);
-    }
+      .badge-wrap {
+        display: flex;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-sm);
+      }
 
-    .info-row {
-      display: flex;
-      gap: var(--space-md);
-      margin-bottom: var(--space-md);
-    }
+      .badge {
+        padding: 4px 12px;
+        border-radius: var(--radius-full);
+        font-size: var(--font-xs);
+        font-weight: 600;
+        background-color: rgba(255, 79, 154, 0.2);
+        color: var(--color-primary);
+        border: 1px solid var(--color-primary);
+      }
 
-    .info-row:last-child {
-      margin-bottom: 0;
-    }
+      .detail-title {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: var(--space-xs);
+      }
 
-    .info-label {
-      color: var(--color-text-secondary);
-      font-size: var(--font-sm);
-      min-width: 90px;
-    }
+      .detail-artist {
+        font-size: var(--font-lg);
+        color: var(--color-text-secondary);
+        font-weight: 600;
+        margin-bottom: var(--space-md);
+      }
 
-    .info-val {
-      font-weight: 600;
-      font-size: var(--font-sm);
-    }
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: var(--space-2xl);
+        padding: var(--space-2xl) 0;
+      }
 
-    .section-title {
-      font-size: clamp(28px, 3.2vw, 36px);
-      font-weight: 800;
-      margin-bottom: var(--space-md);
-      padding-bottom: var(--space-xs);
-      border-bottom: 1px solid var(--color-border);
-    }
+      @media (max-width: 860px) {
+        .main-layout {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .ticket-tier {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--space-md);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      background-color: var(--color-surface);
-      margin-bottom: var(--space-sm);
-      transition: border-color 0.2s;
-    }
+      .info-card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+        margin-bottom: var(--space-xl);
+      }
 
-    .ticket-tier:hover {
-      border-color: var(--color-primary);
-    }
+      .info-row {
+        display: flex;
+        gap: var(--space-md);
+        margin-bottom: var(--space-md);
+      }
 
-    .ticket-status {
-      font-size: var(--font-xs);
-      padding: 2px 8px;
-      border-radius: var(--radius-sm);
-      margin-top: 4px;
-      display: inline-block;
-    }
+      .info-row:last-child {
+        margin-bottom: 0;
+      }
 
-    .status-Available {
-      background: rgba(69, 212, 131, 0.18);
-      color: var(--color-success);
-    }
+      .info-label {
+        color: var(--color-text-secondary);
+        font-size: var(--font-sm);
+        min-width: 90px;
+      }
 
-    .status-Limited {
-      background: rgba(255, 184, 77, 0.18);
-      color: var(--color-warning);
-    }
+      .info-val {
+        font-weight: 600;
+        font-size: var(--font-sm);
+      }
 
-    .status-SoldOut {
-      background: rgba(255, 92, 108, 0.18);
-      color: var(--color-error);
-    }
-  </style>
-</head>
+      .section-title {
+        font-size: clamp(28px, 3.2vw, 36px);
+        font-weight: 800;
+        margin-bottom: var(--space-md);
+        padding-bottom: var(--space-xs);
+        border-bottom: 1px solid var(--color-border);
+      }
 
-<body>
+      .ticket-tier {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-md);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background-color: var(--color-surface);
+        margin-bottom: var(--space-sm);
+        transition: border-color 0.2s;
+      }
 
-  <!-- Header -->
-  <header class="site-header">
-    <div class="container">
-      <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
+      .ticket-tier:hover {
+        border-color: var(--color-primary);
+      }
 
-      <nav class="site-nav">
-        <a href="../../index.html" class="hover-glow" data-nav>Home</a>
-        <a href="index.html" class="active hover-glow" data-nav>Explore</a>
-        <a href="../404.html" class="hover-glow" data-nav>Support</a>
-        <span class="nav-indicator"></span>
-      </nav>
-    </div>
-  </header>
+      .ticket-status {
+        font-size: var(--font-xs);
+        padding: 2px 8px;
+        border-radius: var(--radius-sm);
+        margin-top: 4px;
+        display: inline-block;
+      }
 
-  <!-- Dynamic Banner Hero -->
-  <div class="detail-hero" id="hero-banner">
-    <div class="container hero-content">
+      .status-Available {
+        background: rgba(69, 212, 131, 0.18);
+        color: var(--color-success);
+      }
 
-      <div class="badge-wrap">
-        <span class="badge" id="concert-category">Pop</span>
-        <span class="status-tag inline" id="concert-status">Selling Fast</span>
+      .status-Limited {
+        background: rgba(255, 184, 77, 0.18);
+        color: var(--color-warning);
+      }
+
+      .status-SoldOut {
+        background: rgba(255, 92, 108, 0.18);
+        color: var(--color-error);
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Header -->
+    <header class="site-header">
+      <div class="container">
+        <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
+
+        <nav class="site-nav">
+          <a href="../../index.html" class="hover-glow" data-nav>Home</a>
+          <a href="index.html" class="active hover-glow" data-nav>Explore</a>
+          <a href="../404.html" class="hover-glow" data-nav>Support</a>
+          <span class="nav-indicator"></span>
+        </nav>
       </div>
+    </header>
 
-      <h1 class="detail-title" id="concert-title">
-        Tour Name
-      </h1>
-
-      <div class="detail-artist" id="concert-artist">
-        Artist
-      </div>
-
-    </div>
-  </div>
-
-  <main class="container main-layout">
-
-    <!-- Left Column: Details & Overview -->
-    <div>
-
-      <h2 class="section-title">
-        About The Show
-      </h2>
-
-      <p
-        id="concert-desc"
-        style="color: var(--color-text-secondary); line-height: 1.7; font-size: var(--font-md); margin-bottom: var(--space-xl);"
-      ></p>
-
-      <h2 class="section-title">
-        Available Ticket Categories
-      </h2>
-
-      <div id="ticket-list">
-        <!-- Tickets dynamically injected -->
-      </div>
-
-    </div>
-
-    <!-- Right Column: Event Information Sidebar -->
-    <aside>
-
-      <div class="info-card">
-
-        <h3
-          style="font-size: var(--font-md); font-weight: 700; margin-bottom: var(--space-md);"
-        >
-          Event Information
-        </h3>
-
-        <div class="info-row">
-          <span class="info-label">Date:</span>
-          <span class="info-val" id="concert-date">--</span>
-        </div>
-
-        <div class="info-row">
-          <span class="info-label">Time:</span>
-          <span class="info-val" id="concert-time">--</span>
-        </div>
-
-        <div class="info-row">
-          <span class="info-label">Venue:</span>
-          <span class="info-val" id="concert-venue">--</span>
-        </div>
-
-        <div class="info-row">
-          <span class="info-label">Prices:</span>
-          <span
-            class="info-val"
-            id="concert-price"
-            style="color: var(--color-primary);"
+    <!-- Dynamic Banner Hero -->
+    <div class="detail-hero" id="hero-banner">
+      <div class="container hero-content">
+        <div class="badge-wrap">
+          <span class="badge" id="concert-category">Pop</span>
+          <span class="status-tag inline" id="concert-status"
+            >Selling Fast</span
           >
-            --
-          </span>
         </div>
 
-        <div style="margin-top: var(--space-lg);">
-          <a
-            href="#ticket-list"
-            class="btn btn-primary"
-            style="width: 100%; text-align: center; display: block; box-sizing: border-box;"
-          >
-            Select Tickets
-          </a>
-        </div>
+        <h1 class="detail-title" id="concert-title">Tour Name</h1>
 
+        <div class="detail-artist" id="concert-artist">Artist</div>
+      </div>
+    </div>
+
+    <main class="container main-layout">
+      <!-- Left Column: Details & Overview -->
+      <div>
+        <h2 class="section-title">About The Show</h2>
+
+        <p
+          id="concert-desc"
+          style="
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            font-size: var(--font-md);
+            margin-bottom: var(--space-xl);
+          "
+        ></p>
+
+        <h2 class="section-title">Available Ticket Categories</h2>
+
+        <div id="ticket-list">
+          <!-- Tickets dynamically injected -->
+        </div>
       </div>
 
-    </aside>
+      <!-- Right Column: Event Information Sidebar -->
+      <aside>
+        <div class="info-card">
+          <h3
+            style="
+              font-size: var(--font-md);
+              font-weight: 700;
+              margin-bottom: var(--space-md);
+            "
+          >
+            Event Information
+          </h3>
 
-  </main>
+          <div class="info-row">
+            <span class="info-label">Date:</span>
+            <span class="info-val" id="concert-date">--</span>
+          </div>
 
-  <!-- Scripts -->
-  <script src="../../js/mock-data.js"></script>
-  <script src="../../js/navbar.js"></script>
+          <div class="info-row">
+            <span class="info-label">Time:</span>
+            <span class="info-val" id="concert-time">--</span>
+          </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const concertId = urlParams.get("id");
+          <div class="info-row">
+            <span class="info-label">Venue:</span>
+            <span class="info-val" id="concert-venue">--</span>
+          </div>
 
-    if (typeof MOCK_CONCERTS === "undefined") {
-      window.location.href = "../404.html";
-    }
+          <div class="info-row">
+            <span class="info-label">Prices:</span>
+            <span
+              class="info-val"
+              id="concert-price"
+              style="color: var(--color-primary)"
+            >
+              --
+            </span>
+          </div>
 
-    const concert = MOCK_CONCERTS.find(c => c.id === concertId);
+          <div style="margin-top: var(--space-lg)">
+            <a
+              href="#ticket-list"
+              class="btn btn-primary"
+              style="
+                width: 100%;
+                text-align: center;
+                display: block;
+                box-sizing: border-box;
+              "
+            >
+              Select Tickets
+            </a>
+          </div>
+        </div>
+      </aside>
+    </main>
 
-    function getStatusTagClass(status) {
-      const s = (status || "").toLowerCase();
+    <!-- Scripts -->
+    <script src="../../js/mock-data.js"></script>
+    <script src="../../js/navbar.js"></script>
 
-      if (s.includes("selling")) return "selling-fast";
-      if (s.includes("hot")) return "hot";
-      if (s.includes("high demand")) return "high-demand";
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const concertId = urlParams.get("id");
 
-      return "default";
-    }
+      if (typeof MOCK_CONCERTS === "undefined") {
+        window.location.href = "../404.html";
+      }
 
-    if (!concert) {
-      window.location.href = "../404.html";
-    } else {
+      const concert = MOCK_CONCERTS.find((c) => c.id === concertId);
 
-      // Set Document Title
-      document.title = `${concert.title} | Concertly`;
+      function getStatusTagClass(status) {
+        const s = (status || "").toLowerCase();
 
-      // Set Banner
-      const banner = document.getElementById("hero-banner");
-      banner.style.backgroundImage = `url('${concert.banner}')`;
+        if (s.includes("selling")) return "selling-fast";
+        if (s.includes("hot")) return "hot";
+        if (s.includes("high demand")) return "high-demand";
 
-      // Set Category
-      document.getElementById("concert-category").innerText =
-        concert.category;
+        return "default";
+      }
 
-      // Set Status + Color
-      const statusEl = document.getElementById("concert-status");
+      if (!concert) {
+        window.location.href = "../404.html";
+      } else {
+        // Set Document Title
+        document.title = `${concert.title} | Concertly`;
 
-      statusEl.innerText = concert.status;
-      statusEl.className =
-        `status-tag inline ${getStatusTagClass(concert.status)}`;
+        // Set Banner
+        const banner = document.getElementById("hero-banner");
+        banner.style.backgroundImage = `url('${concert.banner}')`;
 
-      // Set Concert Information
-      document.getElementById("concert-title").innerText =
-        concert.title;
+        // Set Category
+        document.getElementById("concert-category").innerText =
+          concert.category;
 
-      document.getElementById("concert-artist").innerText =
-        `Featuring ${concert.artist}`;
+        // Set Status + Color
+        const statusEl = document.getElementById("concert-status");
 
-      document.getElementById("concert-desc").innerText =
-        concert.description;
+        statusEl.innerText = concert.status;
+        statusEl.className = `status-tag inline ${getStatusTagClass(concert.status)}`;
 
-      document.getElementById("concert-date").innerText =
-        concert.date;
+        // Set Concert Information
+        document.getElementById("concert-title").innerText = concert.title;
 
-      document.getElementById("concert-time").innerText =
-        concert.time;
+        document.getElementById("concert-artist").innerText =
+          `Featuring ${concert.artist}`;
 
-      document.getElementById("concert-venue").innerText =
-        concert.location;
+        document.getElementById("concert-desc").innerText = concert.description;
 
-      document.getElementById("concert-price").innerText =
-        concert.priceRange;
+        document.getElementById("concert-date").innerText = concert.date;
 
-      // Render Tickets
-      const ticketContainer =
-        document.getElementById("ticket-list");
+        document.getElementById("concert-time").innerText = concert.time;
 
-      ticketContainer.innerHTML = concert.tickets
-        .map(t => {
+        document.getElementById("concert-venue").innerText = concert.location;
 
-          const cleanStatusClass =
-            t.status.replace(/\s+/g, "");
+        document.getElementById("concert-price").innerText = concert.priceRange;
 
-          const isSoldOut =
-            t.status.toLowerCase().includes("sold out");
+        // Render Tickets
+        const ticketContainer = document.getElementById("ticket-list");
 
-          return `
+        ticketContainer.innerHTML = concert.tickets
+          .map((t) => {
+            const cleanStatusClass = t.status.replace(/\s+/g, "");
+
+            const isSoldOut = t.status.toLowerCase().includes("sold out");
+
+            return `
             <div class="ticket-tier">
 
               <div>
@@ -407,10 +392,12 @@
 
             </div>
           `;
-        })
-        .join("");
-    }
-  </script>
+          })
+          .join("");
+      }
+    </script>
 
-</body>
+    <div id="site-footer" data-root="../../"></div>
+    <script src="../../js/footer.js"></script>
+  </body>
 </html>

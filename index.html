@@ -1,283 +1,318 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concertly - Live Music & Stadium Tours</title>
-  <link rel="stylesheet" href="css/reset.css">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/utilitites.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <style>
-    body {
-      background-color: var(--color-bg);
-      color: var(--color-text);
-      font-family: var(--font-family);
-      margin: 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Concertly - Live Music & Stadium Tours</title>
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/utilitites.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <style>
+      body {
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-family);
+        margin: 0;
+      }
 
-    /* Hero Slider & Drag Styles */
-    .hero-slider-wrapper {
-      position: relative;
-      width: 100%;
-      min-height: 75vh;
-      overflow: hidden;
-      user-select: none;
-    }
-    .hero-track {
-      display: flex;
-      width: 100%;
-      height: 100%;
-      min-height: 75vh;
-      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
-      cursor: grab;
-    }
-    .hero-track.dragging {
-      transition: none;
-      cursor: grabbing;
-    }
-    .hero-slide {
-      flex: 0 0 100%;
-      width: 100%;
-      min-height: 75vh;
-      display: flex;
-      align-items: center;
-      background-size: cover;
-      background-position: center 20%;
-      background-repeat: no-repeat;
-      position: relative;
-    }
-    .hero-slide .container {
-      position: relative;
-      z-index: 2;
-    }
-    .carousel-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: rgba(255, 255, 255, 0.85);
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-      transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    }
-    .carousel-btn svg {
-      width: 22px;
-      height: 22px;
-    }
-    .carousel-btn:hover {
-      color: #fff;
-      transform: translateY(-50%) scale(1.18);
-    }
-    .carousel-btn.prev { left: 20px; }
-    .carousel-btn.next { right: 20px; }
-    .carousel-dots {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-    .carousel-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.35);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .carousel-dot.active {
-      background: var(--color-primary);
-      width: 26px;
-      border-radius: 12px;
-    }
+      /* Hero Slider & Drag Styles */
+      .hero-slider-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 75vh;
+        overflow: hidden;
+        user-select: none;
+      }
+      .hero-track {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        min-height: 75vh;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+        cursor: grab;
+      }
+      .hero-track.dragging {
+        transition: none;
+        cursor: grabbing;
+      }
+      .hero-slide {
+        flex: 0 0 100%;
+        width: 100%;
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+        background-size: cover;
+        background-position: center 20%;
+        background-repeat: no-repeat;
+        position: relative;
+      }
+      .hero-slide .container {
+        position: relative;
+        z-index: 2;
+      }
+      .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.85);
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition:
+          background-color 0.2s ease,
+          color 0.2s ease,
+          transform 0.2s ease;
+      }
+      .carousel-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+      .carousel-btn:hover {
+        color: #fff;
+        transform: translateY(-50%) scale(1.18);
+      }
+      .carousel-btn.prev {
+        left: 20px;
+      }
+      .carousel-btn.next {
+        right: 20px;
+      }
+      .carousel-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+      }
+      .carousel-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.35);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .carousel-dot.active {
+        background: var(--color-primary);
+        width: 26px;
+        border-radius: 12px;
+      }
 
-    .hero-tag {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: var(--radius-full);
-      background-color: rgba(255, 79, 154, 0.2);
-      color: var(--color-primary);
-      border: 1px solid var(--color-primary);
-      font-size: var(--font-xs);
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: var(--space-sm);
-    }
-    .hero-title {
-      font-size: clamp(2.5rem, 5vw, 4.5rem);
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: var(--space-sm);
-    }
-    .hero-desc {
-      color: var(--color-text-secondary);
-      max-width: 580px;
-      font-size: var(--font-md);
-      line-height: 1.6;
-      margin-bottom: var(--space-lg);
-    }
-    .hero-actions {
-      display: flex;
-      gap: var(--space-md);
-      flex-wrap: wrap;
-    }
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: var(--space-xl);
-      padding-top: var(--space-xl);
-    }
-    .section-title {
-      font-size: clamp(28px, 3.2vw, 36px);
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-    .concert-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--space-lg);
-      margin-bottom: var(--space-xl);
-    }
-    .card {
-      background-color: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.25s ease, border-color 0.25s ease;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--color-primary);
-    }
-    .card-img {
-      width: 100%;
-      height: 280px;
-      object-fit: cover;
-      display: block;
-    }
-    .card-body {
-      padding: var(--space-md);
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-    .card-badge {
-      align-self: flex-start;
-      font-size: var(--font-xs);
-      font-weight: 600;
-      color: var(--color-primary);
-      margin-bottom: var(--space-xs);
-    }
-    .card-title {
-      font-size: var(--font-md);
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: var(--color-text);
-      text-decoration: none;
-    }
-    .card-meta {
-      font-size: var(--font-sm);
-      color: var(--color-text-secondary);
-      margin-bottom: var(--space-sm);
-    }
-    .card-footer {
-      margin-top: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: var(--space-sm);
-      border-top: 1px solid var(--color-border);
-    }
-    .card-price {
-      font-weight: 700;
-      color: var(--color-text);
-      font-size: var(--font-sm);
-    }
-  </style>
-</head>
-<body>
+      .hero-tag {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: var(--radius-full);
+        background-color: rgba(255, 79, 154, 0.2);
+        color: var(--color-primary);
+        border: 1px solid var(--color-primary);
+        font-size: var(--font-xs);
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: var(--space-sm);
+      }
+      .hero-title {
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: var(--space-sm);
+      }
+      .hero-desc {
+        color: var(--color-text-secondary);
+        max-width: 580px;
+        font-size: var(--font-md);
+        line-height: 1.6;
+        margin-bottom: var(--space-lg);
+      }
+      .hero-actions {
+        display: flex;
+        gap: var(--space-md);
+        flex-wrap: wrap;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: var(--space-xl);
+        padding-top: var(--space-xl);
+      }
+      .section-title {
+        font-size: clamp(28px, 3.2vw, 36px);
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .concert-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
+      }
+      .card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition:
+          transform 0.25s ease,
+          border-color 0.25s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: var(--color-primary);
+      }
+      .card-img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        display: block;
+      }
+      .card-body {
+        padding: var(--space-md);
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+      .card-badge {
+        align-self: flex-start;
+        font-size: var(--font-xs);
+        font-weight: 600;
+        color: var(--color-primary);
+        margin-bottom: var(--space-xs);
+      }
+      .card-title {
+        font-size: var(--font-md);
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--color-text);
+        text-decoration: none;
+      }
+      .card-meta {
+        font-size: var(--font-sm);
+        color: var(--color-text-secondary);
+        margin-bottom: var(--space-sm);
+      }
+      .card-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: var(--space-sm);
+        border-top: 1px solid var(--color-border);
+      }
+      .card-price {
+        font-weight: 700;
+        color: var(--color-text);
+        font-size: var(--font-sm);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <header class="site-header">
+      <div class="container">
+        <a href="index.html" class="site-logo hover-glow">CONCERTLY</a>
+        <nav class="site-nav">
+          <a href="index.html" class="active hover-glow" data-nav>Home</a>
+          <a href="pages/concerts/index.html" class="hover-glow" data-nav
+            >Explore</a
+          >
+          <a href="pages/404.html" class="hover-glow" data-nav>Support</a>
+          <span class="nav-indicator"></span>
+        </nav>
+      </div>
+    </header>
 
-  <!-- Navigation -->
-  <header class="site-header">
-    <div class="container">
-      <a href="index.html" class="site-logo hover-glow">CONCERTLY</a>
-      <nav class="site-nav">
-        <a href="index.html" class="active hover-glow" data-nav>Home</a>
-        <a href="pages/concerts/index.html" class="hover-glow" data-nav>Explore</a>
-        <a href="pages/404.html" class="hover-glow" data-nav>Support</a>
-        <span class="nav-indicator"></span>
-      </nav>
-    </div>
-  </header>
+    <!-- Hero Slider Section with Drag/Swipe Support -->
+    <section class="hero-slider-wrapper" id="hero-wrapper">
+      <button
+        class="carousel-btn prev"
+        id="hero-prev"
+        aria-label="Previous Slide"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <div class="hero-track" id="hero-track">
+        <!-- Injected via js/main.js -->
+      </div>
+      <button class="carousel-btn next" id="hero-next" aria-label="Next Slide">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+      <div class="carousel-dots" id="hero-dots"></div>
+    </section>
 
-  <!-- Hero Slider Section with Drag/Swipe Support -->
-  <section class="hero-slider-wrapper" id="hero-wrapper">
-    <button class="carousel-btn prev" id="hero-prev" aria-label="Previous Slide">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-    </button>
-    <div class="hero-track" id="hero-track">
-      <!-- Injected via js/main.js -->
-    </div>
-    <button class="carousel-btn next" id="hero-next" aria-label="Next Slide">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-    </button>
-    <div class="carousel-dots" id="hero-dots"></div>
-  </section>
-
-  <!-- Main Content: Concert Grid -->
-  <main class="container">
-    <div class="section-header">
-      <div>
-        <h2 class="section-title">Trending Shows</h2>
-        <p
+    <!-- Main Content: Concert Grid -->
+    <main class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Trending Shows</h2>
+          <p
+            style="
+              color: var(--color-text-secondary);
+              margin: 0;
+              font-size: var(--font-sm);
+            "
+          >
+            Discover the hottest stadium concerts and showcases
+          </p>
+        </div>
+        <a
+          href="pages/concerts/index.html"
+          class="hover-glow"
           style="
-            color: var(--color-text-secondary);
-            margin: 0;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 600;
             font-size: var(--font-sm);
           "
+          >View All &rarr;</a
         >
-          Discover the hottest stadium concerts and showcases
-        </p>
       </div>
-      <a
-        href="pages/concerts/index.html"
-        class="hover-glow"
-        style="
-          color: var(--color-primary);
-          text-decoration: none;
-          font-weight: 600;
-          font-size: var(--font-sm);
-        "
-        >View All &rarr;</a
-      >
-    </div>
 
-    <div class="concert-grid" id="concert-list">
-      <!-- Injected via js/main.js -->
-    </div>
-  </main>
+      <div class="concert-grid" id="concert-list">
+        <!-- Injected via js/main.js -->
+      </div>
+    </main>
 
-  <!-- Scripts -->
-  <script src="js/mock-data.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/navbar.js"></script>
-</body>
+    <div id="site-footer" data-root=""></div>
+    <script src="js/footer.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/mock-data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/navbar.js"></script>
+  </body>
 </html>
