@@ -8,6 +8,21 @@ const ORDER_STATUS_BADGE_CLASS = {
 const ORDERS_PER_PAGE = 5;
 let recentOrdersPage = 1;
 let showAllRecentOrders = false;
+let showAllRevenue = false;
+
+function getCompletedOrders() {
+  return MOCK_ORDERS.filter(order => order.status === "Paid");
+}
+
+function renderSalesStats() {
+  const completedOrders = getCompletedOrders();
+  const totalRevenue = completedOrders.reduce((total, order) => total + order.amount, 0);
+  const revenueEl = document.getElementById("stat-total-revenue");
+  const ticketsEl = document.getElementById("stat-tickets-sold");
+
+  if (revenueEl) revenueEl.textContent = `$${totalRevenue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  if (ticketsEl) ticketsEl.textContent = completedOrders.length.toLocaleString("en-US");
+}
 
 function renderUpcomingConcerts() {
   const list = document.getElementById("upcoming-concerts-list");
@@ -16,10 +31,10 @@ function renderUpcomingConcerts() {
   const now = new Date();
   const upcoming = sortedByDate(MOCK_CONCERTS).filter(concert => {
     const status = getConcertStatus(concert, now);
-    return status === "Upcoming" || status === "On Sale / Open";
+    return status === "Upcoming" || status === "On Sale";
   });
 
-  list.innerHTML = upcoming.map(c => `
+  list.innerHTML = upcoming.slice(0, 4).map(c => `
     <div class="mini-list-item">
       <img class="mini-thumb" src="${c.poster}" alt="">
       <div class="mini-list-info">
@@ -68,26 +83,38 @@ function renderConcertRevenue() {
   const chart = document.getElementById("concert-revenue-chart");
   if (!chart) return;
 
-  const revenueByConcert = MOCK_ORDERS.reduce((totals, order) => {
+  const revenueByConcert = getCompletedOrders().reduce((totals, order) => {
     totals[order.concert] = (totals[order.concert] || 0) + order.amount;
     return totals;
   }, {});
   const revenues = MOCK_CONCERTS.map(concert => ({
     title: concert.title,
     revenue: revenueByConcert[concert.title] || 0
-  }));
+  }))
+    .filter(item => item.revenue > 0)
+    .sort((a, b) => b.revenue - a.revenue);
+  const visibleRevenues = showAllRevenue ? revenues : revenues.slice(0, 5);
   const maxRevenue = Math.max(...revenues.map(item => item.revenue), 1);
 
-  chart.innerHTML = revenues.map(item => {
-    const height = item.revenue ? Math.max((item.revenue / maxRevenue) * 100, 8) : 3;
+  chart.innerHTML = visibleRevenues.map(item => {
+    const width = (item.revenue / maxRevenue) * 100;
     return `
-      <div class="bar-chart-col" title="${item.title}: $${item.revenue.toFixed(2)}">
-        <span class="bar-chart-value">$${item.revenue.toFixed(0)}</span>
-        <div class="bar-chart-bar${item.revenue === maxRevenue ? " filled" : ""}" style="height: ${height}%"></div>
-        <span class="bar-chart-label">${item.title}</span>
+      <div class="revenue-item" title="${item.title}">
+        <span class="revenue-title">${item.title}</span>
+        <div class="revenue-bar" aria-hidden="true">
+          <span class="revenue-bar-fill" style="width: ${width}%"></span>
+        </div>
+        <span class="revenue-value">$${item.revenue.toFixed(0)}</span>
       </div>
     `;
   }).join("");
+
+  const toggle = document.getElementById("revenue-toggle");
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", String(showAllRevenue));
+    toggle.setAttribute("aria-label", showAllRevenue ? "Show top 5 revenue concerts" : "Show full revenue list");
+    toggle.title = showAllRevenue ? "Show top 5 revenue concerts" : "Show full revenue list";
+  }
 }
 
 function renderRecentOrders() {
@@ -143,9 +170,14 @@ function renderRecentOrdersPagination(pageCount) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  renderSalesStats();
   renderUpcomingConcerts();
   renderTodayCheckins();
   renderConcertRevenue();
+  document.getElementById("revenue-toggle").addEventListener("click", () => {
+    showAllRevenue = !showAllRevenue;
+    renderConcertRevenue();
+  });
   renderRecentOrders();
   document.getElementById("recent-orders-view-all").addEventListener("click", () => {
     showAllRecentOrders = !showAllRecentOrders;

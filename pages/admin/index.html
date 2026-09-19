@@ -113,7 +113,7 @@
           <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
           <div>
             <span class="stat-label">Total Revenue</span>
-            <span class="stat-value">$482,650</span>
+            <span class="stat-value" id="stat-total-revenue">$0</span>
             <span class="stat-change up"
               ><i class="fa-solid fa-arrow-trend-up"></i> 12.4% vs last
               month</span
@@ -124,7 +124,7 @@
           <div class="stat-icon blue"><i class="fa-solid fa-ticket"></i></div>
           <div>
             <span class="stat-label">Tickets Sold</span>
-            <span class="stat-value">8,214</span>
+            <span class="stat-value" id="stat-tickets-sold">0</span>
             <span class="stat-change up"
               ><i class="fa-solid fa-arrow-trend-up"></i> 6.8% vs last
               month</span
@@ -159,7 +159,16 @@
         <div class="card panel">
           <div class="panel-header">
             <span class="panel-title">Revenue by concert</span>
+            <button
+              type="button"
+              class="panel-link revenue-toggle"
+              id="revenue-toggle"
+              aria-label="Show full revenue list"
+              aria-expanded="false"
+              title="Show full revenue list"
             >
+              &gt;
+            </button>
           </div>
           <div class="bar-chart" id="concert-revenue-chart"></div>
         </div>
