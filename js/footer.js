@@ -23,7 +23,7 @@ function renderSiteFooter() {
     <footer class="footer">
       <div class="container footer-top">
         <div class="footer-brand">
-          <a href="${root}index.html" class="logo">CONCERTLY<span>.</span></a>
+          <a href="${root}index.html" class="logo">CONCERTLY</a>
           <p>Live concerts and shows, all in one place.</p>
         </div>
 

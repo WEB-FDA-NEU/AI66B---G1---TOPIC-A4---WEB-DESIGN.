@@ -6,14 +6,22 @@ let attendeeStatusFilter = "all";
 let attendeeSearch = "";
 let selectedEventId = "";
 
-const MOCK_ATTENDEES = [
-  { id: "00184", eventId: "c1", name: "Nguyen Hoang Linh", email: "linh.nguyen@gmail.com", type: "VIP", checkedIn: false },
-  { id: "00185", eventId: "c1", name: "Pham Duc Anh", email: "ducanh.pham@gmail.com", type: "Standard", checkedIn: false },
-  { id: "00186", eventId: "c3", name: "Le Thi Quynh", email: "quynh.le@gmail.com", type: "Standard", checkedIn: false },
-  { id: "00187", eventId: "c3", name: "Tran Gia Han", email: "gh.tran@gmail.com", type: "VIP", checkedIn: false },
-  { id: "00188", eventId: "c2", name: "Vu Minh Duc", email: "minhduc.vu@gmail.com", type: "Standard", checkedIn: false },
-  { id: "00189", eventId: "c2", name: "Do Khanh Chi", email: "chi.do@gmail.com", type: "Standard", checkedIn: false }
-];
+const MOCK_ATTENDEES = MOCK_ORDERS
+  .filter(order => order.status === "Paid" || order.status === "Pending")
+  .map(order => {
+    const concert = MOCK_CONCERTS.find(item => item.title === order.concert);
+    const attendeeName = order.customer.toLowerCase().replace(/\s+/g, ".");
+
+    return {
+      id: order.orderId.replace("#CT-", ""),
+      eventId: concert ? concert.id : "",
+      name: order.customer,
+      email: `${attendeeName}@gmail.com`,
+      type: order.amount >= 300 ? "VIP" : "Standard",
+      checkedIn: false
+    };
+  })
+  .filter(attendee => attendee.eventId);
 
 function getConcertForAttendee(attendee) {
   return MOCK_CONCERTS.find(concert => concert.id === attendee.eventId);

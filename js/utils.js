@@ -16,7 +16,7 @@ function badgeClassFor(status) {
 
 function getConcertStatus(concert, now = new Date()) {
   if (concert.cancelled) return "Cancelled";
-  if (!concert.published) return "Draft";
+  if (concert.published === false) return "Draft";
 
   const concertDate = new Date(`${concert.date}T${concert.time}`);
   if (concertDate < now) return "Ended";

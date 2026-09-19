@@ -508,51 +508,53 @@
     cursor: pointer;
 }
 
-/* Lightweight CSS-only bar chart, no JS/canvas needed for a static build */
+/* Revenue ranking list */
 .bar-chart {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
     gap: var(--space-md);
-    height: 200px;
-    padding-top: var(--space-md);
+    padding-top: var(--space-xs);
 }
 
-.bar-chart-col {
-    flex: 1;
+.revenue-item {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    height: 100%;
-    justify-content: flex-end;
+    gap: var(--space-sm);
     min-width: 0;
 }
 
-.bar-chart-value {
-    color: var(--color-text-secondary);
-    font-size: 11px;
-    white-space: nowrap;
-}
-
-.bar-chart-bar {
-    width: 100%;
-    max-width: 34px;
-    border-radius: 6px 6px 0 0;
-    background: var(--color-bg-hover);
-    position: relative;
-}
-
-.bar-chart-bar.filled {
-    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
-}
-
-.bar-chart-label {
-    font-size: 12px;
-    color: var(--color-text-muted);
-    max-width: 120px;
+.revenue-title {
+    flex: 0 1 42%;
+    min-width: 0;
     overflow: hidden;
-    text-align: center;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text-secondary);
+    font-size: var(--font-sm);
+}
+
+.revenue-bar {
+    flex: 1;
+    height: 10px;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-hover);
+}
+
+.revenue-bar-fill {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+}
+
+.revenue-value {
+    flex: 0 0 64px;
+    color: var(--color-text);
+    font-size: var(--font-sm);
+    font-weight: 700;
+    text-align: right;
     white-space: nowrap;
 }
 
