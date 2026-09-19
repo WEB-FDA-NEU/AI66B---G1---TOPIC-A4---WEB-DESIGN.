@@ -26,7 +26,6 @@
       min-height: 75vh;
       overflow: hidden;
       user-select: none;
-      border-bottom: 1px solid var(--color-border);
     }
     .hero-track {
       display: flex;
@@ -60,25 +59,26 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(11, 11, 15, 0.5);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #fff;
-      font-size: 1.5rem;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.85);
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 10;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
+      transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+    .carousel-btn svg {
+      width: 22px;
+      height: 22px;
     }
     .carousel-btn:hover {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
+      color: #fff;
+      transform: translateY(-50%) scale(1.18);
     }
     .carousel-btn.prev { left: 20px; }
     .carousel-btn.next { right: 20px; }
@@ -218,51 +218,57 @@
   <!-- Navigation -->
   <header class="site-header">
     <div class="container">
-      <a href="index.html" class="site-logo">CONCERTLY</a>
+      <a href="index.html" class="site-logo hover-glow">CONCERTLY</a>
       <nav class="site-nav">
-        <a href="index.html" class="active">Home</a>
-        <a href="pages/concerts/index.html">Explore</a>
-        <a href="pages/404.html">Support</a>
+        <a href="index.html" class="active hover-glow" data-nav>Home</a>
+        <a href="pages/concerts/index.html" class="hover-glow" data-nav>Explore</a>
+        <a href="pages/404.html" class="hover-glow" data-nav>Support</a>
+        <span class="nav-indicator"></span>
       </nav>
     </div>
   </header>
 
   <!-- Hero Slider Section with Drag/Swipe Support -->
   <section class="hero-slider-wrapper" id="hero-wrapper">
-    <button class="carousel-btn prev" id="hero-prev" aria-label="Previous Slide">&#10094;</button>
+    <button class="carousel-btn prev" id="hero-prev" aria-label="Previous Slide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
     <div class="hero-track" id="hero-track">
       <!-- Injected via js/main.js -->
     </div>
-    <button class="carousel-btn next" id="hero-next" aria-label="Next Slide">&#10095;</button>
+    <button class="carousel-btn next" id="hero-next" aria-label="Next Slide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
     <div class="carousel-dots" id="hero-dots"></div>
   </section>
 
-    <!-- Main Content: Concert Grid -->
-    <main class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">Trending Shows</h2>
-          <p
-            style="
-              color: var(--color-text-secondary);
-              margin: 0;
-              font-size: var(--font-sm);
-            "
-          >
-            Discover the hottest stadium concerts and showcases
-          </p>
-        </div>
-        <a
-          href="pages/concerts/index.html"
+  <!-- Main Content: Concert Grid -->
+  <main class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Trending Shows</h2>
+        <p
           style="
-            color: var(--color-primary);
-            text-decoration: none;
-            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin: 0;
             font-size: var(--font-sm);
           "
-          >View All &rarr;</a
         >
+          Discover the hottest stadium concerts and showcases
+        </p>
       </div>
+      <a
+        href="pages/concerts/index.html"
+        class="hover-glow"
+        style="
+          color: var(--color-primary);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: var(--font-sm);
+        "
+        >View All &rarr;</a
+      >
+    </div>
 
     <div class="concert-grid" id="concert-list">
       <!-- Injected via js/main.js -->
