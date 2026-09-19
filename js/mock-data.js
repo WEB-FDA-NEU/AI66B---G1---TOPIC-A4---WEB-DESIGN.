@@ -34,8 +34,7 @@ const MOCK_CONCERTS = [
     tickets: [
       { type: "Balcony Seated", price: "$60", status: "Available" },
       { type: "Front Row Orchestra", price: "$140", status: "Available" },
-      { type: "Midnight VIP Pass", price: "$260", status: "Selling Fast" }
-    ]
+      { type: "Midnight VIP Pass", price: "$260", status: "Limited" }]
   },
   {
     id: "c2",
@@ -84,6 +83,7 @@ const MOCK_CONCERTS = [
     location: "Tokyo Dome, Tokyo, Japan",
     priceRange: "$85 - $380",
     poster: "https://www.acfc.com.vn/acfc_wp/wp-content/uploads/2026/01/image-20.png",
+    banner: "https://www.acfc.com.vn/acfc_wp/wp-content/uploads/2026/01/image-20.png",
     category: "K-Pop",
     status: "Selling Fast",
     description: "The global fashion and music icon Jennie takes the spotlight with sensational solo performances, dazzling choreography, and chic visuals.",
