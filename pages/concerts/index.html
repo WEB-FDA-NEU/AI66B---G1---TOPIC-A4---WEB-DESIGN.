@@ -168,11 +168,12 @@
   <!-- Navigation -->
   <header class="site-header">
     <div class="container">
-      <a href="../../index.html" class="site-logo">CONCERTLY</a>
+      <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
       <nav class="site-nav">
-        <a href="../../index.html">Home</a>
-        <a href="index.html" class="active">Explore</a>
-        <a href="../404.html">Support</a>
+        <a href="../../index.html" class="hover-glow" data-nav>Home</a>
+        <a href="index.html" class="active hover-glow" data-nav>Explore</a>
+        <a href="../404.html" class="hover-glow" data-nav>Support</a>
+        <span class="nav-indicator"></span>
       </nav>
     </div>
   </header>
@@ -249,12 +250,16 @@
           : s.includes('hot') ? 'hot'
           : s.includes('high demand') ? 'high-demand'
           : 'default';
+        const statusTitle = s.includes('selling') ? 'Vé đang bán nhanh — sắp hết'
+          : s.includes('hot') ? 'Đang cháy vé — nhu cầu rất cao'
+          : s.includes('high demand') ? 'Được nhiều người quan tâm'
+          : 'Còn vé';
 
         return `
         <article class="card">
           <div class="card-media">
             <img src="${c.poster}" alt="${c.artist}" class="card-img" loading="lazy">
-            <span class="status-tag ${statusClass}">${c.status}</span>
+            <span class="status-tag ${statusClass}" title="${statusTitle}">${c.status}</span>
           </div>
           <div class="card-body">
             <span class="card-badge">${c.category}</span>
