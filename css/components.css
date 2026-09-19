@@ -2,14 +2,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     padding: 11px 20px;
-
     border-radius: var(--radius-md);
     border: 1px solid transparent;
-
     font-weight: 600;
-
     transition: .2s;
 }
 
@@ -41,23 +37,19 @@
 
 .card {
     background: var(--color-bg-card);
-
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-
     overflow: hidden;
-
     transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
 
 .card:hover {
     transform: translateY(-4px);
-    border-color: rgba(255,79,154,.4);
+    border-color: rgba(255, 79, 154, .4);
     box-shadow: var(--shadow-md);
 }
 
 /* ============ SITE HEADER (sticky, shared across pages) ============ */
-
 .site-header {
     position: sticky;
     top: 0;
@@ -72,7 +64,7 @@
 
 .site-header.scrolled {
     background: rgba(11, 11, 15, .94);
-    box-shadow: 0 4px 20px rgba(0,0,0,.35);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .35);
 }
 
 .site-header .container {
@@ -91,10 +83,22 @@
     white-space: nowrap;
 }
 
+/* Shared "glow + grow" hover feedback for key text links: logo, nav
+   items, and standalone CTAs like "View All" */
+.hover-glow {
+    display: inline-block;
+    transition: transform .2s ease, text-shadow .2s ease;
+}
+.hover-glow:hover {
+    transform: scale(1.07);
+    text-shadow: 0 0 14px currentColor;
+}
+
 .site-nav {
     display: flex;
     gap: var(--space-xl);
     align-items: center;
+    position: relative; /* anchors the sliding indicator below */
 }
 
 .site-nav a {
@@ -116,6 +120,10 @@
     font-weight: 700;
 }
 
+/* CSS-only fallback: shows a static underline under the active link even
+   if navbar.js fails to load/run. Hidden automatically once JS confirms
+   it initialized (nav gets .js-ready — see navbar.js) so the two never
+   show at once. */
 .site-nav a.active::after {
     content: "";
     position: absolute;
@@ -126,9 +134,26 @@
     border-radius: 2px;
     background: var(--color-primary);
 }
+.site-nav.js-ready a.active::after {
+    display: none;
+}
+
+/* Single sliding pill that animates between links on hover, and rests
+   under the active link when the mouse leaves the nav (see navbar.js) */
+.nav-indicator {
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    height: 2px;
+    width: 0;
+    border-radius: 2px;
+    background: var(--color-primary);
+    opacity: 0;
+    transition: left .25s ease, width .25s ease, opacity .2s ease;
+    pointer-events: none;
+}
 
 /* ============ CARD MEDIA + STATUS TAG (no emoji, subtle color coding) ============ */
-
 .card-media {
     position: relative;
     overflow: hidden;
@@ -151,16 +176,41 @@
     font-size: 11px;
     font-weight: 700;
     letter-spacing: .3px;
-    color: #fff;
     text-transform: uppercase;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid transparent;
 }
 
-.status-tag.selling-fast { background: rgba(255, 79, 154, .85); }
-.status-tag.hot { background: rgba(255, 92, 108, .85); }
-.status-tag.high-demand { background: rgba(93, 169, 255, .85); }
-.status-tag.default { background: rgba(255, 255, 255, .18); }
+/* Inline variant for use outside card overlays (e.g. detail page hero) */
+.status-tag.inline {
+    position: static;
+    display: inline-block;
+}
+
+/* Frosted-glass look: low-opacity tinted background you can see the photo
+   through, with a matching border + bright text carrying the color —
+   instead of a flat, saturated fill */
+.status-tag.high-demand {
+    background: rgba(93, 169, 255, .16);
+    border-color: rgba(93, 169, 255, .5);
+    color: #9dcbff;
+}
+.status-tag.selling-fast {
+    background: rgba(255, 184, 77, .16);
+    border-color: rgba(255, 184, 77, .5);
+    color: #ffd08a;
+}
+.status-tag.hot {
+    background: rgba(255, 92, 108, .16);
+    border-color: rgba(255, 92, 108, .5);
+    color: #ffa3ad;
+}
+.status-tag.default {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .3);
+    color: #fff;
+}
 
 .form-group {
     display: flex;
@@ -175,21 +225,15 @@
 
 .form-input {
     width: 100%;
-
     padding: 13px 15px;
-
     background: var(--color-bg-secondary);
     color: var(--color-text);
-
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-
     outline: none;
 }
 
 .form-input:focus {
     border-color: var(--color-primary);
-
-    box-shadow:
-        0 0 0 3px rgba(255,79,154,.1);
+    box-shadow: 0 0 0 3px rgba(255, 79, 154, .1);
 }

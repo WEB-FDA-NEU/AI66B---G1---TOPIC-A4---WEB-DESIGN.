@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concert Details | Concertly</title>
+
   <link rel="stylesheet" href="../../css/reset.css">
   <link rel="stylesheet" href="../../css/variables.css">
   <link rel="stylesheet" href="../../css/base.css">
@@ -11,6 +12,7 @@
   <link rel="stylesheet" href="../../css/components.css">
   <link rel="stylesheet" href="../../css/utilitites.css">
   <link rel="stylesheet" href="../../css/responsive.css">
+
   <style>
     body {
       background-color: var(--color-bg);
@@ -18,32 +20,47 @@
       font-family: var(--font-family);
       margin: 0;
     }
+
     .detail-hero {
       position: relative;
-      min-height: 50vh;
+      min-height: 58vh;
       display: flex;
       align-items: flex-end;
       padding: var(--space-2xl) 0 var(--space-xl);
       background-size: cover;
-      background-position: center;
-      border-bottom: 1px solid var(--color-border);
+      background-position: center 15%;
     }
+
     .detail-hero::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(11, 11, 15, 0.4) 0%, rgba(11, 11, 15, 0.95) 100%);
+      /* Soft ombre: mostly transparent up top so the artist's face reads
+         clearly, fading into the exact page background color at the
+         bottom so it blends into "About The Show" with no hard seam */
+      background: linear-gradient(
+        180deg,
+        rgba(11, 11, 15, 0.05) 0%,
+        rgba(11, 11, 15, 0.25) 45%,
+        rgba(11, 11, 15, 0.75) 75%,
+        var(--color-bg) 100%
+      );
     }
+
     .hero-content {
       position: relative;
       z-index: 1;
-      width: 100%;
+      /* NOTE: no width:100% here — this div also has the shared .container
+         class, which centers it at max 1200px. Overriding width here was
+         stretching the badges/title flush to the browser edge. */
     }
+
     .badge-wrap {
       display: flex;
       gap: var(--space-xs);
       margin-bottom: var(--space-sm);
     }
+
     .badge {
       padding: 4px 12px;
       border-radius: var(--radius-full);
@@ -53,29 +70,34 @@
       color: var(--color-primary);
       border: 1px solid var(--color-primary);
     }
+
     .detail-title {
       font-size: clamp(2rem, 5vw, 3.5rem);
       font-weight: 800;
       line-height: 1.1;
       margin-bottom: var(--space-xs);
     }
+
     .detail-artist {
       font-size: var(--font-lg);
       color: var(--color-text-secondary);
       font-weight: 600;
       margin-bottom: var(--space-md);
     }
+
     .main-layout {
       display: grid;
       grid-template-columns: 1fr 360px;
       gap: var(--space-2xl);
       padding: var(--space-2xl) 0;
     }
+
     @media (max-width: 860px) {
       .main-layout {
         grid-template-columns: 1fr;
       }
     }
+
     .info-card {
       background-color: var(--color-surface);
       border: 1px solid var(--color-border);
@@ -83,30 +105,36 @@
       padding: var(--space-lg);
       margin-bottom: var(--space-xl);
     }
+
     .info-row {
       display: flex;
       gap: var(--space-md);
       margin-bottom: var(--space-md);
     }
+
     .info-row:last-child {
       margin-bottom: 0;
     }
+
     .info-label {
       color: var(--color-text-secondary);
       font-size: var(--font-sm);
       min-width: 90px;
     }
+
     .info-val {
       font-weight: 600;
       font-size: var(--font-sm);
     }
+
     .section-title {
-      font-size: var(--font-lg);
-      font-weight: 700;
+      font-size: clamp(28px, 3.2vw, 36px);
+      font-weight: 800;
       margin-bottom: var(--space-md);
-      border-bottom: 1px solid var(--color-border);
       padding-bottom: var(--space-xs);
+      border-bottom: 1px solid var(--color-border);
     }
+
     .ticket-tier {
       display: flex;
       justify-content: space-between;
@@ -118,9 +146,11 @@
       margin-bottom: var(--space-sm);
       transition: border-color 0.2s;
     }
+
     .ticket-tier:hover {
       border-color: var(--color-primary);
     }
+
     .ticket-status {
       font-size: var(--font-xs);
       padding: 2px 8px;
@@ -128,138 +158,259 @@
       margin-top: 4px;
       display: inline-block;
     }
+
     .status-Available {
-      background: rgba(34, 197, 94, 0.2);
-      color: #22c55e;
+      background: rgba(69, 212, 131, 0.18);
+      color: var(--color-success);
     }
+
     .status-Limited {
-      background: rgba(245, 158, 11, 0.2);
-      color: #f59e0b;
+      background: rgba(255, 184, 77, 0.18);
+      color: var(--color-warning);
     }
+
     .status-SoldOut {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
+      background: rgba(255, 92, 108, 0.18);
+      color: var(--color-error);
     }
   </style>
 </head>
+
 <body>
 
   <!-- Header -->
-  <header class="container" style="padding: var(--space-md) 0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="../../index.html" style="font-size: var(--font-lg); font-weight: 800; color: var(--color-primary); text-decoration: none; letter-spacing: -1px;">CONCERTLY</a>
-    <nav style="display: flex; gap: var(--space-lg); align-items: center;">
-      <a href="../../index.html" style="color: var(--color-text-secondary); text-decoration: none;">Home</a>
-      <a href="index.html" style="color: var(--color-text-secondary); text-decoration: none;">Explore</a>
-      <a href="../404.html" style="color: var(--color-text-secondary); text-decoration: none;">Support</a>
-    </nav>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
+
+      <nav class="site-nav">
+        <a href="../../index.html" class="hover-glow" data-nav>Home</a>
+        <a href="index.html" class="active hover-glow" data-nav>Explore</a>
+        <a href="../404.html" class="hover-glow" data-nav>Support</a>
+        <span class="nav-indicator"></span>
+      </nav>
+    </div>
   </header>
 
   <!-- Dynamic Banner Hero -->
   <div class="detail-hero" id="hero-banner">
     <div class="container hero-content">
+
       <div class="badge-wrap">
         <span class="badge" id="concert-category">Pop</span>
-        <span class="badge" id="concert-status">Selling Fast</span>
+        <span class="status-tag inline" id="concert-status">Selling Fast</span>
       </div>
-      <h1 class="detail-title" id="concert-title">Tour Name</h1>
-      <div class="detail-artist" id="concert-artist">Artist</div>
+
+      <h1 class="detail-title" id="concert-title">
+        Tour Name
+      </h1>
+
+      <div class="detail-artist" id="concert-artist">
+        Artist
+      </div>
+
     </div>
   </div>
 
   <main class="container main-layout">
+
     <!-- Left Column: Details & Overview -->
     <div>
-      <h2 class="section-title">About The Show</h2>
-      <p id="concert-desc" style="color: var(--color-text-secondary); line-height: 1.7; font-size: var(--font-md); margin-bottom: var(--space-xl);"></p>
 
-      <h2 class="section-title">Available Ticket Categories</h2>
+      <h2 class="section-title">
+        About The Show
+      </h2>
+
+      <p
+        id="concert-desc"
+        style="color: var(--color-text-secondary); line-height: 1.7; font-size: var(--font-md); margin-bottom: var(--space-xl);"
+      ></p>
+
+      <h2 class="section-title">
+        Available Ticket Categories
+      </h2>
+
       <div id="ticket-list">
         <!-- Tickets dynamically injected -->
       </div>
+
     </div>
 
     <!-- Right Column: Event Information Sidebar -->
     <aside>
+
       <div class="info-card">
-        <h3 style="font-size: var(--font-md); font-weight: 700; margin-bottom: var(--space-md);">Event Information</h3>
+
+        <h3
+          style="font-size: var(--font-md); font-weight: 700; margin-bottom: var(--space-md);"
+        >
+          Event Information
+        </h3>
+
         <div class="info-row">
           <span class="info-label">Date:</span>
           <span class="info-val" id="concert-date">--</span>
         </div>
+
         <div class="info-row">
           <span class="info-label">Time:</span>
           <span class="info-val" id="concert-time">--</span>
         </div>
+
         <div class="info-row">
           <span class="info-label">Venue:</span>
           <span class="info-val" id="concert-venue">--</span>
         </div>
+
         <div class="info-row">
           <span class="info-label">Prices:</span>
-          <span class="info-val" id="concert-price" style="color: var(--color-primary);">--</span>
+          <span
+            class="info-val"
+            id="concert-price"
+            style="color: var(--color-primary);"
+          >
+            --
+          </span>
         </div>
+
         <div style="margin-top: var(--space-lg);">
-          <a href="#ticket-list" class="btn btn-primary" style="width: 100%; text-align: center; display: block; box-sizing: border-box;">Select Tickets</a>
+          <a
+            href="#ticket-list"
+            class="btn btn-primary"
+            style="width: 100%; text-align: center; display: block; box-sizing: border-box;"
+          >
+            Select Tickets
+          </a>
         </div>
+
       </div>
+
     </aside>
+
   </main>
 
   <!-- Scripts -->
   <script src="../../js/mock-data.js"></script>
+  <script src="../../js/navbar.js"></script>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const concertId = urlParams.get('id');
+    const concertId = urlParams.get("id");
 
-    if (typeof MOCK_CONCERTS === 'undefined') {
-      window.location.href = '../404.html';
+    if (typeof MOCK_CONCERTS === "undefined") {
+      window.location.href = "../404.html";
     }
 
     const concert = MOCK_CONCERTS.find(c => c.id === concertId);
 
-    // If ID not found, redirect to 404
+    function getStatusTagClass(status) {
+      const s = (status || "").toLowerCase();
+
+      if (s.includes("selling")) return "selling-fast";
+      if (s.includes("hot")) return "hot";
+      if (s.includes("high demand")) return "high-demand";
+
+      return "default";
+    }
+
     if (!concert) {
-      window.location.href = '../404.html';
+      window.location.href = "../404.html";
     } else {
+
       // Set Document Title
       document.title = `${concert.title} | Concertly`;
 
-      // Set Banner & Text
-      const banner = document.getElementById('hero-banner');
+      // Set Banner
+      const banner = document.getElementById("hero-banner");
       banner.style.backgroundImage = `url('${concert.banner}')`;
 
-      document.getElementById('concert-category').innerText = concert.category;
-      document.getElementById('concert-status').innerText = concert.status;
-      document.getElementById('concert-title').innerText = concert.title;
-      document.getElementById('concert-artist').innerText = `Featuring ${concert.artist}`;
-      document.getElementById('concert-desc').innerText = concert.description;
+      // Set Category
+      document.getElementById("concert-category").innerText =
+        concert.category;
 
-      document.getElementById('concert-date').innerText = concert.date;
-      document.getElementById('concert-time').innerText = concert.time;
-      document.getElementById('concert-venue').innerText = concert.location;
-      document.getElementById('concert-price').innerText = concert.priceRange;
+      // Set Status + Color
+      const statusEl = document.getElementById("concert-status");
+
+      statusEl.innerText = concert.status;
+      statusEl.className =
+        `status-tag inline ${getStatusTagClass(concert.status)}`;
+
+      // Set Concert Information
+      document.getElementById("concert-title").innerText =
+        concert.title;
+
+      document.getElementById("concert-artist").innerText =
+        `Featuring ${concert.artist}`;
+
+      document.getElementById("concert-desc").innerText =
+        concert.description;
+
+      document.getElementById("concert-date").innerText =
+        concert.date;
+
+      document.getElementById("concert-time").innerText =
+        concert.time;
+
+      document.getElementById("concert-venue").innerText =
+        concert.location;
+
+      document.getElementById("concert-price").innerText =
+        concert.priceRange;
 
       // Render Tickets
-      const ticketContainer = document.getElementById('ticket-list');
-      ticketContainer.innerHTML = concert.tickets.map(t => {
-        const cleanStatusClass = t.status.replace(/\s+/g, '');
-        const isSoldOut = t.status.toLowerCase().includes('sold out');
-        return `
-          <div class="ticket-tier">
-            <div>
-              <div style="font-weight: 700; font-size: var(--font-sm);">${t.type}</div>
-              <span class="ticket-status status-${cleanStatusClass}">${t.status}</span>
+      const ticketContainer =
+        document.getElementById("ticket-list");
+
+      ticketContainer.innerHTML = concert.tickets
+        .map(t => {
+
+          const cleanStatusClass =
+            t.status.replace(/\s+/g, "");
+
+          const isSoldOut =
+            t.status.toLowerCase().includes("sold out");
+
+          return `
+            <div class="ticket-tier">
+
+              <div>
+                <div
+                  style="font-weight: 700; font-size: var(--font-sm);"
+                >
+                  ${t.type}
+                </div>
+
+                <span
+                  class="ticket-status status-${cleanStatusClass}"
+                >
+                  ${t.status}
+                </span>
+              </div>
+
+              <div style="text-align: right;">
+
+                <div
+                  style="font-weight: 800; font-size: var(--font-md); color: var(--color-primary); margin-bottom: 6px;"
+                >
+                  ${t.price}
+                </div>
+
+                <button
+                  class="btn btn-secondary"
+                  style="padding: 6px 14px; font-size: var(--font-xs);"
+                  ${isSoldOut ? "disabled" : ""}
+                >
+                  ${isSoldOut ? "Sold Out" : "Select"}
+                </button>
+
+              </div>
+
             </div>
-            <div style="text-align: right;">
-              <div style="font-weight: 800; font-size: var(--font-md); color: var(--color-primary); margin-bottom: 6px;">${t.price}</div>
-              <button class="btn btn-secondary" style="padding: 6px 14px; font-size: var(--font-xs);" ${isSoldOut ? 'disabled' : ''}>
-                ${isSoldOut ? 'Sold Out' : 'Select'}
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        })
+        .join("");
     }
   </script>
+
 </body>
 </html>

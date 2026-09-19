@@ -40,7 +40,7 @@ function initHeroCarousel() {
     const titleText = concert.title || concert.name || 'Concert Tour';
 
     return `
-      <div class="hero-slide" style="background-image: linear-gradient(rgba(11, 11, 15, 0.75), rgba(11, 11, 15, 0.95)), url('${bannerUrl}'); background-position: center 20%;">
+      <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(11, 11, 15, 0.15) 0%, rgba(11, 11, 15, 0.35) 45%, rgba(11, 11, 15, 0.85) 78%, var(--color-bg) 100%), url('${bannerUrl}'); background-position: center 20%;">
         <div class="container">
           <span class="hero-tag">${categoryText} • ${statusText}</span>
           <h1 class="hero-title">${titleText}</h1>
@@ -182,6 +182,14 @@ function getStatusTagClass(status) {
   return 'default';
 }
 
+function getStatusTagTitle(status) {
+  const s = (status || '').toLowerCase();
+  if (s.includes('selling')) return 'Vé đang bán nhanh — sắp hết';
+  if (s.includes('hot')) return 'Đang cháy vé — nhu cầu rất cao';
+  if (s.includes('high demand')) return 'Được nhiều người quan tâm';
+  return 'Còn vé';
+}
+
 // 2. Generate HTML markup for a concert card
 function createConcertCardHTML(show, isHome = false) {
   const detailLink = isHome 
@@ -195,7 +203,7 @@ function createConcertCardHTML(show, isHome = false) {
     <article class="card">
       <div class="card-media">
         <img src="${posterUrl}" alt="${show.artist || show.title}" class="card-img" style="object-position: top center;" loading="lazy">
-        <span class="status-tag ${statusClass}">${show.status || 'Available'}</span>
+        <span class="status-tag ${statusClass}" title="${getStatusTagTitle(show.status)}">${show.status || 'Available'}</span>
       </div>
       <div class="card-body">
         <span class="card-badge">${show.category || 'Concert'}</span>
