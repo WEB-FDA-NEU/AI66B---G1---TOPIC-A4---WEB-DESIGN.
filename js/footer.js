@@ -17,8 +17,6 @@ function renderSiteFooter() {
 
   const root = mount.dataset.root || "";
 
-  // Links marked with # are placeholders — there's no Help Center / Refund
-  // Policy / Terms page yet, wire these up once those pages exist.
   mount.innerHTML = `
     <footer class="footer">
       <div class="container footer-top">
@@ -38,21 +36,10 @@ function renderSiteFooter() {
           <a href="${root}pages/auth/register.html">Create account</a>
         </div>
 
-        <div class="footer-col">
-          <h4>Support</h4>
-          <a href="#">Help Center</a>
-          <a href="#">Refund Policy</a>
-          <a href="#">Terms of Service</a>
-        </div>
       </div>
 
       <div class="container footer-bottom">
         <span>&copy; 2026 Concertly. All rights reserved.</span>
-        <div class="footer-social">
-          <a href="#">Instagram</a>
-          <a href="#">Facebook</a>
-          <a href="#">TikTok</a>
-        </div>
       </div>
     </footer>
   `;
