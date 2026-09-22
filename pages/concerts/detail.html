@@ -62,13 +62,16 @@
       }
 
       .badge {
-        padding: 4px 12px;
-        border-radius: var(--radius-full);
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background-color: rgba(11, 11, 15, 0.48);
         font-size: var(--font-xs);
         font-weight: 600;
-        background-color: rgba(255, 79, 154, 0.2);
         color: var(--color-primary);
-        border: 1px solid var(--color-primary);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
       }
 
       .detail-title {
@@ -173,6 +176,23 @@
         background: rgba(255, 92, 108, 0.18);
         color: var(--color-error);
       }
+
+      .detail-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        flex-wrap: wrap;
+      }
+
+      .detail-actions .btn {
+        padding: 8px 14px;
+        font-size: var(--font-sm);
+      }
+
+      .countdown {
+        color: var(--color-text-secondary);
+        font-size: var(--font-sm);
+      }
     </style>
   </head>
 
@@ -182,12 +202,26 @@
       <div class="container">
         <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
 
-        <nav class="site-nav">
-          <a href="../../index.html" class="hover-glow" data-nav>Home</a>
-          <a href="index.html" class="active hover-glow" data-nav>Explore</a>
-          <a href="../404.html" class="hover-glow" data-nav>Support</a>
-          <span class="nav-indicator"></span>
-        </nav>
+        <div class="header-actions" data-home="../../index.html">
+          <nav class="site-nav">
+            <a href="../../index.html" class="hover-glow" data-nav>Home</a>
+            <a href="index.html" class="active hover-glow" data-nav>Explore</a>
+            <a href="../404.html" class="hover-glow" data-nav>Support</a>
+            <span class="nav-indicator"></span>
+          </nav>
+          <div class="site-auth">
+            <button class="avatar-button" type="button" aria-label="Account menu">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5"></circle>
+                <path d="M5.5 20c.8-3.2 3.1-5 6.5-5s5.7 1.8 6.5 5"></path>
+              </svg>
+            </button>
+            <div class="auth-menu" role="menu">
+              <a href="../auth/login.html" data-auth-login role="menuitem">Log in</a>
+              <button type="button" data-auth-logout role="menuitem" hidden>Log out</button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -204,6 +238,9 @@
         <h1 class="detail-title" id="concert-title">Tour Name</h1>
 
         <div class="detail-artist" id="concert-artist">Artist</div>
+        <div class="detail-actions">
+          <span class="countdown" id="countdown" aria-live="polite"></span>
+        </div>
       </div>
     </div>
 
@@ -271,6 +308,7 @@
           <div style="margin-top: var(--space-lg)">
             <a
               href="#ticket-list"
+              data-requires-auth
               class="btn btn-primary"
               style="
                 width: 100%;
@@ -293,6 +331,7 @@
     <script>
       const urlParams = new URLSearchParams(window.location.search);
       const concertId = urlParams.get("id");
+      const countdown = document.getElementById("countdown");
 
       if (typeof MOCK_CONCERTS === "undefined") {
         window.location.href = "../404.html";
@@ -304,8 +343,8 @@
         const s = (status || "").toLowerCase();
 
         if (s.includes("selling")) return "selling-fast";
-        if (s.includes("hot")) return "hot";
-        if (s.includes("high demand")) return "high-demand";
+        if (s.includes("popular")) return "hot";
+        if (s.includes("limited availability")) return "high-demand";
 
         return "default";
       }
@@ -346,6 +385,21 @@
 
         document.getElementById("concert-price").innerText = concert.priceRange;
 
+        const eventDate = new Date(`${concert.date}T${concert.time}`);
+        const updateCountdown = () => {
+          const remaining = eventDate.getTime() - Date.now();
+          if (remaining <= 0) {
+            countdown.textContent = "Event day has arrived";
+            return;
+          }
+
+          const days = Math.floor(remaining / 86400000);
+          const hours = Math.floor((remaining % 86400000) / 3600000);
+          countdown.textContent = `${days}d ${hours}h until showtime`;
+        };
+        updateCountdown();
+        window.setInterval(updateCountdown, 60000);
+
         // Render Tickets
         const ticketContainer = document.getElementById("ticket-list");
 
@@ -382,6 +436,7 @@
 
                 <button
                   class="btn btn-secondary"
+                  data-requires-auth
                   style="padding: 6px 14px; font-size: var(--font-xs);"
                   ${isSoldOut ? "disabled" : ""}
                 >
