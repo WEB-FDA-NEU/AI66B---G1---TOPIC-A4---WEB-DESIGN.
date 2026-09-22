@@ -210,6 +210,15 @@
     box-shadow: var(--shadow-md);
 }
 
+.auth-menu::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
 .site-auth:hover .auth-menu,
 .site-auth:focus-within .auth-menu {
     display: block;
