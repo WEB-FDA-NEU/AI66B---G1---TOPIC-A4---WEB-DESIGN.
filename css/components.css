@@ -74,6 +74,12 @@
     padding: 18px 0;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+}
+
 .site-logo {
     font-size: 26px;
     font-weight: 800;
@@ -151,6 +157,86 @@
     opacity: 0;
     transition: left .25s ease, width .25s ease, opacity .2s ease;
     pointer-events: none;
+}
+
+.site-auth {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: var(--space-lg);
+}
+
+.avatar-button {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--color-border-light);
+    border-radius: 50%;
+    background: var(--color-bg-card);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, background-color .2s ease;
+}
+
+.avatar-button svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.site-auth:hover .avatar-button,
+.avatar-button:focus-visible {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: rgba(255, 79, 154, .1);
+}
+
+.auth-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 132px;
+    padding: 6px;
+    display: none;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+}
+
+.site-auth:hover .auth-menu,
+.site-auth:focus-within .auth-menu {
+    display: block;
+}
+
+.auth-menu a,
+.auth-menu button {
+    width: 100%;
+    display: block;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: var(--font-sm);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auth-menu a:hover,
+.auth-menu button:hover,
+.auth-menu a:focus-visible,
+.auth-menu button:focus-visible {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
 }
 
 /* ============ CARD MEDIA + STATUS TAG (no emoji, subtle color coding) ============ */
