@@ -38,6 +38,11 @@
     width: 100%;
   }
 
+  .filter-tools {
+    width: 100%;
+    margin-left: 0;
+  }
+
   .category-pills {
     overflow-x: auto;
     padding-bottom: var(--space-xs);
