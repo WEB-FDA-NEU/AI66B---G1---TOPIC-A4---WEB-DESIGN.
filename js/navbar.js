@@ -7,6 +7,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   initStickyHeader();
   initNavIndicator();
+  initAuthMenu();
+  initAuthGuards();
 });
 
 function initStickyHeader() {
@@ -54,4 +56,27 @@ function initNavIndicator() {
   // Safety net: recompute once everything (fonts/images) has fully loaded,
   // in case layout shifted slightly after the first paint.
   window.addEventListener("load", () => moveIndicatorTo(activeLink));
+}
+
+function initAuthMenu() {
+  const auth = document.querySelector(".site-auth");
+  if (!auth) return;
+
+  const loginLink = auth.querySelector("[data-auth-login]");
+  if (!loginLink) return;
+}
+
+function initAuthGuards() {
+  const guardedElements = document.querySelectorAll("[data-requires-auth]");
+  if (!guardedElements.length || localStorage.getItem("concertlyUser")) return;
+
+  const loginLink = document.querySelector("[data-auth-login]");
+  const loginUrl = loginLink ? loginLink.href : "#";
+
+  guardedElements.forEach((element) => {
+    element.addEventListener("click", (event) => {
+      event.preventDefault();
+      window.location.href = loginUrl;
+    });
+  });
 }

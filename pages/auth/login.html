@@ -46,6 +46,7 @@
     <script>
         function handleLogin(e) {
             e.preventDefault();
+            localStorage.setItem('concertlyUser', document.getElementById('username').value);
             // Demo chuyển hướng sang xem vé của concert đầu tiên (id: c1) theo route /me/tickets/{id}
             window.location.href = '../me/ticket-detail.html?id=c1';
         }

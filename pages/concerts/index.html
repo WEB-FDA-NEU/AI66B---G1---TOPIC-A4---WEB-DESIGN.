@@ -41,6 +41,37 @@
         align-items: center;
         margin-bottom: var(--space-xl);
       }
+      .filter-tools {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-left: auto;
+      }
+      .result-count {
+        color: var(--color-text-muted);
+        font-size: var(--font-xs);
+        white-space: nowrap;
+      }
+      .sort-select,
+      .clear-filters {
+        min-height: 34px;
+        padding: 6px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface);
+        color: var(--color-text-secondary);
+        font: inherit;
+        font-size: var(--font-xs);
+      }
+      .clear-filters {
+        cursor: pointer;
+      }
+      .clear-filters:hover,
+      .sort-select:focus {
+        border-color: var(--color-primary);
+        color: var(--color-text);
+        outline: none;
+      }
       .search-box {
         flex: 1;
         min-width: 260px;
@@ -78,7 +109,7 @@
       }
       .pill-btn {
         padding: 6px 14px;
-        border-radius: var(--radius-full);
+        border-radius: 999px;
         background-color: var(--color-surface);
         border: 1px solid var(--color-border);
         color: var(--color-text-secondary);
@@ -113,6 +144,13 @@
       .card:hover {
         transform: translateY(-4px);
         border-color: var(--color-primary);
+      }
+      .concert-card {
+        cursor: pointer;
+      }
+      .concert-card:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 3px;
       }
       .card-img {
         width: 100%;
@@ -154,6 +192,7 @@
         border-top: 1px solid var(--color-border);
       }
       .card-price {
+        margin-left: auto;
         font-weight: 700;
         color: var(--color-text);
         font-size: var(--font-sm);
@@ -171,12 +210,25 @@
     <header class="site-header">
       <div class="container">
         <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
-        <nav class="site-nav">
-          <a href="../../index.html" class="hover-glow" data-nav>Home</a>
-          <a href="index.html" class="active hover-glow" data-nav>Explore</a>
-          <a href="../404.html" class="hover-glow" data-nav>Support</a>
-          <span class="nav-indicator"></span>
-        </nav>
+        <div class="header-actions" data-home="../../index.html">
+          <nav class="site-nav">
+            <a href="../../index.html" class="hover-glow" data-nav>Home</a>
+            <a href="index.html" class="active hover-glow" data-nav>Explore</a>
+            <a href="../404.html" class="hover-glow" data-nav>Support</a>
+            <span class="nav-indicator"></span>
+          </nav>
+          <div class="site-auth">
+            <button class="avatar-button" type="button" aria-label="Account menu">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5"></circle>
+                <path d="M5.5 20c.8-3.2 3.1-5 6.5-5s5.7 1.8 6.5 5"></path>
+              </svg>
+            </button>
+            <div class="auth-menu" role="menu">
+              <a href="../auth/login.html" data-auth-login role="menuitem">Sign in</a>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -223,6 +275,15 @@
             placeholder="Search artist, tour or city..."
           />
         </div>
+        <div class="filter-tools">
+          <span class="result-count" id="result-count"></span>
+          <select id="sort-select" class="sort-select" aria-label="Sort concerts">
+            <option value="date">Soonest date</option>
+            <option value="price-low">Price: low to high</option>
+            <option value="price-high">Price: high to low</option>
+          </select>
+          <button type="button" class="clear-filters" id="clear-filters">Clear</button>
+        </div>
       </section>
 
       <!-- Concert Cards Grid -->
@@ -237,12 +298,16 @@
     <script>
       let activeCategory = "all";
       let searchQuery = "";
+      let sortMode = "date";
 
       const grid = document.getElementById("explore-grid");
       const searchInput = document.getElementById("search-input");
       const filterButtons = document.querySelectorAll(
         "#category-filters .pill-btn",
       );
+      const sortSelect = document.getElementById("sort-select");
+      const clearFiltersButton = document.getElementById("clear-filters");
+      const resultCount = document.getElementById("result-count");
 
       function renderConcerts() {
         if (typeof MOCK_CONCERTS === "undefined" || !grid) return;
@@ -259,6 +324,17 @@
           return matchesCategory && matchesSearch;
         });
 
+        filtered.sort((a, b) => {
+          if (sortMode === "price-low" || sortMode === "price-high") {
+            const priceA = Number.parseInt(a.priceRange.replace(/[^0-9]/g, ""), 10);
+            const priceB = Number.parseInt(b.priceRange.replace(/[^0-9]/g, ""), 10);
+            return sortMode === "price-low" ? priceA - priceB : priceB - priceA;
+          }
+          return new Date(a.date) - new Date(b.date);
+        });
+
+        resultCount.textContent = `${filtered.length} ${filtered.length === 1 ? "concert" : "concerts"}`;
+
         if (filtered.length === 0) {
           grid.innerHTML = `
           <div class="empty-state">
@@ -274,38 +350,53 @@
             const s = (c.status || "").toLowerCase();
             const statusClass = s.includes("selling")
               ? "selling-fast"
-              : s.includes("hot")
+              : s.includes("popular")
                 ? "hot"
-                : s.includes("high demand")
+                : s.includes("limited availability")
                   ? "high-demand"
                   : "default";
             const statusTitle = s.includes("selling")
               ? "Vé đang bán nhanh — sắp hết"
-              : s.includes("hot")
-                ? "Đang cháy vé — nhu cầu rất cao"
-                : s.includes("high demand")
-                  ? "Được nhiều người quan tâm"
+              : s.includes("popular")
+                ? "Most popular concert"
+                : s.includes("limited availability")
+                  ? "Limited tickets remaining"
                   : "Còn vé";
 
             return `
-        <article class="card">
+        <article class="card concert-card" data-href="detail.html?id=${c.id}" tabindex="0" role="link">
           <div class="card-media">
             <img src="${c.poster}" alt="${c.artist}" class="card-img" loading="lazy">
-            <span class="status-tag ${statusClass}" title="${statusTitle}">${c.status}</span>
           </div>
           <div class="card-body">
-            <span class="card-badge">${c.category}</span>
+            <div class="card-labels">
+              <span class="card-badge">${c.category}</span>
+              <span class="status-tag ${statusClass}" title="${statusTitle}">${c.status}</span>
+            </div>
             <a href="detail.html?id=${c.id}" class="card-title">${c.title}</a>
             <div class="card-meta">${c.artist} | ${c.date}</div>
             <div class="card-footer">
               <span class="card-price">${c.priceRange}</span>
-              <a href="detail.html?id=${c.id}" class="btn btn-primary" style="padding: 6px 14px; font-size: var(--font-xs);">Book Now</a>
             </div>
           </div>
         </article>
       `;
           })
           .join("");
+
+        grid.querySelectorAll(".concert-card").forEach((card) => {
+          card.addEventListener("click", (event) => {
+            if (event.target.closest("a, button")) return;
+            window.location.href = card.dataset.href;
+          });
+
+          card.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            window.location.href = card.dataset.href;
+          });
+        });
+
       }
 
       // Category button click listener
@@ -325,6 +416,23 @@
           renderConcerts();
         });
       }
+
+      sortSelect.addEventListener("change", () => {
+        sortMode = sortSelect.value;
+        renderConcerts();
+      });
+
+      clearFiltersButton.addEventListener("click", () => {
+        activeCategory = "all";
+        searchQuery = "";
+        sortMode = "date";
+        searchInput.value = "";
+        sortSelect.value = "date";
+        filterButtons.forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.category === "all");
+        });
+        renderConcerts();
+      });
 
       // Initial render
       renderConcerts();

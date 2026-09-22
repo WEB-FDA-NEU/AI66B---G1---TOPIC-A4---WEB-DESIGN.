@@ -66,6 +66,12 @@
         line-height: 1.6;
         margin-bottom: var(--space-xl);
       }
+      .error-actions {
+        display: flex;
+        justify-content: center;
+        gap: var(--space-sm);
+        flex-wrap: wrap;
+      }
     </style>
   </head>
   <body>
@@ -73,12 +79,25 @@
     <header class="site-header">
       <div class="container">
         <a href="../index.html" class="site-logo hover-glow">CONCERTLY</a>
-        <nav class="site-nav">
-          <a href="../index.html" class="hover-glow" data-nav>Home</a>
-          <a href="concerts/index.html" class="hover-glow" data-nav>Explore</a>
-          <a href="404.html" class="active hover-glow" data-nav>Support</a>
-          <span class="nav-indicator"></span>
-        </nav>
+        <div class="header-actions" data-home="../index.html">
+          <nav class="site-nav">
+            <a href="../index.html" class="hover-glow" data-nav>Home</a>
+            <a href="concerts/index.html" class="hover-glow" data-nav>Explore</a>
+            <a href="404.html" class="active hover-glow" data-nav>Support</a>
+            <span class="nav-indicator"></span>
+          </nav>
+          <div class="site-auth">
+            <button class="avatar-button" type="button" aria-label="Account menu">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5"></circle>
+                <path d="M5.5 20c.8-3.2 3.1-5 6.5-5s5.7 1.8 6.5 5"></path>
+              </svg>
+            </button>
+            <div class="auth-menu" role="menu">
+              <a href="auth/login.html" data-auth-login role="menuitem">Sign in</a>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -91,7 +110,10 @@
           The concert page or resource you are looking for has been rescheduled,
           removed, or never existed. Let's get you back to the main stage.
         </p>
-        <a href="../index.html" class="btn btn-primary">Back to Home</a>
+        <div class="error-actions">
+          <a href="../index.html" class="btn btn-primary">Back to Home</a>
+          <a href="concerts/index.html" class="btn btn-secondary">Explore Concerts</a>
+        </div>
       </section>
     </main>
 

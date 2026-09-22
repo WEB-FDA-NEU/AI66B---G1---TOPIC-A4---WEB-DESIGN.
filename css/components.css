@@ -74,6 +74,12 @@
     padding: 18px 0;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+}
+
 .site-logo {
     font-size: 26px;
     font-weight: 800;
@@ -153,6 +159,137 @@
     pointer-events: none;
 }
 
+.site-auth {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: var(--space-lg);
+}
+
+.avatar-button {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--color-border-light);
+    border-radius: 50%;
+    background: var(--color-bg-card);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, background-color .2s ease;
+}
+
+.avatar-button svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.site-auth:hover .avatar-button,
+.avatar-button:focus-visible {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: rgba(255, 79, 154, .1);
+}
+
+.auth-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 132px;
+    padding: 6px;
+    display: none;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+}
+
+.auth-menu::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+.site-auth:hover .auth-menu,
+.site-auth:focus-within .auth-menu {
+    display: block;
+}
+
+.auth-menu a,
+.auth-menu button {
+    width: 100%;
+    display: block;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: var(--font-sm);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auth-menu a:hover,
+.auth-menu button:hover,
+.auth-menu a:focus-visible,
+.auth-menu button:focus-visible {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+}
+
+.auth-guard-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.auth-guard-message {
+    position: absolute;
+    z-index: 20;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    width: max-content;
+    max-width: 250px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-card);
+    color: var(--color-text-secondary);
+    box-shadow: var(--shadow-md);
+    font-size: var(--font-xs);
+    line-height: 1.4;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.auth-guard-message a {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-guard-message a:hover {
+    text-decoration: underline;
+}
+
+.auth-guard-wrapper.is-visible .auth-guard-message,
+.auth-guard-message:hover {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+}
+
 /* ============ CARD MEDIA + STATUS TAG (no emoji, subtle color coding) ============ */
 .card-media {
     position: relative;
@@ -171,15 +308,47 @@
     position: absolute;
     top: 12px;
     left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 4px 10px;
-    border-radius: var(--radius-sm);
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: .3px;
-    text-transform: uppercase;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid transparent;
+    letter-spacing: .15px;
+    text-transform: none;
+    background: rgba(11, 11, 15, .48);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .14);
+}
+
+.card-labels {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.card-labels .status-tag {
+    position: static;
+    flex-shrink: 0;
+}
+
+.card-labels .card-badge {
+    margin-bottom: 0;
+}
+
+.status-tag::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
 }
 
 /* Inline variant for use outside card overlays (e.g. detail page hero) */
@@ -192,24 +361,23 @@
    through, with a matching border + bright text carrying the color —
    instead of a flat, saturated fill */
 .status-tag.high-demand {
-    background: rgba(93, 169, 255, .16);
-    border-color: rgba(93, 169, 255, .5);
-    color: #9dcbff;
+    background: rgba(10, 20, 28, .7);
+    color: #c9e5f8;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
 }
 .status-tag.selling-fast {
-    background: rgba(255, 184, 77, .16);
-    border-color: rgba(255, 184, 77, .5);
-    color: #ffd08a;
+    background: rgba(18, 14, 8, .74);
+    color: #ffe3a3;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
 }
 .status-tag.hot {
-    background: rgba(255, 92, 108, .16);
-    border-color: rgba(255, 92, 108, .5);
-    color: #ffa3ad;
+    background: rgba(29, 12, 16, .72);
+    color: #ffc1c7;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
 }
 .status-tag.default {
-    background: rgba(255, 255, 255, .08);
-    border-color: rgba(255, 255, 255, .3);
-    color: #fff;
+    background: rgba(255, 255, 255, .1);
+    color: #e6e6eb;
 }
 
 .form-group {

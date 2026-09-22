@@ -47,7 +47,7 @@ const MOCK_CONCERTS = [
     poster: "https://m.media-amazon.com/images/I/51akaUj0S6L._AC_UF894,1000_QL80_.jpg",
     banner: "https://www.socanmagazine.ca/wp-content/uploads/2022/09/TheWeeknd_LiveAtRogersCentre_2022_ByBradArdley_1-1024x459.jpg",
     category: "R&B",
-    status: "Hot",
+    status: "Most Popular",
     description: "An electric stadium experience featuring The Weeknd's cinematic visuals, synth-pop classics, and hypnotic R&B anthems.",
     tickets: [
       { type: "General Admission Standing", price: "$90", status: "Available" },
@@ -66,7 +66,7 @@ const MOCK_CONCERTS = [
     poster: "https://static.wixstatic.com/media/57e354_bc294554b9b84f4da9015ff07a9e2813~mv2.jpg/v1/fill/w_1000,h_563,al_c,q_85,usm_0.66_1.00_0.01/57e354_bc294554b9b84f4da9015ff07a9e2813~mv2.jpg",
     banner: "https://wallpapers.com/images/featured/travis-scott-concert-77so7jvq2d74pgs9.jpg",
     category: "Hip-Hop",
-    status: "High Demand",
+    status: "Limited Availability",
     description: "Brace yourself for pure adrenaline, heavy bass, and high-energy mosh pits as Travis Scott brings Utopia to life.",
     tickets: [
       { type: "Floor Standing Mosh", price: "$75", status: "Available" },
@@ -104,7 +104,7 @@ const MOCK_CONCERTS = [
     poster: "https://kenh14cdn.com/203336854389633024/2021/8/29/title-16302503606451337225511.jpeg",
     banner: "https://cdn2.tuoitre.vn/471584752817336320/data/teen360/pictures/2021/08/26/1629981430_236722463_377598043730003_7359485805446615495_n.jpg",
     category: "K-Pop",
-    status: "Hot",
+    status: "Most Popular",
     description: "Witness Lisa's explosive stage presence, fierce rap verses, and electrifying choreography on her milestone solo world tour.",
     tickets: [
       { type: "Rockstar Standing Zone", price: "$95", status: "Available" },
@@ -142,7 +142,7 @@ const MOCK_CONCERTS = [
     poster: "https://retropopmagazine.com/wp-content/uploads/2026/01/Bruno-Mars-The-Romantic-I-Just-Might-Press-Handout-2026-4.jpeg",
     banner: "https://www.allegiantstadium.com/assets/img/Static_Digital_800x500_BrunoMars_2026_Regional_AllegiantStadium_0410-1fc3d6f0cd.jpg",
     category: "Pop",
-    status: "Hot",
+    status: "Most Popular",
     description: "An explosive night of funk, soul, and pure pop showmanship brought to life by Bruno Mars and the Hooligans.",
     tickets: [
       { type: "Silver Tribune", price: "$85", status: "Available" },
@@ -180,7 +180,7 @@ const MOCK_CONCERTS = [
     poster: "https://m.media-amazon.com/images/M/MV5BYzU5NjA3Y2YtY2UwZi00ZDMwLWE5NjAtOTljNTA4NTI4ZjYyXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
     banner: "https://i.scdn.co/image/ab67616d0000b273ba4fa604f046ff824331f4f4",
     category: "K-Pop",
-    status: "Hot",
+    status: "Most Popular",
     description: "The historic stadium tour of BTS featuring synchronized choreography, stunning visual stages, and anthems of self-love.",
     tickets: [
       { type: "CAT 3 Seating", price: "$90", status: "Available" },

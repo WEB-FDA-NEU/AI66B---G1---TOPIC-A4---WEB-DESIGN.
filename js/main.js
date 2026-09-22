@@ -31,23 +31,25 @@ function initHeroCarousel() {
   let currentTranslate = 0;
   let prevTranslate = 0;
   let isSnapping = false;
+  let ignoreNextSlideClick = false;
 
   function renderSlide(concert) {
     const bannerUrl = concert.banner || concert.image || concert.poster || concert.cover || '';
     const descText = concert.description || concert.desc || 'Experience world-class concerts live on stage.';
     const categoryText = concert.category || 'World Tour';
     const statusText = concert.status || 'Selling Fast';
+    const statusClass = getStatusTagClass(statusText);
     const titleText = concert.title || concert.name || 'Concert Tour';
 
     return `
-      <div class="hero-slide" style="background-image: linear-gradient(180deg, rgba(11, 11, 15, 0.15) 0%, rgba(11, 11, 15, 0.35) 45%, rgba(11, 11, 15, 0.85) 78%, var(--color-bg) 100%), url('${bannerUrl}'); background-position: center 20%;">
+      <div class="hero-slide" data-href="pages/concerts/detail.html?id=${concert.id}" style="background-image: linear-gradient(180deg, rgba(11, 11, 15, 0.15) 0%, rgba(11, 11, 15, 0.35) 45%, rgba(11, 11, 15, 0.85) 78%, var(--color-bg) 100%), url('${bannerUrl}'); background-position: center 20%;">
         <div class="container">
-          <span class="hero-tag">${categoryText} • ${statusText}</span>
+          <div class="hero-tags">
+            <span class="hero-tag">${categoryText}</span>
+            <span class="status-tag inline ${statusClass}">${statusText}</span>
+          </div>
           <h1 class="hero-title">${titleText}</h1>
           <p class="hero-desc">${descText}</p>
-          <div class="hero-actions">
-            <a href="pages/concerts/detail.html?id=${concert.id}" class="btn btn-primary">Book Tickets</a>
-          </div>
         </div>
       </div>
     `;
@@ -56,6 +58,17 @@ function initHeroCarousel() {
   // Render slides into the track, with clones at each end for the loop
   const slidesMarkup = [slides[slideCount - 1], ...slides, slides[0]].map(renderSlide);
   track.innerHTML = slidesMarkup.join("");
+
+  track.querySelectorAll(".hero-slide").forEach((slide) => {
+    slide.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) return;
+      if (ignoreNextSlideClick) {
+        ignoreNextSlideClick = false;
+        return;
+      }
+      window.location.href = slide.dataset.href;
+    });
+  });
 
   // Render pagination dots (only for the real slides)
   if (heroDots) {
@@ -148,6 +161,7 @@ function initHeroCarousel() {
     track.classList.remove('dragging');
 
     const movedBy = currentTranslate - prevTranslate;
+    if (Math.abs(movedBy) > 10) ignoreNextSlideClick = true;
     if (movedBy < -100) {
       currentIndex += 1;
     } else if (movedBy > 100) {
@@ -177,16 +191,16 @@ function initHeroCarousel() {
 function getStatusTagClass(status) {
   const s = (status || '').toLowerCase();
   if (s.includes('selling')) return 'selling-fast';
-  if (s.includes('hot')) return 'hot';
-  if (s.includes('high demand')) return 'high-demand';
+  if (s.includes('popular')) return 'hot';
+  if (s.includes('limited availability')) return 'high-demand';
   return 'default';
 }
 
 function getStatusTagTitle(status) {
   const s = (status || '').toLowerCase();
   if (s.includes('selling')) return 'Vé đang bán nhanh — sắp hết';
-  if (s.includes('hot')) return 'Đang cháy vé — nhu cầu rất cao';
-  if (s.includes('high demand')) return 'Được nhiều người quan tâm';
+  if (s.includes('popular')) return 'Most popular concert';
+  if (s.includes('limited availability')) return 'Limited tickets remaining';
   return 'Còn vé';
 }
 
@@ -200,18 +214,19 @@ function createConcertCardHTML(show, isHome = false) {
   const statusClass = getStatusTagClass(show.status);
 
   return `
-    <article class="card">
+    <article class="card concert-card" data-href="${detailLink}" tabindex="0" role="link">
       <div class="card-media">
         <img src="${posterUrl}" alt="${show.artist || show.title}" class="card-img" style="object-position: top center;" loading="lazy">
-        <span class="status-tag ${statusClass}" title="${getStatusTagTitle(show.status)}">${show.status || 'Available'}</span>
       </div>
       <div class="card-body">
-        <span class="card-badge">${show.category || 'Concert'}</span>
+        <div class="card-labels">
+          <span class="card-badge">${show.category || 'Concert'}</span>
+          <span class="status-tag ${statusClass}" title="${getStatusTagTitle(show.status)}">${show.status || 'Available'}</span>
+        </div>
         <a href="${detailLink}" class="card-title">${show.title}</a>
         <div class="card-meta">${show.artist} | ${show.date}</div>
         <div class="card-footer">
           <span class="card-price">${show.priceRange || '$50 - $250'}</span>
-          <a href="${detailLink}" class="btn btn-primary" style="padding: 6px 14px; font-size: var(--font-xs);">Details</a>
         </div>
       </div>
     </article>
@@ -225,6 +240,7 @@ function renderHomePage() {
 
   const homeConcerts = MOCK_CONCERTS.filter(c => HOME_ARTIST_IDS.includes(c.id));
   homeContainer.innerHTML = homeConcerts.map(show => createConcertCardHTML(show, true)).join("");
+  initClickableConcertCards(homeContainer);
 }
 
 // 4. Render Explore page (all concerts)
@@ -238,6 +254,22 @@ function renderExplorePage(filterList = (typeof MOCK_CONCERTS !== "undefined" ? 
   }
 
   exploreContainer.innerHTML = filterList.map(show => createConcertCardHTML(show, false)).join("");
+  initClickableConcertCards(exploreContainer);
+}
+
+function initClickableConcertCards(container) {
+  container.querySelectorAll(".concert-card").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) return;
+      window.location.href = card.dataset.href;
+    });
+
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      window.location.href = card.dataset.href;
+    });
+  });
 }
 
 // Global execution
