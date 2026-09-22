@@ -7,6 +7,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   initStickyHeader();
   initNavIndicator();
+  initAuthMenu();
 });
 
 function initStickyHeader() {
@@ -54,4 +55,21 @@ function initNavIndicator() {
   // Safety net: recompute once everything (fonts/images) has fully loaded,
   // in case layout shifted slightly after the first paint.
   window.addEventListener("load", () => moveIndicatorTo(activeLink));
+}
+
+function initAuthMenu() {
+  const auth = document.querySelector(".site-auth");
+  if (!auth) return;
+
+  const loginLink = auth.querySelector("[data-auth-login]");
+  const logoutButton = auth.querySelector("[data-auth-logout]");
+  const isLoggedIn = Boolean(localStorage.getItem("concertlyUser"));
+
+  loginLink.hidden = isLoggedIn;
+  logoutButton.hidden = !isLoggedIn;
+
+  logoutButton.addEventListener("click", () => {
+    localStorage.removeItem("concertlyUser");
+    window.location.href = "index.html";
+  });
 }
