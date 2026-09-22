@@ -1,5 +1,18 @@
 /* Responsive enhancements for Concert Screens */
 @media (max-width: 768px) {
+  .site-header .container {
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-md);
+  }
+
+  .header-actions {
+    gap: var(--space-md);
+  }
+
+  .site-auth {
+    margin-left: auto;
+  }
+
   .hero {
     min-height: 60vh;
     padding: var(--space-xl) 0;
