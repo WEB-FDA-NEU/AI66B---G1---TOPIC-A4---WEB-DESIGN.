@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initStickyHeader();
   initNavIndicator();
   initAuthMenu();
+  initAuthGuards();
 });
 
 function initStickyHeader() {
@@ -70,6 +71,38 @@ function initAuthMenu() {
 
   logoutButton.addEventListener("click", () => {
     localStorage.removeItem("concertlyUser");
-    window.location.href = "index.html";
+    window.location.href = auth.closest("[data-home]")?.dataset.home || "index.html";
+  });
+}
+
+function initAuthGuards() {
+  const guardedElements = document.querySelectorAll("[data-requires-auth]");
+  if (!guardedElements.length || localStorage.getItem("concertlyUser")) return;
+
+  const loginLink = document.querySelector("[data-auth-login]");
+  const loginUrl = loginLink ? loginLink.href : "#";
+
+  guardedElements.forEach((element) => {
+    const wrapper = document.createElement("span");
+    wrapper.className = "auth-guard-wrapper";
+    element.parentNode.insertBefore(wrapper, element);
+    wrapper.appendChild(element);
+
+    const message = document.createElement("span");
+    message.className = "auth-guard-message";
+    message.innerHTML = `You need to sign in before continuing. <a href="${loginUrl}">Sign in</a>`;
+    wrapper.appendChild(message);
+
+    const showMessage = () => wrapper.classList.add("is-visible");
+    const hideMessage = () => wrapper.classList.remove("is-visible");
+
+    element.addEventListener("click", (event) => {
+      event.preventDefault();
+      showMessage();
+    });
+    element.addEventListener("mouseenter", showMessage);
+    element.addEventListener("mouseleave", hideMessage);
+    element.addEventListener("focus", showMessage);
+    element.addEventListener("blur", hideMessage);
   });
 }
