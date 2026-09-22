@@ -1,12 +1,68 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Concertly</title>
-  </head>
-  <body>
-    <div id="site-footer" data-root="../../"></div>
-    <script src="../../js/footer.js"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Concertly</title>
+    <style>
+        body { background-color: #0b0b0b; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; }
+        .box { background: #161616; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid #222; }
+        h2 { color: #ff3399; text-align: center; margin-bottom: 24px; }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; outline: none; }
+        .input-group input:focus { border-color: #ff3399; }
+        .error-msg { background: rgba(255, 51, 153, 0.1); border: 1px solid #ff3399; color: #ff3399; padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; display: none; }
+        .btn { width: 100%; padding: 12px; background: #ff3399; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn:hover { background: #e01b82; }
+        .link { text-align: center; margin-top: 20px; font-size: 14px; color: #888; }
+        .link a { color: #ff3399; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Create Account</h2>
+        <div id="reg-error" class="error-msg">Passwords do not match! Please check again.</div>
+        <form onsubmit="handleRegister(event)">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" placeholder="John Doe" required>
+            </div>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" placeholder="name@example.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Create a strong password" required>
+            </div>
+            <div class="input-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirm-password" placeholder="Re-enter your password" required>
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <div class="link">
+            Already have an account? <a href="login.html">Sign In</a>
+        </div>
+    </div>
+    <script>
+        function handleRegister(e) {
+            e.preventDefault();
+            const pass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            const errorBox = document.getElementById('reg-error');
+
+            if (pass !== confirmPass) {
+                errorBox.style.display = 'block'; // Hiển thị thông báo lỗi nếu mật khẩu không khớp
+                return;
+            }
+
+            errorBox.style.display = 'none';
+            alert('Account registered successfully!');
+            window.location.href = 'login.html';
+        }
+    </script>
+          <script src="../../js/footer.js"></script>
+</body>
 </html>
