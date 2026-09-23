@@ -3,6 +3,30 @@
 const CONCERTS_PER_PAGE = 5;
 let concertPage = 1;
 let filteredConcerts = [];
+let editingConcertId = null;
+
+function getConcertFormTicketRows() {
+  const rows = document.querySelectorAll("#ticket-type-list .ticket-type-row");
+
+  return Array.from(rows)
+    .map(row => {
+      const inputs = row.querySelectorAll(".form-input");
+      const type = inputs[0]?.value.trim();
+      const priceValue = inputs[1]?.value.trim();
+
+      if (!type || !priceValue) return null;
+
+      const numericPrice = Number(priceValue);
+      const normalizedPrice = Number.isFinite(numericPrice) ? `$${numericPrice}` : `$${priceValue.replace(/^\$\s*/, "")}`;
+
+      return {
+        type,
+        price: normalizedPrice,
+        status: "Available"
+      };
+    })
+    .filter(Boolean);
+}
 
 function renderConcertTable() {
   const tbody = document.getElementById("concert-table-body");
@@ -101,16 +125,70 @@ function openNewConcertForm() {
   formCard.scrollIntoView({ behavior: "smooth" });
 }
 
+function saveConcertForm(event) {
+  event.preventDefault();
+
+  const name = document.getElementById("concert-name").value.trim();
+  const artist = document.getElementById("artist-name").value.trim();
+  const date = document.getElementById("concert-date").value;
+  const time = document.getElementById("concert-time").value;
+  const adminStatus = document.getElementById("concert-status").value;
+  const location = document.getElementById("venue").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const previewImage = document.querySelector("#cover-preview img");
+  const tickets = getConcertFormTicketRows();
+
+  if (!name || !artist || !date || !time || !location) {
+    alert("Please fill in all required concert details before saving.");
+    return;
+  }
+
+  const concertPayload = {
+    title: name,
+    artist,
+    date,
+    time,
+    adminStatus,
+    location,
+    description: description || "No description provided yet.",
+    poster: previewImage ? previewImage.src : "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
+    tickets: tickets.length ? tickets : [
+      { type: "General Admission", price: "$0", status: "Available" }
+    ]
+  };
+
+  if (editingConcertId) {
+    const index = MOCK_CONCERTS.findIndex(concert => concert.id === editingConcertId);
+    if (index !== -1) {
+      MOCK_CONCERTS[index] = { ...MOCK_CONCERTS[index], ...concertPayload };
+    }
+  } else {
+    MOCK_CONCERTS.unshift({
+      id: `c${Date.now()}`,
+      ...concertPayload,
+      priceRange: "From $0",
+      banner: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
+      category: "Live",
+      status: "Selling Fast"
+    });
+  }
+
+  resetConcertForm();
+  renderConcertTable();
+}
+
 function loadConcertIntoForm(id) {
   const c = MOCK_CONCERTS.find(x => x.id === id);
   if (!c) return;
 
+  editingConcertId = id;
   document.getElementById("concert-form").hidden = false;
   document.getElementById("form-card-title").textContent = "Edit Concert";
   document.getElementById("concert-name").value = c.title;
   document.getElementById("artist-name").value = c.artist;
   document.getElementById("concert-date").value = c.date;
   document.getElementById("concert-time").value = c.time;
+  document.getElementById("concert-status").value = c.adminStatus || getConcertStatus(c);
   document.getElementById("venue").value = c.location;
   document.getElementById("description").value = c.description;
   document.getElementById("cover-preview").innerHTML = `<img src="${c.poster}" alt="">`;
@@ -120,6 +198,7 @@ function loadConcertIntoForm(id) {
 }
 
 function resetConcertForm() {
+  editingConcertId = null;
   document.getElementById("form-card-title").textContent = "Add New Concert";
   document.querySelector("#concert-form form").reset();
   document.getElementById("cover-preview").innerHTML = '<i class="fa-solid fa-image"></i>';
@@ -144,5 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (button.dataset.pageAction === "next") concertPage++;
     renderConcertTable();
   });
+  document.querySelector("#concert-form form").addEventListener("submit", saveConcertForm);
   renderConcertTable();
 });

@@ -15,6 +15,7 @@ function badgeClassFor(status) {
 }
 
 function getConcertStatus(concert, now = new Date()) {
+  if (concert.adminStatus) return concert.adminStatus;
   if (concert.cancelled) return "Cancelled";
   if (concert.published === false) return "Draft";
 
