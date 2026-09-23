@@ -49,6 +49,7 @@
     <script>
         function handleRegister(e) {
             e.preventDefault();
+            const fullName = document.getElementById('registerName').value;
             const pass = document.getElementById('password').value;
             const confirmPass = document.getElementById('confirm-password').value;
             const errorBox = document.getElementById('reg-error');
@@ -59,7 +60,7 @@
             }
 
             errorBox.style.display = 'none';
-            localStorage.setItem('loggedInName', fullName);
+            localStorage.setItem('concertlyUser', fullName);
             alert('Account registered successfully!');
             window.location.href = 'login.html';
         }

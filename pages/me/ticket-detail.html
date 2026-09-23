@@ -40,7 +40,7 @@
         // Tìm concert trong mảng MOCK_CONCERTS từ file mock-data.js
         const concert = MOCK_CONCERTS.find(c => c.id === concertId) || MOCK_CONCERTS[0];
 
-        const ticketHolderName = localStorage.getItem('loggedInUser') || 'Guest User';
+        const ticketHolderName = localStorage.getItem('concertlyUser') || 'Guest User';
 
         // Hiển thị thông tin lên giao diện vé
         const container = document.getElementById('ticket-container');
