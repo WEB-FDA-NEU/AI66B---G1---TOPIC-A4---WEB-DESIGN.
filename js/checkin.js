@@ -9,7 +9,9 @@ let selectedEventId = "";
 const MOCK_ATTENDEES = MOCK_ORDERS
   .filter(order => order.status === "Paid" || order.status === "Pending")
   .map(order => {
-    const concert = MOCK_CONCERTS.find(item => item.title === order.concert);
+    const concert = MOCK_CONCERTS.find(item => item.title === order.concert)
+      || MOCK_CONCERTS.find(item => item.title === "Ruby Solo Showcase - Live in Concert" && order.concert === "Ruby Solo Showcase");
+    const ticket = concert?.tickets.find(item => Number(String(item.price).replace(/[$,]/g, "")) === order.amount);
     const attendeeName = order.customer.toLowerCase().replace(/\s+/g, ".");
 
     return {
@@ -17,7 +19,7 @@ const MOCK_ATTENDEES = MOCK_ORDERS
       eventId: concert ? concert.id : "",
       name: order.customer,
       email: `${attendeeName}@gmail.com`,
-      type: order.amount >= 300 ? "VIP" : "Standard",
+      type: ticket ? ticket.type : "Unknown ticket type",
       checkedIn: false
     };
   })

@@ -13,7 +13,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10481",
     "customer": "Pham Duc Anh",
     "concert": "Circus Maximus World Tour",
-    "amount": 225.0,
+    "amount": 300.0,
     "date": "Sep 17, 2026",
     "status": "Paid"
   },
@@ -28,7 +28,7 @@ const MOCK_ORDERS = [
   {
     "orderId": "#CT-10479",
     "customer": "Tran Gia Han",
-    "concert": "Ruby Solo Showcase",
+    "concert": "Ruby Solo Showcase - Live in Concert",
     "amount": 170.0,
     "date": "Sep 16, 2026",
     "status": "Paid"
@@ -45,7 +45,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10477",
     "customer": "Nguyen Minh Chau",
     "concert": "The Eras Tour",
-    "amount": 290.0,
+    "amount": 220.0,
     "date": "Sep 15, 2026",
     "status": "Paid"
   },
@@ -53,7 +53,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10476",
     "customer": "Hoang Anh Tuan",
     "concert": "Circus Maximus World Tour",
-    "amount": 180.0,
+    "amount": 120.0,
     "date": "Sep 14, 2026",
     "status": "Paid"
   },
@@ -61,7 +61,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10475",
     "customer": "Do Khanh Linh",
     "concert": "After Hours Til Dawn Stadium Tour",
-    "amount": 315.0,
+    "amount": 420.0,
     "date": "Sep 14, 2026",
     "status": "Pending"
   },
@@ -69,14 +69,14 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10474",
     "customer": "Bui Quang Huy",
     "concert": "24K Magic World Tour",
-    "amount": 125.0,
+    "amount": 85.0,
     "date": "Sep 13, 2026",
     "status": "Paid"
   },
   {
     "orderId": "#CT-10473",
     "customer": "Pham Ngoc Mai",
-    "concert": "Ruby Solo Showcase",
+    "concert": "Ruby Solo Showcase - Live in Concert",
     "amount": 170.0,
     "date": "Sep 13, 2026",
     "status": "Refunded"
@@ -93,7 +93,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10471",
     "customer": "Tran Thu Trang",
     "concert": "The Midnight Echoes Tour",
-    "amount": 95.0,
+    "amount": 60.0,
     "date": "Sep 12, 2026",
     "status": "Paid"
   },
@@ -101,7 +101,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10470",
     "customer": "Le Hoang Nam",
     "concert": "The Eras Tour",
-    "amount": 260.0,
+    "amount": 220.0,
     "date": "Sep 11, 2026",
     "status": "Pending"
   },
@@ -109,7 +109,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10469",
     "customer": "Nguyen Phuong Anh",
     "concert": "Justice World Tour",
-    "amount": 145.0,
+    "amount": 160.0,
     "date": "Sep 11, 2026",
     "status": "Paid"
   },
@@ -117,7 +117,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10468",
     "customer": "Dang Minh Khang",
     "concert": "Circus Maximus World Tour",
-    "amount": 225.0,
+    "amount": 300.0,
     "date": "Sep 10, 2026",
     "status": "Paid"
   },
@@ -125,14 +125,14 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10467",
     "customer": "Vu Thanh Ha",
     "concert": "After Hours Til Dawn Stadium Tour",
-    "amount": 210.0,
+    "amount": 180.0,
     "date": "Sep 10, 2026",
     "status": "Refunded"
   },
   {
     "orderId": "#CT-10466",
     "customer": "Phan Anh Thu",
-    "concert": "Ruby Solo Showcase",
+    "concert": "Ruby Solo Showcase - Live in Concert",
     "amount": 170.0,
     "date": "Sep 09, 2026",
     "status": "Paid"
@@ -141,7 +141,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10465",
     "customer": "Hoang Minh Quan",
     "concert": "The Midnight Echoes Tour",
-    "amount": 110.0,
+    "amount": 140.0,
     "date": "Sep 09, 2026",
     "status": "Pending"
   },
@@ -157,7 +157,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10463",
     "customer": "Nguyen Quoc Bao",
     "concert": "ACT III: M.O.T.T.E World Tour",
-    "amount": 150.0,
+    "amount": 210.0,
     "date": "Sep 08, 2026",
     "status": "Paid"
   },
@@ -229,7 +229,7 @@ const MOCK_ORDERS = [
     "orderId": "#CT-10454",
     "customer": "Nguyen Khanh Linh",
     "concert": "After Hours Til Dawn Stadium Tour",
-    "amount": 315.0,
+    "amount": 420.0,
     "date": "Sep 03, 2026",
     "status": "Paid"
   },
