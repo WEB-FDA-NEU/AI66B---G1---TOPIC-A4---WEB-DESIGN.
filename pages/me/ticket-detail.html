@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-    <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Ticket Detail - Concertly</title>
@@ -22,7 +22,7 @@
     <div class="box">
         <h2>Digital Ticket Detail</h2>
         <div class="ticket-card" id="ticket-container">
-            <!-- Dữ liệu sẽ được điền tự động bằng JavaScript từ mock-data.js -->
+            <!-- Dữ liệu sẽ được điền tự động bằng JavaScript -->
             <p style="text-align: center; color: #888;">Loading ticket details...</p>
         </div>
         <div style="text-align: center; margin-top: 20px;">
@@ -33,16 +33,21 @@
     <!-- Nhúng file mock-data.js của nhóm vào -->
     <script src="../../js/mock-data.js"></script>
     <script>
-        // Lấy id từ URL (ví dụ: ticket-detail.html?id=c1 thì lấy ra c1)
         const urlParams = new URLSearchParams(window.location.search);
-        const concertId = urlParams.get('id') || 'c1'; // Mặc định lấy c1 nếu không truyền id
-
-        // Tìm concert trong mảng MOCK_CONCERTS từ file mock-data.js
+        const concertId = urlParams.get('id') || 'c1'; 
         const concert = MOCK_CONCERTS.find(c => c.id === concertId) || MOCK_CONCERTS[0];
-
         const ticketHolderName = localStorage.getItem('concertlyUser') || 'Guest User';
 
-        // Hiển thị thông tin lên giao diện vé
+        // 1. Tạo biến ID vé ngẫu nhiên để dùng chung
+        const randomTicketId = `#CNCT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+        // 2. Chuyển dữ liệu thành dạng đường link URL để điện thoại dễ quét
+        // Lưu ý: Đây là link ảo dùng để demo hệ thống check-in
+        const verifyUrl = `https://concertly.local/check-in?ticket=${randomTicketId}&user=${ticketHolderName}`;
+        const encodedData = encodeURIComponent(verifyUrl);
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedData}`;
+
+        // 3. Đổ dữ liệu vào HTML (Đã thay Ticket ID tĩnh và chèn ảnh QR động)
         const container = document.getElementById('ticket-container');
         container.innerHTML = `
             <img src="${concert.poster}" alt="${concert.title}" class="poster-img">
@@ -56,12 +61,13 @@
                 <p>Venue: <span>${concert.location}</span></p>
                 <p>Ticket Type: <span>${concert.tickets[0].type} (${concert.tickets[0].price})</span></p>
                 <p>Ticket Holder: <span>${ticketHolderName}</span></p>
-                <p>Ticket ID: <span>#CNCT-${Math.floor(100000 + Math.random() * 900000)}</span></p>
+                <p>Ticket ID: <span>${randomTicketId}</span></p>
             </div>
             <div class="qr-section">
-                <div class="qr-placeholder">[ MOCK QR ]</div>
+                <img src="${qrApiUrl}" alt="Dynamic QR Code" style="width: 130px; height: 130px; display: block; margin: 0 auto;">
                 <p style="color: #666; font-size: 11px; margin-top: 6px;">Scan at the entrance gate</p>
             </div>
         `;
     </script>
+</body>
 </html>

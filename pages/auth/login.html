@@ -22,32 +22,95 @@
 </head>
 <body>
     <div class="box">
-        <h2>Sign In</h2>
-        <form onsubmit="handleLogin(event)">
-            <div class="input-group">
-                <label>Email or Username</label>
-                <input type="text" id="username" placeholder="name@example.com or admin" required>
+        <div id="login-section">
+            <h2>Sign In</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Email or Username</label>
+                    <input type="text" id="username" placeholder="name@example.com or admin" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                
+                <div style="text-align: right; margin-bottom: 15px;">
+                    <!-- Gọi hàm để đổi form -->
+                    <a href="#" onclick="toggleForm('forgot'); return false;" style="color: #aaa; font-size: 13px; text-decoration: none;">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <div class="link">
+                Don't have an account? <a href="register.html">Register</a>
             </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-            </div>
-            <div style="text-align: right; margin-bottom: 15px;">
-                <a href="forgot-password.html" style="color: #aaa; font-size: 13px; text-decoration: none;">Forgot Password?</a>
-            </div>
-            <button type="submit" class="btn">Login</button>
-        </form>
-        <div class="link">
-            Don't have an account? <a href="register.html">Register</a>
+        </div>
+
+        <!-- KHU VỰC 2: FORM KHÔI PHỤC MẬT KHẨU -->
+        <div id="forgot-section" style="display: none;">
+            <h2>Reset Password</h2>
+            <p style="color: #aaa; font-size: 14px; text-align: center; margin-bottom: 20px;">
+                Enter your email and we'll send you a recovery link.
+            </p>
+            <form onsubmit="handleReset(event)">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="name@example.com" required>
+                </div>
+                <button type="submit" class="btn">Send Link</button>
+                <div class="link" style="margin-top: 15px;">
+                    <!-- Nút quay lại màn hình đăng nhập -->
+                    <a href="#" onclick="toggleForm('login'); return false;">&larr; Back to Login</a>
+                </div>
+            </form>
         </div>
     </div>
     <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            localStorage.setItem('concertlyUser', document.getElementById('username').value);
-            // Demo chuyển hướng sang xem vé của concert đầu tiên (id: c1) theo route /me/tickets/{id}
-             window.location.href = '../../index.html';
+    function handleLogin(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Kiểm tra nếu người dùng gõ "admin" (có thể quy định mật khẩu tùy ý cho nguyên mẫu)
+        if (username.toLowerCase() === 'admin' && password === 'admin123') {
+            // Lưu tên hiển thị và gán thêm quyền (role) là quản trị viên
+            localStorage.setItem('concertlyUser', 'Admin');
+            localStorage.setItem('userRole', 'admin');
+            
+            alert('Welcome back, Admin!');
+            // Nếu bạn có làm trang Dashboard riêng cho Admin thì đổi link ở đây, nếu không thì cứ về trang chủ
+            window.location.href = '../../index.html'; 
+            
+        } else {
+            // Logic cho khách hàng bình thường: cắt lấy phần trước chữ @
+            const displayPrefix = username.includes('@') ? username.split('@')[0] : username;
+            
+            localStorage.setItem('concertlyUser', displayPrefix);
+            localStorage.setItem('userRole', 'customer'); // Gán quyền khách hàng
+            
+            window.location.href = '../../index.html';
         }
+    }
+        // Hàm chuyển đổi giữa 2 form
+    function toggleForm(type) {
+        const loginSec = document.getElementById('login-section');
+        const forgotSec = document.getElementById('forgot-section');
+        
+        if (type === 'forgot') {
+            loginSec.style.display = 'none';
+            forgotSec.style.display = 'block';
+        } else {
+            loginSec.style.display = 'block';
+            forgotSec.style.display = 'none';
+        }
+    }
+
+    // Hàm giả lập gửi link khôi phục
+    function handleReset(e) {
+        e.preventDefault();
+        alert('A password recovery link has been sent to your email!');
+        toggleForm('login'); // Gửi xong thì tự động quay về form đăng nhập
+    }
     </script>
 </body>
 </html>
