@@ -26,14 +26,11 @@
         <form onsubmit="handleLogin(event)">
             <div class="input-group">
                 <label>Email or Username</label>
-                <input type="text" id="username" placeholder="name@example.com or admin" required>
+                <input type="text" id="username" placeholder="name@example.com or acbd" required>
             </div>
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="password" placeholder="••••••••" required>
-            </div>
-            <div style="text-align: right; margin-bottom: 15px;">
-                <a href="forgot-password.html" style="color: #aaa; font-size: 13px; text-decoration: none;">Forgot Password?</a>
             </div>
             <button type="submit" class="btn">Login</button>
         </form>
@@ -42,11 +39,30 @@
         </div>
     </div>
     <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            localStorage.setItem('concertlyUser', document.getElementById('username').value);
-            // Demo chuyển hướng sang xem vé của concert đầu tiên (id: c1) theo route /me/tickets/{id}
-            window.location.href = '../me/ticket-detail.html?id=c1';
+    function handleLogin(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Kiểm tra nếu người dùng gõ "admin" (có thể quy định mật khẩu tùy ý cho nguyên mẫu)
+        if (username.toLowerCase() === 'admin' && password === 'admin123') {
+            // Lưu tên hiển thị và gán thêm quyền (role) là quản trị viên
+            localStorage.setItem('concertlyUser', 'Admin');
+            localStorage.setItem('userRole', 'admin');
+            
+            alert('Welcome back, Admin!');
+            // Nếu bạn có làm trang Dashboard riêng cho Admin thì đổi link ở đây, nếu không thì cứ về trang chủ
+            window.location.href = '../../index.html'; 
+            
+        } else {
+            // Logic cho khách hàng bình thường: cắt lấy phần trước chữ @
+            const displayPrefix = username.includes('@') ? username.split('@')[0] : username;
+            
+            localStorage.setItem('concertlyUser', displayPrefix);
+            localStorage.setItem('userRole', 'customer'); // Gán quyền khách hàng
+            
+            window.location.href = '../../index.html';
         }
     </script>
 </body>

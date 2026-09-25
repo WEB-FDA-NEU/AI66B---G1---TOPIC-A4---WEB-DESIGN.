@@ -10,7 +10,7 @@
         h2 { color: #ff3399; text-align: center; margin-bottom: 24px; }
         .input-group { margin-bottom: 16px; }
         .input-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; outline: none; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; outline: none; box-sizing: border-box; }
         .input-group input:focus { border-color: #ff3399; }
         .error-msg { background: rgba(255, 51, 153, 0.1); border: 1px solid #ff3399; color: #ff3399; padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; display: none; }
         .btn { width: 100%; padding: 12px; background: #ff3399; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -26,7 +26,7 @@
         <form onsubmit="handleRegister(event)">
             <div class="input-group">
                 <label>Full Name</label>
-                <input type="text" placeholder="John Doe" required>
+                <input type="text" id="registerName" placeholder="John Doe" required>
             </div>
             <div class="input-group">
                 <label>Email Address</label>
@@ -49,6 +49,7 @@
     <script>
         function handleRegister(e) {
             e.preventDefault();
+            const fullName = document.getElementById('registerName').value;
             const pass = document.getElementById('password').value;
             const confirmPass = document.getElementById('confirm-password').value;
             const errorBox = document.getElementById('reg-error');
@@ -59,6 +60,7 @@
             }
 
             errorBox.style.display = 'none';
+            localStorage.setItem('concertlyUser', fullName);
             alert('Account registered successfully!');
             window.location.href = 'login.html';
         }

@@ -65,6 +65,30 @@ function initAuthMenu() {
   const loginLink = auth.querySelector("[data-auth-login]");
   if (!loginLink) return;
 }
+function initAuthMenu() {
+  const auth = document.querySelector(".site-auth");
+  if (!auth) return;
+
+  const loginLink = auth.querySelector("[data-auth-login]");
+  if (!loginLink) return;
+
+ 
+  const activeUser = localStorage.getItem("concertlyUser");
+  if (activeUser) {
+    auth.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span style="color: #fff; font-size: 14px; font-weight: bold;">Hi, ${activeUser}</span>
+        <a href="#" onclick="handleLogout(event)" style="color: #ff3399; font-size: 14px; text-decoration: none;">Logout</a>
+      </div>
+    `;
+  }
+}
+
+window.handleLogout = function(e) {
+  e.preventDefault();
+  localStorage.removeItem("concertlyUser");
+  window.location.reload();
+};
 
 function initAuthGuards() {
   const guardedElements = document.querySelectorAll("[data-requires-auth]");

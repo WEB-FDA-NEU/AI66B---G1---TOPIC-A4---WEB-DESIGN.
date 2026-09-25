@@ -14,8 +14,22 @@
 function renderSiteFooter() {
   const mount = document.getElementById("site-footer");
   if (!mount) return;
-
+  
   const root = mount.dataset.root || "";
+  const activeUser = localStorage.getItem("concertlyUser");
+  
+  let accountLinks = '';
+  if (activeUser) {
+    accountLinks = `
+      <a href="${root}pages/me/ticket-detail.html">My Tickets</a>
+      <a href="#" onclick="localStorage.removeItem('concertlyUser'); window.location.reload(); event.preventDefault();">Log out</a>
+    `;
+  } else {
+    accountLinks = `
+      <a href="${root}pages/auth/login.html">Log in</a>
+      <a href="${root}pages/auth/register.html">Create account</a>
+    `;
+  }
 
   mount.innerHTML = `
     <footer class="footer">
@@ -32,8 +46,7 @@ function renderSiteFooter() {
 
         <div class="footer-col">
           <h4>Account</h4>
-          <a href="${root}pages/auth/login.html">Log in</a>
-          <a href="${root}pages/auth/register.html">Create account</a>
+          ${accountLinks}
         </div>
 
       </div>
