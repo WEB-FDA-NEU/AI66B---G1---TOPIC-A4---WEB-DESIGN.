@@ -35,21 +35,28 @@ function initHeroCarousel() {
 
   function renderSlide(concert) {
     const bannerUrl = concert.banner || concert.image || concert.poster || concert.cover || '';
-    const descText = concert.description || concert.desc || 'Experience world-class concerts live on stage.';
     const categoryText = concert.category || 'World Tour';
     const statusText = concert.status || 'Selling Fast';
     const statusClass = getStatusTagClass(statusText);
     const titleText = concert.title || concert.name || 'Concert Tour';
+    const offer = getHeroOffer(concert);
 
     return `
-      <div class="hero-slide" data-href="pages/concerts/detail.html?id=${concert.id}" style="background-image: linear-gradient(180deg, rgba(11, 11, 15, 0.15) 0%, rgba(11, 11, 15, 0.35) 45%, rgba(11, 11, 15, 0.85) 78%, var(--color-bg) 100%), url('${bannerUrl}'); background-position: center 20%;">
+      <div class="hero-slide" data-href="pages/concerts/detail.html?id=${concert.id}" style="--offer-accent: ${offer.accent}; --offer-tint: ${offer.tint}; background-image: linear-gradient(180deg, rgba(11, 11, 15, 0.15) 0%, rgba(11, 11, 15, 0.35) 45%, rgba(11, 11, 15, 0.85) 78%, var(--color-bg) 100%), url('${bannerUrl}'); background-position: center 20%;">
         <div class="container">
           <div class="hero-tags">
             <span class="hero-tag">${categoryText}</span>
             <span class="status-tag inline ${statusClass}">${statusText}</span>
           </div>
           <h1 class="hero-title">${titleText}</h1>
-          <p class="hero-desc">${descText}</p>
+          <div class="hero-offer">
+            <span class="offer-kicker">Limited-time offer</span>
+            <strong>${offer.title}</strong>
+          </div>
+          <a class="hero-explore" href="pages/concerts/detail.html?id=${concert.id}">
+            Explore this show for ticket details.
+            <span class="hero-explore-arrow" aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
     `;
@@ -202,6 +209,18 @@ function getStatusTagTitle(status) {
   if (s.includes('popular')) return 'Most popular concert';
   if (s.includes('limited availability')) return 'Limited tickets remaining';
   return 'Còn vé';
+}
+
+function getHeroOffer(concert) {
+  const offers = {
+    c1: { accent: '#ffd166', tint: 'rgba(255, 209, 102, 0.16)', title: 'Save 20% on Ariana VIP', detail: 'A golden night of vocals, lights, and limited VIP seats.' },
+    c11: { accent: '#9cf3ff', tint: 'rgba(156, 243, 255, 0.14)', title: 'Valentine tickets from $60', detail: 'Make it a midnight date with Cortis at Royal Albert Hall.' },
+    c2: { accent: '#ff6875', tint: 'rgba(255, 104, 117, 0.16)', title: 'Midnight deal: save 25%', detail: 'The Weeknd live, with limited lounge tickets still available.' },
+    c3: { accent: '#d8ff5f', tint: 'rgba(216, 255, 95, 0.14)', title: 'Early access: save 30%', detail: 'Get closer to the energy before the best floor seats go.' },
+    c4: { accent: '#ff9fc8', tint: 'rgba(255, 159, 200, 0.16)', title: 'Ruby VIP from $85', detail: 'A rare solo showcase with a limited VIP release.' }
+  };
+
+  return offers[concert.id] || { accent: '#ff78b5', tint: 'rgba(255, 120, 181, 0.14)', title: 'Save 20% on selected tickets', detail: 'Join VIP for early access and exclusive member prices.' };
 }
 
 // 2. Generate HTML markup for a concert card
