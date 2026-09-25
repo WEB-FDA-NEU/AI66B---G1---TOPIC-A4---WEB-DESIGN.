@@ -277,6 +277,12 @@
         </div>
         <div class="filter-tools">
           <span class="result-count" id="result-count"></span>
+          <select id="status-select" class="sort-select" aria-label="Filter by ticket status">
+            <option value="all">All concerts</option>
+            <option value="popular">Most Popular</option>
+            <option value="selling-fast">Selling Fast</option>
+            <option value="limited">Limited Availability</option>
+          </select>
           <select id="sort-select" class="sort-select" aria-label="Sort concerts">
             <option value="date">Soonest date</option>
             <option value="price-low">Price: low to high</option>
@@ -297,7 +303,9 @@
     <script src="../../js/navbar.js"></script>
     <script>
       let activeCategory = "all";
-      let searchQuery = "";
+      const initialSearch = new URLSearchParams(window.location.search).get("search") || "";
+      let searchQuery = initialSearch.trim();
+      let activeView = "all";
       let sortMode = "date";
 
       const grid = document.getElementById("explore-grid");
@@ -306,8 +314,11 @@
         "#category-filters .pill-btn",
       );
       const sortSelect = document.getElementById("sort-select");
+      const statusSelect = document.getElementById("status-select");
       const clearFiltersButton = document.getElementById("clear-filters");
       const resultCount = document.getElementById("result-count");
+
+      if (searchInput) searchInput.value = searchQuery;
 
       function renderConcerts() {
         if (typeof MOCK_CONCERTS === "undefined" || !grid) return;
@@ -321,7 +332,13 @@
             item.artist.toLowerCase().includes(term) ||
             item.title.toLowerCase().includes(term) ||
             item.location.toLowerCase().includes(term);
-          return matchesCategory && matchesSearch;
+          const status = (item.status || "").toLowerCase();
+          const matchesView =
+            activeView === "all" ||
+            (activeView === "popular" && status.includes("popular")) ||
+            (activeView === "selling-fast" && status.includes("selling")) ||
+            (activeView === "limited" && status.includes("limited availability"));
+          return matchesCategory && matchesSearch && matchesView;
         });
 
         filtered.sort((a, b) => {
@@ -330,6 +347,7 @@
             const priceB = Number.parseInt(b.priceRange.replace(/[^0-9]/g, ""), 10);
             return sortMode === "price-low" ? priceA - priceB : priceB - priceA;
           }
+
           return new Date(a.date) - new Date(b.date);
         });
 
@@ -409,6 +427,11 @@
         });
       });
 
+      statusSelect.addEventListener("change", () => {
+        activeView = statusSelect.value;
+        renderConcerts();
+      });
+
       // Search input listener
       if (searchInput) {
         searchInput.addEventListener("input", (e) => {
@@ -425,8 +448,10 @@
       clearFiltersButton.addEventListener("click", () => {
         activeCategory = "all";
         searchQuery = "";
+        activeView = "all";
         sortMode = "date";
         searchInput.value = "";
+        statusSelect.value = "all";
         sortSelect.value = "date";
         filterButtons.forEach((btn) => {
           btn.classList.toggle("active", btn.dataset.category === "all");
