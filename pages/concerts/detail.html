@@ -449,12 +449,7 @@
 
         const goToBooking = (event, ticketType = "", ticketPrice = "") => {
           event.preventDefault();
-          if (!localStorage.getItem("concertlyUser")) {
-            window.location.replace(signInUrl);
-            return;
-          }
-
-          window.location.href = checkoutUrl(ticketType, ticketPrice);
+          window.location.replace(signInUrl);
         };
 
         ticketContainer.querySelectorAll("[data-ticket-select]").forEach((button) => {
