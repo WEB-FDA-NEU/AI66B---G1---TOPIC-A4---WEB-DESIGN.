@@ -304,21 +304,6 @@
             </span>
           </div>
 
-          <div style="margin-top: var(--space-lg)">
-            <a
-              href="#ticket-list"
-              data-booking-entry
-              class="btn btn-primary"
-              style="
-                width: 100%;
-                text-align: center;
-                display: block;
-                box-sizing: border-box;
-              "
-            >
-              Select Tickets
-            </a>
-          </div>
         </div>
       </aside>
     </main>
@@ -460,20 +445,13 @@
           return `../checkout/index.html?${params}`;
         };
 
-        const bookingEntry = document.querySelector("[data-booking-entry]");
         const signInUrl = "../auth/login.html";
 
         const goToBooking = (event, ticketType = "", ticketPrice = "") => {
           event.preventDefault();
-          if (!localStorage.getItem("concertlyUser")) {
-            window.location.href = signInUrl;
-            return;
-          }
-
-          window.location.href = checkoutUrl(ticketType, ticketPrice);
+          window.location.replace(signInUrl);
         };
 
-        bookingEntry.addEventListener("click", (event) => goToBooking(event));
         ticketContainer.querySelectorAll("[data-ticket-select]").forEach((button) => {
           button.addEventListener("click", () => {
             const bookingEvent = new MouseEvent("click", { cancelable: true });

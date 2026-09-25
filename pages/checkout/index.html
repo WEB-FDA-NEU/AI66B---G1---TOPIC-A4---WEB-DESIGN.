@@ -7,6 +7,11 @@
   </head>
   <body>
     <div id="site-footer" data-root="../../"></div>
+    <script>
+      if (!localStorage.getItem("concertlyUser")) {
+        window.location.replace("../auth/login.html");
+      }
+    </script>
     <script src="../../js/footer.js"></script>
   </body>
 </html>
