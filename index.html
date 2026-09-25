@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/utilitites.css" />
     <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/theme.css" />
     <style>
       body {
         background-color: var(--color-bg);
@@ -397,24 +398,53 @@
             <a href="pages/404.html" class="hover-glow" data-nav>Support</a>
             <span class="nav-indicator"></span>
           </nav>
-          <form class="header-search" action="pages/concerts/index.html" method="get" role="search">
-            <input class="header-search-input" type="search" name="search" placeholder="Find your next live show..." aria-label="Search concerts" />
-            <button class="header-search-button" type="submit" aria-label="Search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <form
+            class="header-search"
+            action="pages/concerts/index.html"
+            method="get"
+            role="search"
+          >
+            <input
+              class="header-search-input"
+              type="search"
+              name="search"
+              placeholder="Find your next live show..."
+              aria-label="Search concerts"
+            />
+            <button
+              class="header-search-button"
+              type="submit"
+              aria-label="Search"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
                 <circle cx="11" cy="11" r="7"></circle>
                 <path d="m20 20-4-4"></path>
               </svg>
             </button>
           </form>
           <div class="site-auth">
-            <button class="avatar-button" type="button" aria-label="Account menu">
+            <button
+              class="avatar-button"
+              type="button"
+              aria-label="Account menu"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.5"></circle>
                 <path d="M5.5 20c.8-3.2 3.1-5 6.5-5s5.7 1.8 6.5 5"></path>
               </svg>
             </button>
             <div class="auth-menu" role="menu">
-              <a href="pages/auth/login.html" data-auth-login role="menuitem">Sign in</a>
+              <a href="pages/auth/login.html" data-auth-login role="menuitem"
+                >Sign in</a
+              >
               <a href="pages/auth/register.html" role="menuitem">Sign up</a>
             </div>
           </div>
@@ -498,5 +528,6 @@
     <script src="js/mock-data.js"></script>
     <script src="js/main.js"></script>
     <script src="js/navbar.js"></script>
+    <script src="js/theme.js"></script>
   </body>
 </html>
