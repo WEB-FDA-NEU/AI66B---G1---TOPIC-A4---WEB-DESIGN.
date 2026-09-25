@@ -567,7 +567,7 @@
 
 .mini-list-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-md);
 }
 
@@ -596,6 +596,41 @@
 .mini-list-sub {
     font-size: 12px;
     color: var(--color-text-muted);
+}
+
+.mini-sales {
+    margin-top: 7px;
+    max-width: 250px;
+}
+
+.mini-sales-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    color: var(--color-text);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.mini-progress {
+    height: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--color-bg-hover);
+}
+
+.mini-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+}
+
+.mini-sales-remaining {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 10px;
 }
 
 /* --- Data table ---------------------------------------------------------------- */

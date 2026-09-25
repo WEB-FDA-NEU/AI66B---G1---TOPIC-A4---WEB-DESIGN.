@@ -34,16 +34,34 @@ function renderUpcomingConcerts() {
     return status === "Upcoming" || status === "On Sale";
   });
 
-  list.innerHTML = upcoming.slice(0, 4).map(c => `
-    <div class="mini-list-item">
-      <img class="mini-thumb" src="${c.poster}" alt="">
-      <div class="mini-list-info">
-        <div class="mini-list-title">${c.title}</div>
-        <div class="mini-list-sub">${c.artist} · ${formatDateShort(c.date)}</div>
+  list.innerHTML = upcoming.slice(0, 4).map(c => {
+    const capacity = Math.max(Number(c.ticketCapacity) || 0, 1);
+    const sold = Math.min(Math.max(Number(c.ticketsSold) || 0, 0), capacity);
+    const remaining = capacity - sold;
+    const soldPercent = Math.round((sold / capacity) * 100);
+    const status = getConcertStatus(c);
+
+    return `
+      <div class="mini-list-item">
+        <img class="mini-thumb" src="${c.poster}" alt="">
+        <div class="mini-list-info">
+          <div class="mini-list-title">${c.title}</div>
+          <div class="mini-list-sub">${c.artist} · ${formatDateShort(c.date)}</div>
+          <div class="mini-sales" aria-label="${sold} of ${capacity} tickets sold">
+            <div class="mini-sales-meta">
+              <span>${sold.toLocaleString("en-US")} / ${capacity.toLocaleString("en-US")} sold</span>
+              <span>${soldPercent}%</span>
+            </div>
+            <div class="mini-progress" role="progressbar" aria-valuenow="${soldPercent}" aria-valuemin="0" aria-valuemax="100">
+              <span style="width: ${soldPercent}%"></span>
+            </div>
+            <div class="mini-sales-remaining">${remaining.toLocaleString("en-US")} tickets remaining</div>
+          </div>
+        </div>
+        <span class="badge ${badgeClassFor(status)}">${status}</span>
       </div>
-      <span class="badge ${badgeClassFor(getConcertStatus(c))}">${getConcertStatus(c)}</span>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 
   const countEl = document.getElementById("stat-upcoming-count");
   if (countEl) countEl.textContent = upcoming.length;
