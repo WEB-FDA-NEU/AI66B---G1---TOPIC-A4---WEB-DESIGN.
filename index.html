@@ -55,6 +55,7 @@
       .hero-slide .container {
         position: relative;
         z-index: 2;
+        transform: translateY(48px);
       }
       .carousel-btn {
         position: absolute;
@@ -133,7 +134,7 @@
         margin-bottom: var(--space-sm);
       }
       .hero-title {
-        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-size: clamp(2rem, 4vw, 3.5rem);
         font-weight: 800;
         line-height: 1.1;
         margin-bottom: var(--space-sm);
@@ -144,6 +145,151 @@
         font-size: var(--font-md);
         line-height: 1.6;
         margin-bottom: var(--space-lg);
+      }
+      .hero-explore {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-top: var(--space-md);
+        color: var(--color-text);
+        font-size: var(--font-sm);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .hero-explore:hover {
+        color: var(--offer-accent, var(--color-primary-light));
+      }
+      .hero-explore-arrow {
+        color: var(--offer-accent, var(--color-primary));
+        font-size: var(--font-lg);
+        line-height: 1;
+      }
+      .hero-offer {
+        position: relative;
+        left: auto;
+        top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-width: 520px;
+        margin-top: var(--space-md);
+        padding: 14px 0 0 18px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: var(--radius-md);
+        color: var(--color-text);
+      }
+      .hero-offer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 64px;
+        height: 3px;
+        background: var(--offer-accent, var(--color-primary));
+        transform: skewX(-28deg);
+        transform-origin: left center;
+      }
+      .hero-offer strong {
+        color: var(--offer-accent, var(--color-primary-light));
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+      .hero-offer span {
+        color: var(--color-text-secondary);
+        font-size: var(--font-sm);
+      }
+      .hero-offer .offer-kicker {
+        color: var(--color-text);
+        font-size: var(--font-xs);
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .header-search {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        width: 280px;
+        padding: 4px 6px 4px 12px;
+        gap: var(--space-xs);
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+      }
+      .header-search:focus-within {
+        border-color: var(--color-primary);
+      }
+      .header-search-input {
+        width: 100%;
+        min-width: 0;
+        padding: 6px 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--color-text);
+        font: inherit;
+        font-size: var(--font-xs);
+      }
+      .header-search-input::placeholder {
+        color: var(--color-text-muted);
+      }
+      .header-search-button {
+        display: grid;
+        flex: 0 0 auto;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: #fff;
+        cursor: pointer;
+      }
+      .header-search-button svg {
+        width: 14px;
+        height: 14px;
+      }
+      .home-search {
+        padding: var(--space-2xl) 0 var(--space-md);
+      }
+      .home-search-kicker {
+        margin-bottom: var(--space-xs);
+        color: var(--color-primary);
+        font-size: var(--font-xs);
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .home-search-title {
+        margin-bottom: var(--space-md);
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        line-height: 1.15;
+      }
+      .home-search-form {
+        display: flex;
+        max-width: 720px;
+        padding: 6px;
+        gap: var(--space-sm);
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-md);
+      }
+      .home-search-input {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 14px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--color-text);
+        font: inherit;
+      }
+      .home-search-input::placeholder {
+        color: var(--color-text-muted);
       }
       .hero-actions {
         display: flex;
@@ -251,6 +397,15 @@
             <a href="pages/404.html" class="hover-glow" data-nav>Support</a>
             <span class="nav-indicator"></span>
           </nav>
+          <form class="header-search" action="pages/concerts/index.html" method="get" role="search">
+            <input class="header-search-input" type="search" name="search" placeholder="Find your next live show..." aria-label="Search concerts" />
+            <button class="header-search-button" type="submit" aria-label="Search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-4-4"></path>
+              </svg>
+            </button>
+          </form>
           <div class="site-auth">
             <button class="avatar-button" type="button" aria-label="Account menu">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -260,6 +415,7 @@
             </button>
             <div class="auth-menu" role="menu">
               <a href="pages/auth/login.html" data-auth-login role="menuitem">Sign in</a>
+              <a href="pages/auth/register.html" role="menuitem">Sign up</a>
             </div>
           </div>
         </div>
