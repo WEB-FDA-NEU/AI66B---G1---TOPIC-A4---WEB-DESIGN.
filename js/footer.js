@@ -20,9 +20,10 @@ function renderSiteFooter() {
   
   let accountLinks = '';
   if (activeUser) {
+    // Đã thay đổi thẻ href thành các hàm xử lý JavaScript giống hệt Navbar
     accountLinks = `
-      <a href="${root}pages/me/ticket-detail.html">My Tickets</a>
-      <a href="#" onclick="localStorage.removeItem('concertlyUser'); window.location.reload(); event.preventDefault();">Log out</a>
+      <a href="#" onclick="showMyTickets(event)">My Tickets</a>
+      <a href="#" onclick="handleLogout(event)">Log out</a>
     `;
   } else {
     accountLinks = `

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 <!doctype html>
-=======
-<!DOCTYPE html>
->>>>>>> b00bf7cecf12e6c86e71b6fb17d929f43c69926f
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,8 +12,9 @@
         h2 { color: #ff3399; text-align: center; margin-bottom: 24px; }
         .input-group { margin-bottom: 16px; }
         .input-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; outline: none; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; outline: none; box-sizing: border-box; }
         .input-group input:focus { border-color: #ff3399; }
+        .error-msg { background: rgba(255, 51, 153, 0.1); border: 1px solid #ff3399; color: #ff3399; padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; display: none; }
         .btn { width: 100%; padding: 12px; background: #ff3399; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn:hover { background: #e01b82; }
         .link { text-align: center; margin-top: 20px; font-size: 14px; color: #888; }
@@ -27,10 +24,11 @@
 <body>
     <div class="box">
         <h2>Sign In</h2>
+        <div id="login-error" class="error-msg"></div>
         <form onsubmit="handleLogin(event)">
             <div class="input-group">
-                <label>Email or Username</label>
-                <input type="text" id="username" placeholder="name@example.com or acbd" required>
+                <label>Email or Phone Number</label>
+                <input type="text" id="contact-info" placeholder="name@example.com or phone number" required>
             </div>
             <div class="input-group">
                 <label>Password</label>
@@ -43,37 +41,63 @@
         </div>
     </div>
     <script>
-    function handleLogin(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const inputVal = document.getElementById('contact-info').value.trim();
+            const password = document.getElementById('password').value;
+            const errorBox = document.getElementById('login-error');
+            
+            // 1. ADMIN FLOW
+            if (inputVal.toLowerCase() === 'admin' || inputVal.toLowerCase() === 'admin@concertly.com') {
+                if (password === '123456') { 
+                    localStorage.setItem('concertlyUser', 'Administrator');
+                    localStorage.setItem('userRole', 'admin');
+                    window.location.href = '../../index.html'; 
+                    return; 
+                } else {
+                    errorBox.innerText = 'Invalid admin credentials.';
+                    errorBox.style.display = 'block';
+                    return;
+                }
+            }
+            
+            // 2. CUSTOMER FLOW: Verify against registered accounts
+            let accounts = [];
+            try {
+                accounts = JSON.parse(localStorage.getItem('concertlyAccounts')) || [];
+            } catch (err) {
+                accounts = [];
+            }
 
-        // Kiểm tra nếu người dùng gõ "admin" (có thể quy định mật khẩu tùy ý cho nguyên mẫu)
-        if (username.toLowerCase() === 'admin' && password === 'admin123') {
-            // Lưu tên hiển thị và gán thêm quyền (role) là quản trị viên
-            localStorage.setItem('concertlyUser', 'Admin');
-            localStorage.setItem('userRole', 'admin');
-            
-            alert('Welcome back, Admin!');
-            // Nếu bạn có làm trang Dashboard riêng cho Admin thì đổi link ở đây, nếu không thì cứ về trang chủ
-            window.location.href = '../../index.html'; 
-            
-        } else {
-            // Logic cho khách hàng bình thường: cắt lấy phần trước chữ @
-            const displayPrefix = username.includes('@') ? username.split('@')[0] : username;
-            
-            localStorage.setItem('concertlyUser', displayPrefix);
-            localStorage.setItem('userRole', 'customer'); // Gán quyền khách hàng
+            // Find user matching email or phone
+            const matchedUser = accounts.find(acc => 
+                acc.email.toLowerCase() === inputVal.toLowerCase() || 
+                acc.phone === inputVal
+            );
+
+            // Case A: Account does not exist
+            if (!matchedUser) {
+                errorBox.innerText = 'Account not found. Please register first.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            // Case B: Incorrect password
+            if (matchedUser.password !== password) {
+                errorBox.innerText = 'Incorrect password. Please try again.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            // Case C: Success - Set active session
+            errorBox.style.display = 'none';
+            localStorage.setItem('concertlyUser', matchedUser.fullName);
+            localStorage.setItem('concertlyContact', matchedUser.email);
+            localStorage.setItem('userRole', matchedUser.role || 'customer');
             
             window.location.href = '../../index.html';
         }
-<<<<<<< HEAD
-    }
-</script>
-=======
     </script>
->>>>>>> b00bf7cecf12e6c86e71b6fb17d929f43c69926f
 </body>
 </html>
-
