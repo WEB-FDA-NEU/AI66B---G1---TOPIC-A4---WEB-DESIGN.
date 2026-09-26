@@ -20,7 +20,7 @@ function renderSiteFooter() {
   
   let accountLinks = '';
   if (activeUser) {
-    // Đã thay đổi thẻ href thành các hàm xử lý JavaScript giống hệt Navbar
+
     accountLinks = `
       <a href="#" onclick="showMyTickets(event)">My Tickets</a>
       <a href="#" onclick="handleLogout(event)">Log out</a>

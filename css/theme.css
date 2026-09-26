@@ -1,0 +1,103 @@
+:root {
+  color-scheme: dark;
+}
+
+html.theme-light {
+  color-scheme: light;
+  --color-bg: #f6f7fb;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #eef0f5;
+  --color-surface: #ffffff;
+  --color-text: #1c1d24;
+  --color-text-secondary: #555866;
+  --color-text-muted: #777b89;
+  --color-border: #dfe2ea;
+  --color-border-light: #cbd0dc;
+  --shadow-sm: 0 4px 12px rgba(36, 40, 55, .1);
+  --shadow-md: 0 8px 30px rgba(36, 40, 55, .14);
+}
+
+html,
+body {
+  transition: background-color .25s ease, color .25s ease;
+}
+
+.theme-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  font: 600 12px var(--font-family, sans-serif);
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease, transform .2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.theme-toggle-icon {
+  color: var(--color-primary);
+  font-size: 16px;
+  line-height: 1;
+}
+
+html.theme-light body {
+  background-color: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+html.theme-light .site-header,
+html.theme-light .site-header.scrolled {
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 4px 20px rgba(36, 40, 55, .1);
+}
+
+html.theme-light .admin-topbar {
+  background: var(--color-bg-secondary);
+  border-bottom-color: var(--color-border);
+}
+
+html.theme-light .admin-sidebar {
+  background: var(--color-bg-secondary);
+  border-right-color: var(--color-border);
+}
+
+html.theme-light .box {
+  background: var(--color-bg-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+html.theme-light .box h2 {
+  color: var(--color-primary) !important;
+}
+
+html.theme-light .input-group label,
+html.theme-light .link,
+html.theme-light .input-group input {
+  color: var(--color-text-secondary) !important;
+}
+
+html.theme-light .input-group input {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+@media (max-width: 680px) {
+  .theme-toggle {
+    right: 12px;
+    bottom: 12px;
+  }
+}

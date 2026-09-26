@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../../css/components.css" />
     <link rel="stylesheet" href="../../css/utilitites.css" />
     <link rel="stylesheet" href="../../css/responsive.css" />
+    <link rel="stylesheet" href="../../css/theme.css" />
 
     <style>
       body {
@@ -210,14 +211,20 @@
             <span class="nav-indicator"></span>
           </nav>
           <div class="site-auth">
-            <button class="avatar-button" type="button" aria-label="Account menu">
+            <button
+              class="avatar-button"
+              type="button"
+              aria-label="Account menu"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.5"></circle>
                 <path d="M5.5 20c.8-3.2 3.1-5 6.5-5s5.7 1.8 6.5 5"></path>
               </svg>
             </button>
             <div class="auth-menu" role="menu">
-              <a href="../auth/login.html" data-auth-login role="menuitem">Sign in</a>
+              <a href="../auth/login.html" data-auth-login role="menuitem"
+                >Sign in</a
+              >
             </div>
           </div>
         </div>
@@ -303,7 +310,6 @@
               --
             </span>
           </div>
-
         </div>
       </aside>
     </main>
@@ -452,16 +458,25 @@
           window.location.replace(signInUrl);
         };
 
-        ticketContainer.querySelectorAll("[data-ticket-select]").forEach((button) => {
-          button.addEventListener("click", () => {
-            const bookingEvent = new MouseEvent("click", { cancelable: true });
-            goToBooking(bookingEvent, button.dataset.ticketType, button.dataset.ticketPrice);
+        ticketContainer
+          .querySelectorAll("[data-ticket-select]")
+          .forEach((button) => {
+            button.addEventListener("click", () => {
+              const bookingEvent = new MouseEvent("click", {
+                cancelable: true,
+              });
+              goToBooking(
+                bookingEvent,
+                button.dataset.ticketType,
+                button.dataset.ticketPrice,
+              );
+            });
           });
-        });
       }
     </script>
 
     <div id="site-footer" data-root="../../"></div>
     <script src="../../js/footer.js"></script>
+    <script src="../../js/theme.js"></script>
   </body>
 </html>

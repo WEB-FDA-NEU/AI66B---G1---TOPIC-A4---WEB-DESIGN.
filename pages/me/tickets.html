@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="vi">
+<<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vé của tôi — Concertly</title>
-<link rel="stylesheet" href="concertly-styles.css">
+<title>My Tickets — Concertly</title>
+<<link rel="stylesheet" href="../../css/me.css">
 </head>
 <body>
 <div class="shell">
@@ -15,14 +15,14 @@
       <a href="/" class="brand">
         <span class="brand__mark"></span> Concertly
       </a>
-      <button class="nav-toggle" id="navToggle" aria-label="Mở menu">
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="/">Trang chủ</a></li>
-        <li><a href="/concerts">Concert</a></li>
-        <li><a href="/me/tickets" class="is-active">Vé của tôi</a></li>
-        <li><a href="/me/orders">Đơn hàng</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/concerts">Concerts</a></li>
+        <li><a href="/me/tickets" class="is-active">My Tickets</a></li>
+        <li><a href="/me/orders">Orders</a></li>
       </ul>
       <div class="nav-user">
         <span class="nav-user__name">Lân Nguyễn</span>
@@ -35,16 +35,16 @@
     <div class="container">
       <div class="page-head">
         <div>
-          <h1>Vé của tôi</h1>
-          <p>Toàn bộ vé bạn đã mua trên Concertly.</p>
+          <h1>My Tickets</h1>
+          <p>All the tickets you've purchased on Concertly.</p>
         </div>
       </div>
 
       <div class="filter-tabs" id="filterTabs"></div>
       <div id="ticketGrid" class="ticket-grid"></div>
       <div id="emptyState" class="empty" style="display:none;">
-        <h3>Chưa có vé nào ở trạng thái này</h3>
-        <p>Vé bạn mua sẽ hiển thị tại đây.</p>
+        <h3>No tickets in this status yet</h3>
+        <p>Tickets you purchase will appear here.</p>
       </div>
     </div>
   </main>
@@ -59,10 +59,10 @@ const icoSeat = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><pa
 
 /* ---------- filter state ---------- */
 const FILTERS = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'valid', label: 'Còn hiệu lực' },
-  { key: 'used', label: 'Đã sử dụng' },
-  { key: 'cancelled', label: 'Đã hủy' }
+  { key: 'all', label: 'All' },
+  { key: 'valid', label: 'Valid' },
+  { key: 'used', label: 'Used' },
+  { key: 'cancelled', label: 'Cancelled' }
 ];
 let activeFilter = 'all';
 
@@ -122,13 +122,13 @@ function renderTickets(){
           <div>${icoCalendar} ${formatDateTime(concert.datetime)}</div>
           <div>${icoPin} ${concert.venue}</div>
           <div>${icoSeat} ${ticket.seat}</div>
-          <div class="muted">Mã vé: <span class="mono">${ticket.id}</span> · Đơn hàng <a href="order-detail.html?id=${ticket.orderId}" class="mono" style="color:var(--brand)">${ticket.orderId}</a></div>
+          <div class="muted">Ticket ID: <span class="mono">${ticket.id}</span> · Order <a href="order-detail.html?id=${ticket.orderId}" class="mono" style="color:var(--brand)">${ticket.orderId}</a></div>
         </div>
       </div>
       <div class="ticket-card__stub">
         <div>
           <div class="ticket-card__type">${ticket.type}</div>
-          <div class="ticket-card__seat"><span>Ghế</span>${ticket.seat.split('—').pop().trim()}</div>
+          <div class="ticket-card__seat"><span>Seat</span>${seatCode(ticket.seat)}</div>
         </div>
         ${barcode()}
       </div>
@@ -144,5 +144,6 @@ document.getElementById('navToggle').addEventListener('click', () => {
 renderTabs();
 renderTickets();
 </script>
+<script src="../../js/me.js"></script>
 </body>
 </html>

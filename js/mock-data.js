@@ -11,6 +11,8 @@ const MOCK_CONCERTS = [
     banner: "https://www.nme.com/wp-content/uploads/2024/03/Ariana-Grande-review-header-Katia-Temkin.jpg",
     category: "Pop",
     status: "Selling Fast",
+    ticketsSold: 4,
+    ticketCapacity: 600,
     description: "Experience Ariana Grande live on stage with her chart-topping global hits, breathtaking vocals, and an immersive stage production.",
     tickets: [
       { type: "Standard Tier 2", price: "$80", status: "Available" },
@@ -30,6 +32,8 @@ const MOCK_CONCERTS = [
     banner: "https://cdn2.tuoitre.vn/471584752817336320/2025/12/15/cortis4-1765788082717358285352.jpg",
     category: "K-Pop",
     status: "Selling Fast",
+    ticketsSold: 3,
+    ticketCapacity: 450,
     description: "An intimate night of deep synthwave, evocative vocals, and atmospheric live arrangements for an unforgettable Valentine's concert.",
     tickets: [
       { type: "Balcony Seated", price: "$60", status: "Available" },
@@ -48,6 +52,8 @@ const MOCK_CONCERTS = [
     banner: "https://www.socanmagazine.ca/wp-content/uploads/2022/09/TheWeeknd_LiveAtRogersCentre_2022_ByBradArdley_1-1024x459.jpg",
     category: "R&B",
     status: "Most Popular",
+    ticketsSold: 5,
+    ticketCapacity: 900,
     description: "An electric stadium experience featuring The Weeknd's cinematic visuals, synth-pop classics, and hypnotic R&B anthems.",
     tickets: [
       { type: "General Admission Standing", price: "$90", status: "Available" },
@@ -67,6 +73,8 @@ const MOCK_CONCERTS = [
     banner: "https://wallpapers.com/images/featured/travis-scott-concert-77so7jvq2d74pgs9.jpg",
     category: "Hip-Hop",
     status: "Limited Availability",
+    ticketsSold: 4,
+    ticketCapacity: 800,
     description: "Brace yourself for pure adrenaline, heavy bass, and high-energy mosh pits as Travis Scott brings Utopia to life.",
     tickets: [
       { type: "Floor Standing Mosh", price: "$75", status: "Available" },
@@ -86,6 +94,8 @@ const MOCK_CONCERTS = [
     banner: "https://www.acfc.com.vn/acfc_wp/wp-content/uploads/2026/01/image-20.png",
     category: "K-Pop",
     status: "Selling Fast",
+    ticketsSold: 3,
+    ticketCapacity: 500,
     description: "The global fashion and music icon Jennie takes the spotlight with sensational solo performances, dazzling choreography, and chic visuals.",
     tickets: [
       { type: "General Floor Standing", price: "$85", status: "Available" },
@@ -105,6 +115,8 @@ const MOCK_CONCERTS = [
     banner: "https://cdn2.tuoitre.vn/471584752817336320/data/teen360/pictures/2021/08/26/1629981430_236722463_377598043730003_7359485805446615495_n.jpg",
     category: "K-Pop",
     status: "Most Popular",
+    ticketsSold: 2,
+    ticketCapacity: 750,
     description: "Witness Lisa's explosive stage presence, fierce rap verses, and electrifying choreography on her milestone solo world tour.",
     tickets: [
       { type: "Rockstar Standing Zone", price: "$95", status: "Available" },
@@ -124,6 +136,8 @@ const MOCK_CONCERTS = [
     banner: "https://marieclaire.vn/media/full/2025/11/1762689433_taylor_swift_bien_am_nhac_thanh_tuyen_ngon_nu_quyen_thumb-jpg.jpg",
     category: "Pop",
     status: "Selling Fast",
+    ticketsSold: 4,
+    ticketCapacity: 700,
     description: "Experience every era of Taylor Swift's historic discography in a breathtaking, multi-hour stadium masterpiece.",
     tickets: [
       { type: "Standard Floor GA", price: "$95", status: "Available" },
@@ -143,6 +157,8 @@ const MOCK_CONCERTS = [
     banner: "https://www.allegiantstadium.com/assets/img/Static_Digital_800x500_BrunoMars_2026_Regional_AllegiantStadium_0410-1fc3d6f0cd.jpg",
     category: "Pop",
     status: "Most Popular",
+    ticketsSold: 3,
+    ticketCapacity: 600,
     description: "An explosive night of funk, soul, and pure pop showmanship brought to life by Bruno Mars and the Hooligans.",
     tickets: [
       { type: "Silver Tribune", price: "$85", status: "Available" },
@@ -162,6 +178,8 @@ const MOCK_CONCERTS = [
     banner: "https://i8.amplience.net/i/naras/justin_bieber_performer_announcement_2026_grammys_hero_1644x925",
     category: "Pop",
     status: "Selling Fast",
+    ticketsSold: 3,
+    ticketCapacity: 550,
     description: "Celebrate Christmas Eve with Justin Bieber performing massive anthems from Justice and his record-breaking catalog.",
     tickets: [
       { type: "General Admission", price: "$75", status: "Available" },
@@ -181,6 +199,8 @@ const MOCK_CONCERTS = [
     banner: "https://i.scdn.co/image/ab67616d0000b273ba4fa604f046ff824331f4f4",
     category: "K-Pop",
     status: "Most Popular",
+    ticketsSold: 1,
+    ticketCapacity: 850,
     description: "The historic stadium tour of BTS featuring synchronized choreography, stunning visual stages, and anthems of self-love.",
     tickets: [
       { type: "CAT 3 Seating", price: "$90", status: "Available" },
@@ -200,6 +220,8 @@ const MOCK_CONCERTS = [
     banner: "https://cdn-images.vtv.vn/zoom/700_390/66349b6076cb4dee98746cf1/2025/02/08/1738988634-20250207-gd-52491352916461466283040-74311170467851099440769.jpg",
     category: "K-Pop",
     status: "Selling Fast",
+    ticketsSold: 3,
+    ticketCapacity: 500,
     description: "Witness the sheer magnetism and avant-garde artistry of G-Dragon in a dramatic, crimson-lit live performance.",
     tickets: [
       { type: "Standard Tier", price: "$85", status: "Available" },

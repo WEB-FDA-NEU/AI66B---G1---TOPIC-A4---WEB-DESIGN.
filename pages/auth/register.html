@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - Concertly</title>
     <link rel="stylesheet" href="../../css/variables.css">
     <link rel="stylesheet" href="../../css/base.css">
@@ -20,8 +20,8 @@
         .link { text-align: center; margin-top: 20px; font-size: 14px; color: #888; }
         .link a { color: #ff3399; text-decoration: none; cursor: pointer; }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="box">
         <h2>Create Account</h2>
         <div id="reg-error" class="error-msg"></div>
@@ -61,6 +61,33 @@
         <div class="link">
             Already have an account? <a href="login.html">Sign In</a>
         </div>
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="name@example.com" required />
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Create a strong password"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <label>Confirm Password</label>
+          <input
+            type="password"
+            id="confirm-password"
+            placeholder="Re-enter your password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn">Register</button>
+      </form>
+      <div class="link">
+        Already have an account? <a href="login.html">Sign In</a>
+      </div>
     </div>
 
     <script>
@@ -137,6 +164,12 @@
             
             window.location.href = '../../index.html';
         }
+
+        errorBox.style.display = "none";
+        localStorage.setItem("concertlyUser", fullName);
+        alert("Account registered successfully!");
+        window.location.href = "login.html";
+        
     </script>
     <script src="../../js/footer.js"></script>
 </body>
