@@ -62,31 +62,47 @@ function initAuthMenu() {
   const auth = document.querySelector(".site-auth");
   if (!auth) return;
 
-  const loginLink = auth.querySelector("[data-auth-login]");
-  if (!loginLink) return;
-}
-function initAuthMenu() {
-  const auth = document.querySelector(".site-auth");
-  if (!auth) return;
-
-  const loginLink = auth.querySelector("[data-auth-login]");
-  if (!loginLink) return;
-
- 
   const activeUser = localStorage.getItem("concertlyUser");
-  if (activeUser) {
-    auth.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <span style="color: #fff; font-size: 14px; font-weight: bold;">Hi, ${activeUser}</span>
-        <a href="#" onclick="handleLogout(event)" style="color: #ff3399; font-size: 14px; text-decoration: none;">Logout</a>
-      </div>
-    `;
+  if (!activeUser) return;
+
+  const menu = auth.querySelector(".auth-menu");
+  const headerActions = document.querySelector(".header-actions");
+  if (!menu || !headerActions) return;
+
+  const rootUrl = new URL(headerActions.dataset.home || "index.html", window.location.href);
+  const greeting = document.createElement("span");
+  greeting.className = "auth-menu-greeting";
+  greeting.textContent = `Hi, ${activeUser}`;
+  menu.replaceChildren(greeting);
+
+  if (localStorage.getItem("userRole") === "customer") {
+    const accountLinks = [
+      ["My Tickets", "pages/me/tickets.html"],
+      ["My Orders", "pages/me/orders.html"],
+    ];
+    accountLinks.forEach(([label, path]) => {
+      const link = document.createElement("a");
+      link.href = new URL(path, rootUrl).href;
+      link.textContent = label;
+      menu.append(link);
+    });
   }
+
+  const logout = document.createElement("button");
+  logout.type = "button";
+  logout.textContent = "Log out";
+  logout.addEventListener("click", () => {
+    localStorage.removeItem("concertlyUser");
+    localStorage.removeItem("userRole");
+    window.location.reload();
+  });
+  menu.append(logout);
 }
 
 window.handleLogout = function(e) {
   e.preventDefault();
   localStorage.removeItem("concertlyUser");
+  localStorage.removeItem("userRole");
   window.location.reload();
 };
 

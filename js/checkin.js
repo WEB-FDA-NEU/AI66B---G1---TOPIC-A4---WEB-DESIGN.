@@ -34,6 +34,14 @@ function hasConcertStarted(attendee) {
   return concert && new Date(`${concert.date}T${concert.time}`) <= new Date();
 }
 
+function showCheckinFeedback(message, kind = "info") {
+  const feedback = document.getElementById("checkin-feedback");
+  if (!feedback) return;
+  feedback.className = `checkin-feedback checkin-feedback--${kind}`;
+  feedback.textContent = message;
+  feedback.hidden = false;
+}
+
 function resetFutureConcertAttendees() {
   MOCK_ATTENDEES.forEach(attendee => {
     if (!hasConcertStarted(attendee)) {
@@ -138,6 +146,8 @@ document.addEventListener("DOMContentLoaded", () => {
     attendeeSearch = "";
     document.getElementById("attendee-search").value = "";
     attendeeStatusFilter = "all";
+    const feedback = document.getElementById("checkin-feedback");
+    if (feedback) feedback.hidden = true;
     document.querySelectorAll(".filter-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.status === "all"));
     renderCheckinStats();
     renderAttendees();
@@ -173,9 +183,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!button) return;
     const attendee = MOCK_ATTENDEES.find(item => item.id === button.dataset.attendeeId);
     if (!attendee) return;
-    if (!hasConcertStarted(attendee)) return;
+    if (!hasConcertStarted(attendee)) {
+      const concert = getConcertForAttendee(attendee);
+      const opensAt = new Date(`${concert.date}T${concert.time}`).toLocaleString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+      showCheckinFeedback(`Check-in is not open yet. It opens ${opensAt}.`, "warning");
+      return;
+    }
     attendee.checkedIn = true;
     attendee.time = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    showCheckinFeedback(`${attendee.name} checked in successfully.`, "success");
     renderCheckinStats();
     renderAttendees();
   });

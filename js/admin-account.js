@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutButton.addEventListener("click", () => {
       accountDropdown.hidden = true;
       accountButton.setAttribute("aria-expanded", "false");
+      localStorage.removeItem("concertlyUser");
+      localStorage.removeItem("userRole");
       window.location.href = "../auth/login.html";
     });
   }
