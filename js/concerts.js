@@ -59,7 +59,7 @@ function renderConcertTable() {
       <td>
         <div class="row-actions">
           <button class="row-action-btn" aria-label="Edit" onclick="loadConcertIntoForm('${c.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="row-action-btn danger" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
+          <button class="row-action-btn danger" aria-label="Delete ${c.title}" data-delete-concert="${c.id}"><i class="fa-solid fa-trash"></i></button>
         </div>
       </td>
     </tr>
@@ -197,6 +197,18 @@ function loadConcertIntoForm(id) {
   document.getElementById("concert-form").scrollIntoView({ behavior: "smooth" });
 }
 
+function deleteConcert(id) {
+  const index = MOCK_CONCERTS.findIndex(concert => concert.id === id);
+  if (index === -1) return;
+
+  const concert = MOCK_CONCERTS[index];
+  if (!window.confirm(`Delete "${concert.title}" from concerts?`)) return;
+
+  MOCK_CONCERTS.splice(index, 1);
+  if (editingConcertId === id) resetConcertForm();
+  renderConcertTable();
+}
+
 function resetConcertForm() {
   editingConcertId = null;
   document.getElementById("form-card-title").textContent = "Add New Concert";
@@ -207,6 +219,11 @@ function resetConcertForm() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("concert-table-body").addEventListener("click", event => {
+    const button = event.target.closest("[data-delete-concert]");
+    if (button) deleteConcert(button.dataset.deleteConcert);
+  });
+
   document.getElementById("concert-search").addEventListener("input", () => {
     concertPage = 1;
     renderConcertTable();

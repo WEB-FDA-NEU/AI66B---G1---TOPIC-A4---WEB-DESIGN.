@@ -58,6 +58,7 @@
   .filter-tools {
     width: 100%;
     margin-left: 0;
+    flex-wrap: wrap;
   }
 
   .category-pills {

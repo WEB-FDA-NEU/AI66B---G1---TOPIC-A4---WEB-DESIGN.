@@ -3,148 +3,143 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Digital Ticket Detail - Concertly</title>
+    <title>Digital Ticket — Concertly</title>
+    <link rel="stylesheet" href="../../css/reset.css" />
     <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/utilitites.css" />
+    <link rel="stylesheet" href="../../css/responsive.css" />
     <link rel="stylesheet" href="../../css/theme.css" />
-    <style>
-      body {
-        background-color: #0b0b0b;
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        font-family: sans-serif;
-        padding: 20px;
-      }
-      .box {
-        background: #161616;
-        padding: 30px;
-        border-radius: 12px;
-        width: 100%;
-        max-width: 450px;
-        border: 1px solid #222;
-      }
-      h2 {
-        color: #ff3399;
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .ticket-card {
-        background: #202020;
-        border-radius: 10px;
-        padding: 20px;
-        border-left: 5px solid #ff3399;
-      }
-      .ticket-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-      .ticket-status {
-        background: rgba(0, 255, 128, 0.15);
-        color: #00ff80;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-      }
-      .ticket-info p {
-        font-size: 14px;
-        color: #aaa;
-        margin-bottom: 8px;
-      }
-      .ticket-info span {
-        color: #fff;
-        font-weight: 500;
-      }
-      .poster-img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 6px;
-        margin-bottom: 15px;
-      }
-      .qr-section {
-        text-align: center;
-        margin-top: 20px;
-        background: #fff;
-        padding: 15px;
-        border-radius: 8px;
-        color: #000;
-      }
-      .qr-placeholder {
-        width: 100px;
-        height: 100px;
-        margin: 0 auto;
-        background: #000;
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 11px;
-        font-weight: bold;
-      }
-    </style>
+    <link rel="stylesheet" href="../../css/me.css" />
+    <script src="../../js/mock-data.js"></script>
+    <script src="../../js/me.js"></script>
   </head>
   <body>
-    <div class="box">
-      <h2>Digital Ticket Detail</h2>
-      <div class="ticket-card" id="ticket-container">
-        <!-- Dữ liệu sẽ được điền tự động bằng JavaScript -->
-        <p style="text-align: center; color: #888">Loading ticket details...</p>
-      </div>
-      <div style="text-align: center; margin-top: 20px">
-        <a
-          href="../../index.html"
-          style="color: #ff3399; text-decoration: none; font-size: 14px"
-          >← Explore other concerts</a
-        >
-      </div>
+    <div class="shell">
+      <header class="site-header">
+        <div class="container">
+          <a href="../../index.html" class="site-logo hover-glow">CONCERTLY</a>
+          <div class="header-actions" data-home="../../index.html">
+            <nav class="site-nav">
+              <a href="../../index.html" class="hover-glow" data-nav>Home</a>
+              <a href="../concerts/index.html" class="hover-glow" data-nav
+                >Explore</a
+              >
+              <a href="../404.html" class="hover-glow" data-nav>Support</a>
+              <span class="nav-indicator"></span>
+            </nav>
+            <form
+              class="header-search"
+              action="../concerts/index.html"
+              method="get"
+              role="search"
+            >
+              <input
+                class="header-search-input"
+                type="search"
+                name="search"
+                placeholder="Find your next live show..."
+                aria-label="Search concerts"
+              />
+              <button
+                class="header-search-button"
+                type="submit"
+                aria-label="Search"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <path d="m20 20-4-4"></path>
+                </svg>
+              </button>
+            </form>
+            <div class="site-auth">
+              <button
+                class="avatar-button"
+                type="button"
+                aria-label="Account menu"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.5"></circle>
+                  <path d="M5.5 20c.8-3.2 3.1-5 6.5-5s5.7 1.8 6.5 5"></path>
+                </svg>
+              </button>
+              <div class="auth-menu" role="menu">
+                <a href="../auth/login.html" data-auth-login role="menuitem"
+                  >Sign in</a
+                >
+                <a href="../auth/register.html" role="menuitem">Sign up</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main class="account-main">
+        <div class="container">
+          <div class="breadcrumb">
+            <a href="tickets.html">My Tickets</a><span>/</span
+            ><span id="ticketBreadcrumb"></span>
+          </div>
+          <h1 class="digital-ticket-title">Digital ticket</h1>
+          <div id="ticket-container" class="digital-ticket-layout"></div>
+        </div>
+      </main>
     </div>
-
-    <!-- Nhúng file mock-data.js của nhóm vào -->
-    <script src="../../js/mock-data.js"></script>
     <script>
-      const urlParams = new URLSearchParams(window.location.search);
-      const concertId = urlParams.get("id") || "c1";
-      const concert =
-        MOCK_CONCERTS.find((c) => c.id === concertId) || MOCK_CONCERTS[0];
-      const ticketHolderName =
-        localStorage.getItem("concertlyUser") || "Guest User";
-
-      // 1. Tạo biến ID vé ngẫu nhiên để dùng chung
-      const randomTicketId = `#CNCT-${Math.floor(100000 + Math.random() * 900000)}`;
-
-      // 2. Chuyển dữ liệu thành dạng đường link URL để điện thoại dễ quét
-      // Lưu ý: Đây là link ảo dùng để demo hệ thống check-in
-      const verifyUrl = `https://concertly.local/check-in?ticket=${randomTicketId}&user=${ticketHolderName}`;
-      const encodedData = encodeURIComponent(verifyUrl);
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedData}`;
-
-      // 3. Đổ dữ liệu vào HTML (Đã thay Ticket ID tĩnh và chèn ảnh QR động)
+      const ticketId = new URLSearchParams(window.location.search).get("id");
+      const ticket = MOCK_TICKETS.find((item) => item.id === ticketId);
       const container = document.getElementById("ticket-container");
-      container.innerHTML = `
-            <img src="${concert.poster}" alt="${concert.title}" class="poster-img">
-            <div class="ticket-header">
-                <span style="font-weight: bold; font-size: 16px;">${concert.title}</span>
-                <span class="ticket-status">Valid</span>
+      if (!ticket) {
+        document.getElementById("ticketBreadcrumb").textContent = "Not found";
+        container.innerHTML = `<div class="empty empty--detail"><h3>Ticket not found</h3><p>Open a ticket from your ticket list to view its QR code.</p><a class="btn btn--primary" href="tickets.html">Back to My Tickets</a></div>`;
+      } else {
+        const concert = MOCK_CONCERTS.find(
+          (item) => item.id === ticket.concertId,
+        );
+        const order = getOrderById(ticket.orderId);
+        const orderTicket = order?.tickets.find(
+          (item) => item.seat === ticket.seat,
+        );
+        const status = TICKET_STATUS_MAP[ticket.status];
+        const ticketHolder = localStorage.getItem("concertlyUser");
+        const qrPayload = encodeURIComponent(ticket.id);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrPayload}`;
+
+        document.title = `${ticket.id} — Concertly`;
+        document.getElementById("ticketBreadcrumb").textContent = ticket.id;
+        container.innerHTML = `
+          <article class="digital-ticket-card">
+            <img class="digital-ticket-poster" src="${concert.poster}" alt="${concert.title}">
+            <div class="digital-ticket-details">
+              <div class="digital-ticket-heading"><div><p class="digital-ticket-kicker">${concert.artist} · ${concert.category}</p><h2>${concert.title}</h2></div><span class="badge ${status.cls}">${status.label}</span></div>
+              <dl class="digital-ticket-facts">
+                <div><dt>Date &amp; time</dt><dd>${formatDateTime(`${concert.date}T${concert.time}`)}</dd></div>
+                <div><dt>Venue</dt><dd>${concert.location}</dd></div>
+                <div><dt>Seat</dt><dd>${ticket.seat}</dd></div>
+                <div><dt>Ticket type</dt><dd>${ticket.type}${orderTicket ? ` · ${formatCurrency(orderTicket.price)}` : ""}</dd></div>
+                <div><dt>Ticket holder</dt><dd>${ticketHolder}</dd></div>
+                <div><dt>Ticket ID</dt><dd class="mono">${ticket.id}</dd></div>
+                <div><dt>Order ID</dt><dd><a href="order-detail.html?id=${encodeURIComponent(ticket.orderId)}" class="mono">${ticket.orderId}</a></dd></div>
+              </dl>
+              ${ticket.status === "valid" ? `<div class="digital-ticket-qr"><img src="${qrUrl}" alt="QR code for ticket ${ticket.id}"><p>Show this QR code at the venue entrance.</p></div>` : `<div class="digital-ticket-notice">QR code is unavailable because this ticket is ${status.label.toLowerCase()}.</div>`}
             </div>
-            <div class="ticket-info">
-                <p>Artist: <span>${concert.artist}</span></p>
-                <p>Date & Time: <span>${concert.date} - ${concert.time}</span></p>
-                <p>Venue: <span>${concert.location}</span></p>
-                <p>Ticket Type: <span>${concert.tickets[0].type} (${concert.tickets[0].price})</span></p>
-                <p>Ticket Holder: <span>${ticketHolderName}</span></p>
-                <p>Ticket ID: <span>${randomTicketId}</span></p>
-            </div>
-            <div class="qr-section">
-                <img src="${qrApiUrl}" alt="Dynamic QR Code" style="width: 130px; height: 130px; display: block; margin: 0 auto;">
-                <p style="color: #666; font-size: 11px; margin-top: 6px;">Scan at the entrance gate</p>
-            </div>
+          </article>
+          <a class="btn btn--ghost" href="tickets.html">Back to My Tickets</a>
         `;
+      }
     </script>
+    <div id="site-footer" data-root="../../"></div>
+    <script src="../../js/footer.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script src="../../js/theme.js"></script>
   </body>
 </html>
