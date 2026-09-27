@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/me.css" />
     <script src="../../js/mock-data.js"></script>
+    <script src="../../js/purchases.js"></script>
     <script src="../../js/me.js"></script>
   </head>
   <body>
@@ -135,8 +136,8 @@
         wrap.innerHTML = FILTERS.map((f) => {
           const count =
             f.key === "all"
-              ? MOCK_ORDERS.length
-              : MOCK_ORDERS.filter((o) => o.status === f.key).length;
+              ? CUSTOMER_ORDERS.length
+              : CUSTOMER_ORDERS.filter((o) => o.status === f.key).length;
           return `<button class="filter-tab ${f.key === activeFilter ? "is-active" : ""}" data-key="${f.key}">
       ${f.label} <span class="count">${count}</span>
     </button>`;
@@ -156,7 +157,7 @@
         const table = document.getElementById("orderTable");
         const empty = document.getElementById("emptyState");
 
-        const list = MOCK_ORDERS.filter(
+        const list = CUSTOMER_ORDERS.filter(
           (o) => activeFilter === "all" || o.status === activeFilter,
         )
           .slice()

@@ -1,435 +1,137 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
+    <title>Ticket Selection | Concertly</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+  </head>
 
-<title>Ticket Selection | Concertly</title>
+  <body>
+    <div id="site-navbar" data-root="../../"></div>
 
-
-<link rel="stylesheet" href="../../css/reset.css">
-<link rel="stylesheet" href="../../css/variables.css">
-<link rel="stylesheet" href="../../css/base.css">
-<link rel="stylesheet" href="../../css/components.css">
-<link rel="stylesheet" href="../../css/layout.css">
-
-
-</head>
-
-
-<body>
-
-
-<div id="site-navbar" data-root="../../"></div>
-
-
-
-
-
-<main class="ticket-page">
-
-
-
-
-
-<!-- =====================
+    <main class="ticket-page">
+      <!-- =====================
      HERO
 ===================== -->
 
+      <section class="ticket-hero">
+        <img id="concert-banner" src="" alt="Concert Banner" />
 
-<section class="ticket-hero">
+        <div class="ticket-overlay"></div>
 
+        <div class="container ticket-hero-content">
+          <span class="ticket-badge"> Ticket Selection </span>
 
-<img
-id="concert-banner"
-src=""
-alt="Concert Banner">
+          <h1 id="concert-title">Concert Name</h1>
 
+          <h2 id="concert-artist">Artist Name</h2>
 
+          <p id="concert-meta">Location • Date • Time</p>
+        </div>
+      </section>
 
-<div class="ticket-overlay"></div>
-
-
-
-
-<div class="container ticket-hero-content">
-
-
-
-<span class="ticket-badge">
-Ticket Selection
-</span>
-
-
-
-<h1 id="concert-title">
-Concert Name
-</h1>
-
-
-
-
-<h2 id="concert-artist">
-Artist Name
-</h2>
-
-
-
-
-<p id="concert-meta">
-Location • Date • Time
-</p>
-
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<div class="container ticket-container">
-
-
-
-<div class="ticket-layout">
-
-
-
-
-
-
-
-<!-- =====================
+      <div class="container ticket-container">
+        <div class="ticket-layout">
+          <!-- =====================
      LEFT COLUMN
 ===================== -->
 
+          <div class="ticket-left">
+            <section class="ticket-card">
+              <h2>About The Show</h2>
 
-<div class="ticket-left">
+              <p id="concert-description"></p>
+            </section>
 
-
-
-
-
-
-
-<section class="ticket-card">
-
-
-<h2>
-About The Show
-</h2>
-
-
-<p id="concert-description">
-
-</p>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================
+            <!-- =====================
      CONCERT MAP
 ===================== -->
 
+            <section class="ticket-card map-card">
+              <h2>Concert Map</h2>
 
-<section class="ticket-card map-card">
+              <p>Select your preferred seating area</p>
 
+              <div id="concert-map">
+                <!-- MAP SVG RENDER HERE -->
+              </div>
+            </section>
 
-<h2>
-Concert Map
-</h2>
-
-
-<p>
-Select your preferred seating area
-</p>
-
-
-
-<div id="concert-map">
-
-
-<!-- MAP SVG RENDER HERE -->
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================
+            <!-- =====================
      TICKET CATEGORY
 ===================== -->
 
+            <section class="ticket-card">
+              <h2>Available Ticket Categories</h2>
 
-<section class="ticket-card">
+              <div id="ticket-list">
+                <!-- JS RENDER TICKETS -->
+              </div>
+            </section>
+          </div>
 
-
-<h2>
-Available Ticket Categories
-</h2>
-
-
-
-<div id="ticket-list">
-
-
-<!-- JS RENDER TICKETS -->
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================
+          <!-- =====================
      RIGHT COLUMN
 ===================== -->
 
+          <div class="ticket-right">
+            <section class="ticket-card">
+              <h2>Event Information</h2>
 
-<div class="ticket-right">
+              <div id="event-information"></div>
+            </section>
 
+            <section class="ticket-card selection-card">
+              <div class="selection-header">
+                <h2>🎟️ Your Selection</h2>
 
+                <p>Review your ticket before payment</p>
+              </div>
 
+              <div id="selected-ticket" class="selected-ticket">
+                No ticket selected
+              </div>
 
+              <div class="quantity-control">
+                <button id="minus">−</button>
 
+                <span id="quantity"> 0 </span>
 
+                <button id="plus">+</button>
+              </div>
 
-<section class="ticket-card">
+              <div class="total-box">
+                <span> Total </span>
 
+                <strong id="total"> $0 </strong>
+              </div>
 
-<h2>
-Event Information
-</h2>
+              <button id="continue-payment" class="btn btn-primary" disabled>
+                Continue Payment
+              </button>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
 
+    <div id="site-footer" data-root="../../"></div>
 
+    <!-- DATA -->
 
-<div id="event-information">
+    <script src="../../js/mock-data.js"></script>
 
+    <script src="../../js/venue-engine.js"></script>
 
-</div>
+    <script src="../../js/venue-loader.js"></script>
 
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<section class="ticket-card selection-card">
-
-
-
-
-
-<div class="selection-header">
-
-
-<h2>
-🎟️ Your Selection
-</h2>
-
-
-<p>
-Review your ticket before payment
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div 
-id="selected-ticket"
-class="selected-ticket">
-
-
-No ticket selected
-
-
-</div>
-
-
-
-
-
-
-
-<div class="quantity-control">
-
-
-<button id="minus">
-−
-</button>
-
-
-<span id="quantity">
-0
-</span>
-
-
-<button id="plus">
-+
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="total-box">
-
-
-<span>
-Total
-</span>
-
-
-<strong id="total">
-$0
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<button
-
-id="continue-payment"
-
-class="btn btn-primary"
-
-disabled>
-
-
-Continue Payment
-
-
-</button>
-
-
-
-
-
-</section>
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-</main>
-
-
-
-
-
-
-<div id="site-footer" data-root="../../"></div>
-
-
-
-
-
-
-
-
-
-<!-- DATA -->
-
-<script src="../../js/mock-data.js"></script>
-
-<script src="../../js/venue-engine.js"></script>
-
-<script src="../../js/venue-loader.js"></script>
-
-<script src="../../js/tickets.js"></script>
-
-
-</body>
-
-
+    <script src="../../js/tickets.js"></script>
+  </body>
 </html>

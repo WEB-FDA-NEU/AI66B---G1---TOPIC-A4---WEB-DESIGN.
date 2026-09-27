@@ -17,11 +17,15 @@ function getCompletedOrders() {
 function renderSalesStats() {
   const completedOrders = getCompletedOrders();
   const totalRevenue = completedOrders.reduce((total, order) => total + order.amount, 0);
+  const ticketsSold = completedOrders.reduce(
+    (total, order) => total + (Number(order.ticketCount) || 1),
+    0,
+  );
   const revenueEl = document.getElementById("stat-total-revenue");
   const ticketsEl = document.getElementById("stat-tickets-sold");
 
   if (revenueEl) revenueEl.textContent = `$${totalRevenue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-  if (ticketsEl) ticketsEl.textContent = completedOrders.length.toLocaleString("en-US");
+  if (ticketsEl) ticketsEl.textContent = ticketsSold.toLocaleString("en-US");
 }
 
 function renderUpcomingConcerts() {
@@ -139,12 +143,15 @@ function renderRecentOrders() {
   const tbody = document.getElementById("recent-orders-body");
   if (!tbody) return;
 
-  const pageCount = Math.max(1, Math.ceil(MOCK_ORDERS.length / ORDERS_PER_PAGE));
+  const orders = MOCK_ORDERS.slice().sort(
+    (a, b) => new Date(b.date) - new Date(a.date),
+  );
+  const pageCount = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
   recentOrdersPage = Math.min(recentOrdersPage, pageCount);
   const start = (recentOrdersPage - 1) * ORDERS_PER_PAGE;
   const visibleOrders = showAllRecentOrders
-    ? MOCK_ORDERS
-    : MOCK_ORDERS.slice(start, start + ORDERS_PER_PAGE);
+    ? orders
+    : orders.slice(start, start + ORDERS_PER_PAGE);
 
   tbody.innerHTML = visibleOrders.map(order => `
     <tr>
@@ -160,8 +167,8 @@ function renderRecentOrders() {
   const caption = document.getElementById("recent-orders-caption");
   if (caption) {
     caption.textContent = showAllRecentOrders
-      ? `Showing 1–${MOCK_ORDERS.length} of ${MOCK_ORDERS.length} orders`
-      : `Showing ${start + 1}–${Math.min(start + ORDERS_PER_PAGE, MOCK_ORDERS.length)} of ${MOCK_ORDERS.length} orders`;
+      ? `Showing 1–${orders.length} of ${orders.length} orders`
+      : `Showing ${start + 1}–${Math.min(start + ORDERS_PER_PAGE, orders.length)} of ${orders.length} orders`;
   }
   const viewAllButton = document.getElementById("recent-orders-view-all");
   if (viewAllButton) viewAllButton.textContent = showAllRecentOrders ? "Show recent" : "View all";

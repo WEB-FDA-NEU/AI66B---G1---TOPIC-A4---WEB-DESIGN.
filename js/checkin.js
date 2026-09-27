@@ -7,7 +7,7 @@ let attendeeSearch = "";
 let selectedEventId = "";
 
 const MOCK_ATTENDEES = MOCK_ORDERS
-  .filter(order => order.status === "Paid" || order.status === "Pending")
+  .filter(order => !order.isPurchase && (order.status === "Paid" || order.status === "Pending"))
   .map(order => {
     const concert = MOCK_CONCERTS.find(item => item.title === order.concert)
       || MOCK_CONCERTS.find(item => item.title === "Ruby Solo Showcase - Live in Concert" && order.concert === "Ruby Solo Showcase");
@@ -16,6 +16,7 @@ const MOCK_ATTENDEES = MOCK_ORDERS
 
     return {
       id: order.orderId.replace("#CT-", ""),
+      ticketCode: `CT-EST-${order.orderId.replace("#CT-", "")}`,
       eventId: concert ? concert.id : "",
       name: order.customer,
       email: `${attendeeName}@gmail.com`,
@@ -24,6 +25,21 @@ const MOCK_ATTENDEES = MOCK_ORDERS
     };
   })
   .filter(attendee => attendee.eventId);
+
+const PURCHASED_ATTENDEES = readConcertlyPurchases().tickets
+  .filter(ticket => ticket.status === "valid")
+  .map(ticket => ({
+    id: ticket.id,
+    ticketCode: ticket.id,
+    eventId: ticket.concertId,
+    name: ticket.customer || "Customer",
+    email: "",
+    type: ticket.type,
+    checkedIn: false,
+  }))
+  .filter(attendee => MOCK_CONCERTS.some(concert => concert.id === attendee.eventId));
+
+MOCK_ATTENDEES.push(...PURCHASED_ATTENDEES);
 
 function getConcertForAttendee(attendee) {
   return MOCK_CONCERTS.find(concert => concert.id === attendee.eventId);
@@ -95,7 +111,7 @@ function renderAttendees() {
 
   tbody.innerHTML = filteredAttendees.slice(start, start + ATTENDEES_PER_PAGE).map(attendee => `
     <tr>
-      <td class="ticket-code">CT-EST-${attendee.id}</td>
+      <td class="ticket-code">${attendee.ticketCode}</td>
       <td>
         <div class="attendee-name">${attendee.name}</div>
         <div class="attendee-email">${attendee.email}</div>

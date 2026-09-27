@@ -1,193 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
+    <title>Checkout | Concertly</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/variables.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/checkout.css" />
+  </head>
 
-<title>Checkout | Concertly</title>
+  <body>
+    <div id="site-navbar" data-root="../../"></div>
 
+    <main class="checkout-page">
+      <div class="container checkout-container">
+        <h1>Checkout</h1>
 
-<link rel="stylesheet" href="../../css/reset.css">
-<link rel="stylesheet" href="../../css/variables.css">
-<link rel="stylesheet" href="../../css/base.css">
-<link rel="stylesheet" href="../../css/components.css">
-<link rel="stylesheet" href="../../css/layout.css">
-<link rel="stylesheet" href="../../css/checkout.css">
+        <div class="checkout-layout">
+          <!-- LEFT -->
 
-</head>
+          <section class="checkout-card concert-summary">
+            <div id="concert-banner"></div>
 
+            <div id="concert-info"></div>
+          </section>
 
-<body>
+          <section class="checkout-card">
+            <h2>Buyer Information</h2>
 
+            <input type="text" placeholder="Full Name" />
 
-<div id="site-navbar" data-root="../../"></div>
+            <input type="email" placeholder="Email" />
 
+            <input type="tel" placeholder="Phone Number" />
+          </section>
+        </div>
 
+        <!-- RIGHT -->
 
-<main class="checkout-page">
+        <section class="checkout-card payment-card">
+          <h2>Payment</h2>
 
+          <div id="payment-summary"></div>
 
-<div class="container checkout-container">
+          <select>
+            <option>Credit Card</option>
 
+            <option>PayPal</option>
 
+            <option>Bank Transfer</option>
+          </select>
 
-<h1>
-Checkout
-</h1>
+          <button id="confirm-payment" class="btn btn-primary">
+            Confirm Payment
+          </button>
+        </section>
+      </div>
+    </main>
 
+    <div id="site-footer" data-root="../../"></div>
 
+    <script src="../../js/navbar.js"></script>
 
+    <script src="../../js/footer.js"></script>
 
-
-<div class="checkout-layout">
-
-
-
-<!-- LEFT -->
-
-<section class="checkout-card concert-summary">
-
-
-<div id="concert-banner">
-
-</div>
-
-
-
-
-<div id="concert-info">
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-<section class="checkout-card">
-
-
-<h2>
-Buyer Information
-</h2>
-
-
-
-<input 
-type="text"
-placeholder="Full Name">
-
-
-
-<input 
-type="email"
-placeholder="Email">
-
-
-
-<input 
-type="tel"
-placeholder="Phone Number">
-
-
-
-</section>
-
-
-
-</div>
-
-
-
-
-
-
-
-<!-- RIGHT -->
-
-
-<section class="checkout-card payment-card">
-
-
-<h2>
-Payment
-</h2>
-
-
-
-
-<div id="payment-summary">
-
-
-</div>
-
-
-
-
-
-<select>
-
-<option>
-Credit Card
-</option>
-
-<option>
-PayPal
-</option>
-
-<option>
-Bank Transfer
-</option>
-
-
-</select>
-
-
-
-
-
-<button 
-id="confirm-payment"
-class="btn btn-primary">
-
-Confirm Payment
-
-</button>
-
-
-
-</section>
-
-
-
-
-</div>
-
-
-</main>
-
-
-
-
-
-<div id="site-footer" data-root="../../"></div>
-
-
-
-
-
-<script src="../../js/navbar.js"></script>
-
-<script src="../../js/footer.js"></script>
-
-<script src="../../js/checkout.js"></script>
-
-
-</body>
-
+    <script src="../../js/purchases.js"></script>
+    <script src="../../js/checkout.js"></script>
+  </body>
 </html>
