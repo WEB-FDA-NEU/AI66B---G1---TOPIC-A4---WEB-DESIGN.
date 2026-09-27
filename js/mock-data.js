@@ -230,3 +230,4 @@ const MOCK_CONCERTS = [
     ]
   }
 ];
+window.MOCK_CONCERTS = MOCK_CONCERTS;
