@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/me.css" />
     <script src="../../js/mock-data.js"></script>
+    <script src="../../js/purchases.js"></script>
     <script src="../../js/me.js"></script>
   </head>
   <body>
@@ -114,8 +115,7 @@
       const FILTERS = [
         { key: "all", label: "All" },
         { key: "valid", label: "Valid" },
-        { key: "pending", label: "Pending" },
-        { key: "refunded", label: "Refunded" },
+        { key: "cancelled", label: "Cancelled" },
       ];
       let activeFilter = "all";
 
@@ -124,8 +124,8 @@
         wrap.innerHTML = FILTERS.map((f) => {
           const count =
             f.key === "all"
-              ? MOCK_TICKETS.length
-              : MOCK_TICKETS.filter((t) => t.status === f.key).length;
+              ? CUSTOMER_TICKETS.length
+              : CUSTOMER_TICKETS.filter((t) => t.status === f.key).length;
           return `<button class="filter-tab ${f.key === activeFilter ? "is-active" : ""}" data-key="${f.key}">
       ${f.label} <span class="count">${count}</span>
     </button>`;
@@ -142,7 +142,7 @@
       function renderTickets() {
         const grid = document.getElementById("ticketGrid");
         const empty = document.getElementById("emptyState");
-        const list = MOCK_TICKETS.filter(
+        const list = CUSTOMER_TICKETS.filter(
           (t) => activeFilter === "all" || t.status === activeFilter,
         );
 

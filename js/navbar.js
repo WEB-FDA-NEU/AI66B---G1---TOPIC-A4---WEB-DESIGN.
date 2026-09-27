@@ -90,7 +90,15 @@ function initAuthMenu() {
 
   const logout = document.createElement("button");
   logout.type = "button";
-  logout.textContent = "Log out";
+  logout.className = "auth-menu-logout";
+  const logoutIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  logoutIcon.setAttribute("viewBox", "0 0 24 24");
+  logoutIcon.setAttribute("aria-hidden", "true");
+  logoutIcon.innerHTML =
+    '<path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />';
+  const logoutLabel = document.createElement("span");
+  logoutLabel.textContent = "Log out";
+  logout.append(logoutIcon, logoutLabel);
   logout.addEventListener("click", () => {
     localStorage.removeItem("concertlyUser");
     localStorage.removeItem("userRole");

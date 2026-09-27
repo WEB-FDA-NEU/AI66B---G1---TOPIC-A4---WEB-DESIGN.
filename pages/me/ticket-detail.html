@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/me.css" />
     <script src="../../js/mock-data.js"></script>
+    <script src="../../js/purchases.js"></script>
     <script src="../../js/me.js"></script>
   </head>
   <body>
@@ -96,7 +97,7 @@
     </div>
     <script>
       const ticketId = new URLSearchParams(window.location.search).get("id");
-      const ticket = MOCK_TICKETS.find((item) => item.id === ticketId);
+      const ticket = CUSTOMER_TICKETS.find((item) => item.id === ticketId);
       const container = document.getElementById("ticket-container");
       if (!ticket) {
         document.getElementById("ticketBreadcrumb").textContent = "Not found";
@@ -107,7 +108,7 @@
         );
         const order = getOrderById(ticket.orderId);
         const orderTicket = order?.tickets.find(
-          (item) => item.seat === ticket.seat,
+          (item) => item.id === ticket.id,
         );
         const status = TICKET_STATUS_MAP[ticket.status];
         const ticketHolder = localStorage.getItem("concertlyUser");

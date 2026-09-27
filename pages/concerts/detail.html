@@ -442,34 +442,39 @@
           })
           .join("");
 
-        const checkoutUrl = (ticketType = "", ticketPrice = "") => {
-          const params = new URLSearchParams({
-            concertId: concert.id,
-            ticketType,
-            ticketPrice,
-          });
-          return `../checkout/index.html?${params}`;
-        };
-
-        const signInUrl = "../auth/login.html";
-
-        const goToBooking = (event, ticketType = "", ticketPrice = "") => {
-          event.preventDefault();
-          window.location.replace(signInUrl);
-        };
-
         ticketContainer
           .querySelectorAll("[data-ticket-select]")
           .forEach((button) => {
             button.addEventListener("click", () => {
-              const bookingEvent = new MouseEvent("click", {
-                cancelable: true,
-              });
-              goToBooking(
-                bookingEvent,
-                button.dataset.ticketType,
-                button.dataset.ticketPrice,
+              const ticket = concert.tickets.find(
+                (item) => item.type === button.dataset.ticketType,
               );
+
+              if (!ticket || ticket.status.toLowerCase().includes("sold out")) {
+                return;
+              }
+
+              const ticketSelectionUrl = new URL(
+                "tickets.html",
+                window.location.href,
+              );
+              ticketSelectionUrl.searchParams.set("id", concert.id);
+              ticketSelectionUrl.searchParams.set("ticketType", ticket.type);
+
+              if (
+                localStorage.getItem("concertlyUser") &&
+                localStorage.getItem("userRole") === "customer"
+              ) {
+                window.location.href = ticketSelectionUrl.href;
+                return;
+              }
+
+              const signInUrl = new URL(
+                "../auth/login.html",
+                window.location.href,
+              );
+              signInUrl.searchParams.set("redirect", ticketSelectionUrl.href);
+              window.location.href = signInUrl.href;
             });
           });
       }

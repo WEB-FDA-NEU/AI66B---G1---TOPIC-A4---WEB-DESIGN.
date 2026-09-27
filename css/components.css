@@ -252,15 +252,16 @@
 
 .auth-menu {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     right: 0;
-    min-width: 132px;
-    padding: 6px;
+    width: 190px;
+    padding: 8px;
     display: none;
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
+    z-index: 50;
 }
 
 .auth-menu::before {
@@ -299,6 +300,28 @@
 .auth-menu button:focus-visible {
     background: var(--color-bg-hover);
     color: var(--color-text);
+}
+
+.auth-menu .auth-menu-logout {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.auth-menu-logout svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.auth-menu .auth-menu-logout:hover,
+.auth-menu .auth-menu-logout:focus-visible {
+    color: var(--color-error);
+    background: var(--color-bg-hover);
 }
 
 .auth-guard-wrapper {

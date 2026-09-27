@@ -322,3 +322,38 @@ const MOCK_ORDERS = [
     "status": "Paid"
   }
 ];
+
+if (typeof readConcertlyPurchases === "function") {
+  const purchaseOrders = readConcertlyPurchases().orders;
+  const statusLabels = {
+    paid: "Paid",
+    pending: "Pending",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  };
+
+  MOCK_ORDERS.push(
+    ...purchaseOrders.map((order) => {
+      const concert = MOCK_CONCERTS.find((item) => item.id === order.concertId);
+      const subtotal = (order.tickets || []).reduce(
+        (sum, ticket) => sum + Number(ticket.price || 0),
+        0,
+      );
+
+      return {
+        orderId: order.id,
+        customer: order.customer || "Customer",
+        concert: concert?.title || order.concertTitle || "Unknown concert",
+        amount: subtotal + Number(order.fees || 0) - Number(order.discount || 0),
+        date: new Date(order.orderedAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+        }),
+        status: statusLabels[order.status] || order.status,
+        ticketCount: order.tickets?.length || 0,
+        isPurchase: true,
+      };
+    }),
+  );
+}
