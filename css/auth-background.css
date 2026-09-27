@@ -1,0 +1,38 @@
+body {
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -14px;
+  pointer-events: none;
+}
+
+body::before {
+  z-index: -2;
+  background: url("https://www.nme.com/wp-content/uploads/2024/03/Ariana-Grande-review-header-Katia-Temkin.jpg") center 38% / cover no-repeat;
+  filter: blur(9px) brightness(0.32) saturate(0.85);
+  transform: scale(1.04);
+}
+
+body::after {
+  z-index: -1;
+  inset: 0;
+  background: rgba(8, 8, 12, 0.28);
+}
+
+.box {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  body::before {
+    background-position: 58% center;
+    filter: blur(8px) brightness(0.27) saturate(0.85);
+  }
+}
