@@ -7,9 +7,72 @@
 document.addEventListener("DOMContentLoaded", () => {
   initStickyHeader();
   initNavIndicator();
+  initMobileNav();
+  initMobileNavMotion();
   initAuthMenu();
   initAuthGuards();
 });
+
+function initMobileNav() {
+  const header = document.querySelector(".site-header");
+  const actions = header?.querySelector(".header-actions");
+  const nav = actions?.querySelector(".site-nav");
+  if (nav) {
+    const icons = {
+      Home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>',
+      Explore:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/></svg>',
+      Support:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.2 1.8c-1.2 1-1.8 1.3-1.8 2.7M12 17h.01"/></svg>',
+    };
+
+    nav.querySelectorAll("a[data-nav]").forEach((link) => {
+      const label = link.textContent.trim();
+      const icon = icons[label];
+      if (!icon || link.querySelector(".mobile-nav-icon")) return;
+
+      link.replaceChildren();
+      const iconElement = document.createElement("span");
+      iconElement.className = "mobile-nav-icon";
+      iconElement.innerHTML = icon;
+      const labelElement = document.createElement("span");
+      labelElement.className = "mobile-nav-label";
+      labelElement.textContent = label;
+      link.append(iconElement, labelElement);
+    });
+  }
+
+  const logo = header?.querySelector(".site-logo");
+  const container = header?.querySelector(".container");
+  const search = actions?.querySelector(".header-search");
+  const auth = actions?.querySelector(".site-auth");
+  if (!header || !actions || !logo || !container || !search || !auth) return;
+
+  const controls = document.createElement("div");
+  controls.className = "mobile-header-controls";
+  const searchMarker = document.createComment("search position");
+  const authMarker = document.createComment("account position");
+  search.before(searchMarker);
+  auth.before(authMarker);
+  controls.append(auth);
+  logo.after(controls);
+  controls.after(search);
+
+  const mobileQuery = window.matchMedia("(max-width: 768px)");
+
+  const syncViewport = () => {
+    if (mobileQuery.matches) {
+      controls.append(auth);
+      controls.after(search);
+    } else {
+      searchMarker.before(search);
+      authMarker.before(auth);
+    }
+  };
+
+  mobileQuery.addEventListener("change", syncViewport);
+  syncViewport();
+}
 
 function initStickyHeader() {
   const header = document.querySelector(".site-header");
@@ -58,18 +121,71 @@ function initNavIndicator() {
   window.addEventListener("load", () => moveIndicatorTo(activeLink));
 }
 
+function initMobileNavMotion() {
+  const nav = document.querySelector(".site-nav");
+  if (!nav) return;
+
+  const links = [...nav.querySelectorAll("a[data-nav]")];
+  const activeIndex = links.findIndex((link) => link.classList.contains("active"));
+  if (!links.length || activeIndex < 0) return;
+
+  const highlight = document.createElement("span");
+  highlight.className = "mobile-nav-highlight";
+  highlight.setAttribute("aria-hidden", "true");
+  nav.append(highlight);
+
+  links.forEach((link, index) => {
+    if (index === activeIndex) link.setAttribute("aria-current", "page");
+  });
+
+  const placeHighlight = (index, animate = true) => {
+    const link = links[index];
+    highlight.style.transition = animate ? "" : "none";
+    highlight.style.width = `${link.offsetWidth}px`;
+    highlight.style.transform = `translateX(${link.offsetLeft}px)`;
+    highlight.style.opacity = "1";
+  };
+
+  placeHighlight(activeIndex, false);
+
+  links.forEach((link, index) => {
+    link.addEventListener("pointerdown", () => placeHighlight(index));
+    link.addEventListener("focus", () => placeHighlight(index));
+  });
+  nav.addEventListener("pointerleave", () => placeHighlight(activeIndex));
+  window.addEventListener("resize", () => placeHighlight(activeIndex, false));
+}
+
 function initAuthMenu() {
   const auth = document.querySelector(".site-auth");
   if (!auth) return;
-
-  const activeUser = localStorage.getItem("concertlyUser");
-  if (!activeUser) return;
 
   const menu = auth.querySelector(".auth-menu");
   const headerActions = document.querySelector(".header-actions");
   if (!menu || !headerActions) return;
 
   const rootUrl = new URL(headerActions.dataset.home || "index.html", window.location.href);
+  const activeUser = localStorage.getItem("concertlyUser");
+  if (!activeUser) {
+    const guestLinks = [
+      ["data-auth-login", "Sign in", "pages/auth/login.html"],
+      ["data-auth-register", "Sign up", "pages/auth/register.html"],
+    ];
+
+    guestLinks.forEach(([attribute, label, path]) => {
+      let link = menu.querySelector(`a[${attribute}]`);
+      if (!link) {
+        link = document.createElement("a");
+        link.setAttribute(attribute, "");
+        link.setAttribute("role", "menuitem");
+        link.textContent = label;
+        menu.append(link);
+      }
+      link.href = new URL(path, rootUrl).href;
+    });
+    return;
+  }
+
   const greeting = document.createElement("span");
   greeting.className = "auth-menu-greeting";
   greeting.textContent = `Hi, ${activeUser}`;
