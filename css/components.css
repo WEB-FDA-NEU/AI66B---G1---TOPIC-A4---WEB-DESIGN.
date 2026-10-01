@@ -252,7 +252,7 @@
 
 .auth-menu {
     position: absolute;
-    top: calc(100% + 12px);
+    top: calc(100% + 8px);
     right: 0;
     width: 190px;
     padding: 8px;
@@ -267,10 +267,10 @@
 .auth-menu::before {
     content: "";
     position: absolute;
-    top: -10px;
+    top: -12px;
     left: 0;
     right: 0;
-    height: 10px;
+    height: 12px;
 }
 
 .site-auth:hover .auth-menu,
@@ -454,6 +454,32 @@
 .status-tag.default {
     background: rgba(255, 255, 255, .1);
     color: #e6e6eb;
+}
+
+.hero-tags {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-sm);
+}
+
+.hero-slide > .container,
+.detail-hero > .hero-content {
+    min-height: 228px;
+}
+
+.hero-tag {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background-color: rgba(11, 11, 15, .48);
+    color: var(--color-primary);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .14);
 }
 
 .form-group {
