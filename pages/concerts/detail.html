@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../../js/theme-init.js"></script>
     <title>Concert Details | Concertly</title>
 
     <link rel="stylesheet" href="../../css/reset.css" />
@@ -24,12 +25,11 @@
 
       .detail-hero {
         position: relative;
-        min-height: 58vh;
+        min-height: 75vh;
         display: flex;
-        align-items: flex-end;
-        padding: var(--space-2xl) 0 var(--space-xl);
+        align-items: center;
         background-size: cover;
-        background-position: center 15%;
+        background-position: center 20%;
       }
 
       .detail-hero::before {
@@ -41,9 +41,9 @@
          bottom so it blends into "About The Show" with no hard seam */
         background: linear-gradient(
           180deg,
-          rgba(11, 11, 15, 0.05) 0%,
-          rgba(11, 11, 15, 0.25) 45%,
-          rgba(11, 11, 15, 0.75) 75%,
+          rgba(11, 11, 15, 0.15) 0%,
+          rgba(11, 11, 15, 0.35) 45%,
+          rgba(11, 11, 15, 0.85) 78%,
           var(--color-bg) 100%
         );
       }
@@ -51,35 +51,17 @@
       .hero-content {
         position: relative;
         z-index: 1;
+        transform: translateY(48px);
         /* NOTE: no width:100% here — this div also has the shared .container
          class, which centers it at max 1200px. Overriding width here was
          stretching the badges/title flush to the browser edge. */
       }
 
-      .badge-wrap {
-        display: flex;
-        gap: var(--space-xs);
-        margin-bottom: var(--space-sm);
-      }
-
-      .badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 999px;
-        background-color: rgba(11, 11, 15, 0.48);
-        font-size: var(--font-xs);
-        font-weight: 600;
-        color: var(--color-primary);
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
-      }
-
       .detail-title {
-        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-size: clamp(2rem, 4vw, 3.5rem);
         font-weight: 800;
         line-height: 1.1;
-        margin-bottom: var(--space-xs);
+        margin-bottom: var(--space-sm);
       }
 
       .detail-artist {
@@ -99,6 +81,12 @@
       @media (max-width: 860px) {
         .main-layout {
           grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .detail-title {
+          font-size: clamp(1.35rem, 6vw, 1.75rem);
         }
       }
 
@@ -234,8 +222,8 @@
     <!-- Dynamic Banner Hero -->
     <div class="detail-hero" id="hero-banner">
       <div class="container hero-content">
-        <div class="badge-wrap">
-          <span class="badge" id="concert-category">Pop</span>
+        <div class="hero-tags">
+          <span class="hero-tag" id="concert-category">Pop</span>
           <span class="status-tag inline" id="concert-status"
             >Selling Fast</span
           >
