@@ -1,18 +1,39 @@
 const CONCERTLY_PURCHASES_STORAGE_KEY = "concertlyPurchases";
+const CONCERT_TICKET_ID_PATTERN =
+  /^TK-[A-Z0-9]{3,6}-[A-Z0-9]+-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
+
+function hasCurrentTicketId(ticket) {
+  return CONCERT_TICKET_ID_PATTERN.test(ticket?.id || "");
+}
 
 function readConcertlyPurchases() {
   try {
     const stored = JSON.parse(
       localStorage.getItem(CONCERTLY_PURCHASES_STORAGE_KEY) || "{}",
     );
-    const orders = Array.isArray(stored.orders) ? stored.orders : [];
-    const tickets = Array.isArray(stored.tickets) ? stored.tickets : [];
+    const storedOrders = Array.isArray(stored.orders) ? stored.orders : [];
+    const orders = storedOrders.filter(
+      (order) =>
+        Array.isArray(order.tickets) && order.tickets.some(hasCurrentTicketId),
+    );
+    const storedTickets = Array.isArray(stored.tickets) ? stored.tickets : [];
+    const tickets = storedTickets.filter(hasCurrentTicketId);
     const numberedIds = orders
       .map((order) => order.id?.match(/^#CT-(\d+)$/)?.[1])
       .filter(Boolean)
       .map(Number);
     let sequence = Math.max(10482, ...numberedIds);
-    let changed = false;
+    let changed =
+      orders.length !== storedOrders.length ||
+      tickets.length !== storedTickets.length;
+
+    orders.forEach((order) => {
+      if (!Array.isArray(order.tickets)) return;
+      const validTickets = order.tickets.filter(hasCurrentTicketId);
+      if (validTickets.length === order.tickets.length) return;
+      order.tickets = validTickets;
+      changed = true;
+    });
 
     orders
       .filter((order) => !/^#CT-\d+$/.test(order.id || ""))
@@ -54,12 +75,16 @@ function createConcertlyOrderId() {
 }
 
 function getCurrentCustomerPurchases() {
-  const customer = localStorage.getItem("concertlyUser");
+  const customerAccount = localStorage.getItem("concertlyUser");
   const purchases = readConcertlyPurchases();
 
   return {
-    orders: purchases.orders.filter((order) => order.customer === customer),
-    tickets: purchases.tickets.filter((ticket) => ticket.customer === customer),
+    orders: purchases.orders.filter(
+      (order) => (order.customerAccount || order.customer) === customerAccount,
+    ),
+    tickets: purchases.tickets.filter(
+      (ticket) => (ticket.customerAccount || ticket.customer) === customerAccount,
+    ),
   };
 }
 
@@ -74,13 +99,13 @@ function saveConcertlyPurchase(order, tickets) {
 }
 
 function saveCurrentCustomerPurchases(orders, tickets) {
-  const customer = localStorage.getItem("concertlyUser");
+  const customerAccount = localStorage.getItem("concertlyUser");
   const purchases = readConcertlyPurchases();
   purchases.orders = purchases.orders.filter(
-    (order) => order.customer !== customer,
+    (order) => (order.customerAccount || order.customer) !== customerAccount,
   );
   purchases.tickets = purchases.tickets.filter(
-    (ticket) => ticket.customer !== customer,
+    (ticket) => (ticket.customerAccount || ticket.customer) !== customerAccount,
   );
   purchases.orders.push(...orders);
   purchases.tickets.push(...tickets);
@@ -89,3 +114,5 @@ function saveCurrentCustomerPurchases(orders, tickets) {
     JSON.stringify(purchases),
   );
 }
+
+readConcertlyPurchases();
