@@ -11,9 +11,7 @@ let showAllRecentOrders = false;
 let showAllRevenue = false;
 
 function getCompletedOrders() {
-  return MOCK_ORDERS.filter(
-    order => order.isPurchase && order.status === "Paid",
-  );
+  return MOCK_ORDERS.filter(order => order.status === "Paid");
 }
 
 function renderSalesStats() {
@@ -34,11 +32,6 @@ function renderUpcomingConcerts() {
   const list = document.getElementById("upcoming-concerts-list");
   if (!list) return;
 
-  const soldByConcert = getCompletedOrders().reduce((totals, order) => {
-    totals[order.concert] =
-      (totals[order.concert] || 0) + (Number(order.ticketCount) || 0);
-    return totals;
-  }, {});
   const now = new Date();
   const upcoming = sortedByDate(MOCK_CONCERTS).filter(concert => {
     const status = getConcertStatus(concert, now);
@@ -47,7 +40,7 @@ function renderUpcomingConcerts() {
 
   list.innerHTML = upcoming.slice(0, 4).map(c => {
     const capacity = Math.max(Number(c.ticketCapacity) || 0, 1);
-    const sold = Math.min(Math.max(soldByConcert[c.title] || 0, 0), capacity);
+    const sold = Math.min(Math.max(Number(c.ticketsSold) || 0, 0), capacity);
     const remaining = capacity - sold;
     const soldPercent = Math.round((sold / capacity) * 100);
     const status = getConcertStatus(c);
@@ -150,7 +143,7 @@ function renderRecentOrders() {
   const tbody = document.getElementById("recent-orders-body");
   if (!tbody) return;
 
-  const orders = MOCK_ORDERS.filter(order => order.isPurchase).sort(
+  const orders = MOCK_ORDERS.slice().sort(
     (a, b) => new Date(b.date) - new Date(a.date),
   );
   const pageCount = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
@@ -160,7 +153,7 @@ function renderRecentOrders() {
     ? orders
     : orders.slice(start, start + ORDERS_PER_PAGE);
 
-  tbody.innerHTML = visibleOrders.length ? visibleOrders.map(order => `
+  tbody.innerHTML = visibleOrders.map(order => `
     <tr>
       <td class="text-muted">${order.orderId}</td>
       <td>${order.customer}</td>
@@ -169,15 +162,13 @@ function renderRecentOrders() {
       <td class="text-muted">${order.date}</td>
       <td><span class="badge ${ORDER_STATUS_BADGE_CLASS[order.status] || "badge-gray"}">${order.status}</span></td>
     </tr>
-  `).join("") : '<tr><td colspan="6" class="text-muted">No customer orders yet.</td></tr>';
+  `).join("");
 
   const caption = document.getElementById("recent-orders-caption");
   if (caption) {
-    caption.textContent = orders.length === 0
-      ? "No customer orders yet"
-      : showAllRecentOrders
-        ? `Showing 1–${orders.length} of ${orders.length} orders`
-        : `Showing ${start + 1}–${Math.min(start + ORDERS_PER_PAGE, orders.length)} of ${orders.length} orders`;
+    caption.textContent = showAllRecentOrders
+      ? `Showing 1–${orders.length} of ${orders.length} orders`
+      : `Showing ${start + 1}–${Math.min(start + ORDERS_PER_PAGE, orders.length)} of ${orders.length} orders`;
   }
   const viewAllButton = document.getElementById("recent-orders-view-all");
   if (viewAllButton) viewAllButton.textContent = showAllRecentOrders ? "Show recent" : "View all";

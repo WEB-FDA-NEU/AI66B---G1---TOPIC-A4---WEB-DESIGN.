@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/theme-init.js"></script>
     <title>Concertly - Live Music & Stadium Tours</title>
     <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/variables.css" />
@@ -335,6 +336,19 @@
         color: var(--color-text);
         font-size: var(--font-sm);
       }
+      @media (max-width: 600px) {
+        .hero-title {
+          font-size: clamp(1.35rem, 6vw, 1.75rem);
+        }
+        .hero-desc {
+          font-size: var(--font-sm);
+          line-height: 1.45;
+          margin-bottom: var(--space-md);
+        }
+        .hero-offer strong {
+          font-size: clamp(1.125rem, 5vw, 1.5rem);
+        }
+      }
     </style>
   </head>
   <body>
@@ -398,7 +412,12 @@
               <a href="pages/auth/login.html" data-auth-login role="menuitem"
                 >Sign in</a
               >
-              <a href="pages/auth/register.html" role="menuitem">Sign up</a>
+              <a
+                href="pages/auth/register.html"
+                data-auth-register
+                role="menuitem"
+                >Sign up</a
+              >
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../../js/theme-init.js"></script>
     <title>Digital Ticket — Concertly</title>
     <link rel="stylesheet" href="../../css/reset.css" />
     <link rel="stylesheet" href="../../css/variables.css" />
@@ -111,8 +112,7 @@
           (item) => item.id === ticket.id,
         );
         const status = TICKET_STATUS_MAP[ticket.status];
-        const ticketHolder =
-          ticket.customer || localStorage.getItem("concertlyUser");
+        const ticketHolder = localStorage.getItem("concertlyUser");
         const qrPayload = encodeURIComponent(ticket.id);
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrPayload}`;
 

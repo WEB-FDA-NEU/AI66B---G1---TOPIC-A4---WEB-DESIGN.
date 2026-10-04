@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../../js/theme-init.js"></script>
     <title>Explore Concerts | Concertly</title>
     <link rel="stylesheet" href="../../css/reset.css" />
     <link rel="stylesheet" href="../../css/variables.css" />
@@ -72,36 +73,6 @@
         border-color: var(--color-primary);
         color: var(--color-text);
         outline: none;
-      }
-      .search-box {
-        flex: 1;
-        min-width: 260px;
-        max-width: 400px;
-        position: relative;
-      }
-      .search-icon {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 16px;
-        height: 16px;
-        color: var(--color-text-muted);
-        pointer-events: none;
-      }
-      .search-input {
-        width: 100%;
-        padding: 10px 16px 10px 40px;
-        background-color: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        color: var(--color-text);
-        font-size: var(--font-sm);
-        outline: none;
-        transition: border-color 0.2s ease;
-      }
-      .search-input:focus {
-        border-color: var(--color-primary);
       }
       .category-pills {
         display: flex;
@@ -218,6 +189,38 @@
             <a href="../404.html" class="hover-glow" data-nav>Support</a>
             <span class="nav-indicator"></span>
           </nav>
+          <form
+            class="header-search"
+            action="index.html"
+            method="get"
+            role="search"
+          >
+            <input
+              class="header-search-input"
+              type="search"
+              name="search"
+              placeholder="Find your next live show..."
+              aria-label="Search concerts"
+            />
+            <button
+              class="header-search-button"
+              type="submit"
+              aria-label="Search"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-4-4"></path>
+              </svg>
+            </button>
+          </form>
           <div class="site-auth">
             <button
               class="avatar-button"
@@ -251,7 +254,7 @@
     </div>
 
     <main class="container">
-      <!-- Filter & Search Controls -->
+      <!-- Filter Controls -->
       <section class="filter-bar">
         <div class="category-pills" id="category-filters">
           <button class="pill-btn active" data-category="all">
@@ -261,26 +264,6 @@
           <button class="pill-btn" data-category="R&B">R&B</button>
           <button class="pill-btn" data-category="Hip-Hop">Hip-Hop</button>
           <button class="pill-btn" data-category="K-Pop">K-Pop</button>
-        </div>
-        <div class="search-box">
-          <svg
-            class="search-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="7"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input
-            type="text"
-            id="search-input"
-            class="search-input"
-            placeholder="Search artist, tour or city..."
-          />
         </div>
         <div class="filter-tools">
           <span class="result-count" id="result-count"></span>
@@ -327,7 +310,7 @@
       let sortMode = "date";
 
       const grid = document.getElementById("explore-grid");
-      const searchInput = document.getElementById("search-input");
+      const headerSearchInput = document.querySelector(".header-search-input");
       const filterButtons = document.querySelectorAll(
         "#category-filters .pill-btn",
       );
@@ -335,7 +318,7 @@
       const statusSelect = document.getElementById("status-select");
       const clearFiltersButton = document.getElementById("clear-filters");
       const resultCount = document.getElementById("result-count");
-      if (searchInput) searchInput.value = searchQuery;
+      if (headerSearchInput) headerSearchInput.value = searchQuery;
 
       function renderConcerts() {
         if (typeof MOCK_CONCERTS === "undefined" || !grid) return;
@@ -455,14 +438,6 @@
         renderConcerts();
       });
 
-      // Search input listener
-      if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
-          searchQuery = e.target.value.trim();
-          renderConcerts();
-        });
-      }
-
       sortSelect.addEventListener("change", () => {
         sortMode = sortSelect.value;
         renderConcerts();
@@ -473,7 +448,7 @@
         searchQuery = "";
         activeView = "all";
         sortMode = "date";
-        searchInput.value = "";
+        headerSearchInput.value = "";
         statusSelect.value = "all";
         sortSelect.value = "date";
         filterButtons.forEach((btn) => {

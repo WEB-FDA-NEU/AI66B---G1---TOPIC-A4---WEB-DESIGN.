@@ -266,20 +266,12 @@ button:focus-visible {
 .digital-ticket-title {
 	margin: 0 0 20px;
 	font-size: 30px;
-	text-align: center;
 }
 
 .digital-ticket-layout {
 	display: grid;
-	width: 100%;
 	max-width: 1000px;
-	margin-inline: auto;
 	gap: 16px;
-}
-
-.digital-ticket-layout > .btn {
-	display: table;
-	margin: 16px auto 0;
 }
 
 .digital-ticket-card {

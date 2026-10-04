@@ -1,25 +1,167 @@
 /* Responsive enhancements for Concert Screens */
+.mobile-nav-icon {
+  display: none;
+}
+
+.mobile-nav-highlight {
+  display: none;
+}
+
+.site-nav .mobile-only-nav-item {
+  display: none;
+}
+
+.mobile-header-controls {
+  display: contents;
+}
+
 @media (max-width: 768px) {
+  body {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+
   .site-header .container {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-sm) var(--space-md);
+    padding: 14px 0;
+  }
+
+  .site-logo {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .mobile-header-controls {
+    display: flex;
+    grid-column: 2;
+    grid-row: 1;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .site-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .header-actions {
-    gap: var(--space-md);
-    flex-wrap: wrap;
+    display: contents;
+  }
+
+  .site-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0;
+    padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .mobile-nav-highlight {
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    left: 0;
+    z-index: 0;
+    display: block;
+    border: 1px solid rgba(255, 79, 154, 0.16);
+    border-radius: 18px;
+    background: rgba(255, 79, 154, 0.09);
+    box-shadow: 0 4px 16px rgba(255, 79, 154, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 180ms ease;
+  }
+
+  .site-nav a {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: 56px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 4px 4px;
+    border-radius: 0;
+    color: var(--color-text-secondary);
+    font-size: 10px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .site-nav .mobile-only-nav-item {
+    display: flex;
+  }
+
+  .site-nav a.active {
+    color: var(--color-primary);
+    background: transparent;
+    font-weight: 700;
+  }
+
+  .site-nav a .mobile-nav-icon {
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-nav a.active .mobile-nav-icon {
+    transform: translateY(-2px) scale(1.08);
+  }
+
+  .mobile-nav-icon {
+    display: flex;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-nav-icon svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .site-nav a.active::after,
+  .nav-indicator {
+    display: none;
   }
 
   .header-search {
     position: static;
-    order: 3;
+    grid-column: 1 / -1;
+    grid-row: 2;
     width: 100%;
+    flex: 0 0 auto;
     transform: none;
   }
 
   .site-auth {
-    margin-left: auto;
+    width: auto;
+    margin-left: 0;
+  }
+
+  .auth-menu {
+    top: calc(100% + 12px);
+    right: 0;
+    left: auto;
   }
 
   .hero {
@@ -28,6 +170,10 @@
   }
 
   .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .detail-title {
     font-size: 2.2rem;
   }
 
@@ -48,11 +194,6 @@
   .filter-bar {
     flex-direction: column-reverse;
     align-items: stretch;
-  }
-
-  .search-box {
-    max-width: 100%;
-    width: 100%;
   }
 
   .filter-tools {
@@ -81,7 +222,26 @@
     gap: var(--space-xl);
   }
 
+  .main-layout > aside {
+    grid-row: 1;
+  }
+
+  .main-layout > div {
+    grid-row: 2;
+  }
+
   .detail-hero {
-    min-height: 40vh;
+    min-height: 75vh;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-slide > .container,
+  .detail-hero > .hero-content {
+    min-height: 216px;
+  }
+
+  .detail-title {
+    font-size: clamp(1.35rem, 6vw, 1.75rem);
   }
 }
