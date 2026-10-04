@@ -39,16 +39,11 @@ gap:24px;
 
 .checkout-card{
 
-background:
-linear-gradient(
-145deg,
-#191925,
-#11111a
-);
+background: var(--color-surface);
 
 
 border:
-1px solid rgba(255,255,255,.08);
+1px solid var(--color-border);
 
 
 border-radius:22px;
@@ -57,8 +52,14 @@ border-radius:22px;
 padding:30px;
 
 
-box-shadow:
-0 20px 50px rgba(0,0,0,.25);
+box-shadow: var(--shadow-md);
+
+}
+
+
+.checkout-container > .payment-card{
+
+margin-top:24px;
 
 }
 
@@ -104,14 +105,14 @@ padding:15px;
 border-radius:12px;
 
 
-background:#22222d;
+background:var(--color-bg-secondary);
 
 
 border:
-1px solid rgba(255,255,255,.1);
+1px solid var(--color-border);
 
 
-color:white;
+color:var(--color-text);
 
 
 font-size:16px;
