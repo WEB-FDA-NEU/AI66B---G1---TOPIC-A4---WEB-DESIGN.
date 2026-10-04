@@ -7,6 +7,10 @@
   display: none;
 }
 
+.site-nav .mobile-only-nav-item {
+  display: none;
+}
+
 .mobile-header-controls {
   display: contents;
 }
@@ -52,7 +56,7 @@
     left: 0;
     z-index: 1000;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: stretch;
     gap: 0;
     padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
@@ -97,6 +101,10 @@
     font-size: 10px;
     font-weight: 500;
     text-align: center;
+  }
+
+  .site-nav .mobile-only-nav-item {
+    display: flex;
   }
 
   .site-nav a.active {
@@ -186,11 +194,6 @@
   .filter-bar {
     flex-direction: column-reverse;
     align-items: stretch;
-  }
-
-  .search-box {
-    max-width: 100%;
-    width: 100%;
   }
 
   .filter-tools {

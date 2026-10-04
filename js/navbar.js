@@ -19,12 +19,56 @@ function initMobileNav() {
   const nav = actions?.querySelector(".site-nav");
   if (nav) {
     const icons = {
+      "My Tickets":
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg>',
+      "My Orders":
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
       Home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>',
       Explore:
         '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/></svg>',
       Support:
         '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.2 1.8c-1.2 1-1.8 1.3-1.8 2.7M12 17h.01"/></svg>',
     };
+
+    const homeLink = nav.querySelector('a[data-nav]:not(.mobile-only-nav-item)');
+    if (homeLink && !nav.querySelector(".mobile-only-nav-item")) {
+      const homeUrl = new URL(
+        actions.dataset.home || "index.html",
+        window.location.href,
+      );
+      const ticketsUrl = new URL("pages/me/tickets.html", homeUrl);
+      const ordersUrl = new URL("pages/me/orders.html", homeUrl);
+      const currentPath = window.location.pathname;
+      const accountNavItems = [
+        {
+          label: "My Tickets",
+          href: ticketsUrl.href,
+          active:
+            currentPath === ticketsUrl.pathname ||
+            currentPath.endsWith("/pages/me/ticket-detail.html"),
+        },
+        {
+          label: "My Orders",
+          href: ordersUrl.href,
+          active:
+            currentPath === ordersUrl.pathname ||
+            currentPath.endsWith("/pages/me/order-detail.html"),
+        },
+      ];
+
+      accountNavItems.forEach(({ label, href, active }) => {
+        const link = document.createElement("a");
+        link.href = href;
+        link.className = "hover-glow mobile-only-nav-item";
+        link.dataset.nav = "";
+        link.textContent = label;
+        if (active) {
+          link.classList.add("active");
+          link.setAttribute("aria-current", "page");
+        }
+        nav.insertBefore(link, homeLink);
+      });
+    }
 
     nav.querySelectorAll("a[data-nav]").forEach((link) => {
       const label = link.textContent.trim();
@@ -91,7 +135,9 @@ function initNavIndicator() {
   if (!nav) return;
 
   const indicator = nav.querySelector(".nav-indicator");
-  const links = nav.querySelectorAll("a[data-nav]");
+  const links = nav.querySelectorAll(
+    "a[data-nav]:not(.mobile-only-nav-item)",
+  );
   if (!indicator || !links.length) return;
 
   const moveIndicatorTo = (el) => {
