@@ -12,6 +12,20 @@ class HoldRequest(BaseModel):
     seat_ids: list[int] = Field(min_length=1, max_length=8)
 
 
+class CheckoutRequest(BaseModel):
+    reservation_id: UUID
+    payment_method: str
+
+
+class CancelRequest(BaseModel):
+    reason: Optional[str] = Field(default=None, max_length=500)
+
+
+class CheckInRequest(BaseModel):
+    ticket_code: str = Field(min_length=1, max_length=64)
+
+
+# Money columns are whole-unit NUMERIC(12,0); they are declared int so JSON carries plain numbers.
 class SeatOut(BaseModel):
     id: int
     zone_id: int
@@ -29,11 +43,6 @@ class ReservationOut(BaseModel):
     seconds_left: int
     total_amount: int
     seats: list[SeatOut]
-
-
-class CheckoutRequest(BaseModel):
-    reservation_id: UUID
-    payment_method: str
 
 
 class TicketOut(BaseModel):
