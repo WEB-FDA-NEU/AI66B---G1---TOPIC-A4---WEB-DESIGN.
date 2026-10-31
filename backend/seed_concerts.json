@@ -1,0 +1,310 @@
+[
+ {
+  "id": 1,
+  "slug": "c1",
+  "title": "Eternal Sunshine Tour 2026",
+  "artist": "Ariana Grande",
+  "date": "2026-11-20",
+  "time": "20:00",
+  "location": "Madison Square Garden, New York, USA",
+  "poster": "https://media.vogue.co.jp/photos/696ce3e747fe9213e055c6e5/1:1/w_1800,h_1800,c_limit/7-ARIANA-GRANDE-voguejapan.jpg",
+  "description": "Experience Ariana Grande live on stage with her chart-topping global hits, breathtaking vocals, and an immersive stage production.",
+  "zones": [
+   {
+    "name": "Standard Tier 2",
+    "price": 80,
+    "soldOut": false
+   },
+   {
+    "name": "Standard Tier 1",
+    "price": 150,
+    "soldOut": false
+   },
+   {
+    "name": "VIP Diamond Experience",
+    "price": 350,
+    "soldOut": false
+   }
+  ]
+ },
+ {
+  "id": 11,
+  "slug": "c11",
+  "title": "The Midnight Echoes Tour",
+  "artist": "Cortis",
+  "date": "2027-02-14",
+  "time": "20:00",
+  "location": "Royal Albert Hall, London, UK",
+  "poster": "https://images.squarespace-cdn.com/content/v1/605c6aa462ce2d326bb1cb7b/1786647706446-0N3H170KONFOADS2YYWM/2.jpg",
+  "description": "An intimate night of deep synthwave, evocative vocals, and atmospheric live arrangements for an unforgettable Valentine's concert.",
+  "zones": [
+   {
+    "name": "Balcony Seated",
+    "price": 60,
+    "soldOut": false
+   },
+   {
+    "name": "Front Row Orchestra",
+    "price": 140,
+    "soldOut": false
+   },
+   {
+    "name": "Midnight VIP Pass",
+    "price": 260,
+    "soldOut": false
+   }
+  ]
+ },
+ {
+  "id": 2,
+  "slug": "c2",
+  "title": "After Hours Til Dawn Stadium Tour",
+  "artist": "The Weeknd",
+  "date": "2026-12-05",
+  "time": "19:30",
+  "location": "SoFi Stadium, Los Angeles, USA",
+  "poster": "https://m.media-amazon.com/images/I/51akaUj0S6L._AC_UF894,1000_QL80_.jpg",
+  "description": "An electric stadium experience featuring The Weeknd's cinematic visuals, synth-pop classics, and hypnotic R&B anthems.",
+  "zones": [
+   {
+    "name": "General Admission Standing",
+    "price": 90,
+    "soldOut": false
+   },
+   {
+    "name": "Cat 1 Seated",
+    "price": 180,
+    "soldOut": false
+   },
+   {
+    "name": "VIP After Hours Lounge",
+    "price": 420,
+    "soldOut": true
+   }
+  ]
+ },
+ {
+  "id": 3,
+  "slug": "c3",
+  "title": "Circus Maximus World Tour",
+  "artist": "Travis Scott",
+  "date": "2026-10-18",
+  "time": "20:30",
+  "location": "Allianz Arena, Munich, Germany",
+  "poster": "https://static.wixstatic.com/media/57e354_bc294554b9b84f4da9015ff07a9e2813~mv2.jpg/v1/fill/w_1000,h_563,al_c,q_85,usm_0.66_1.00_0.01/57e354_bc294554b9b84f4da9015ff07a9e2813~mv2.jpg",
+  "description": "Brace yourself for pure adrenaline, heavy bass, and high-energy mosh pits as Travis Scott brings Utopia to life.",
+  "zones": [
+   {
+    "name": "Floor Standing Mosh",
+    "price": 75,
+    "soldOut": false
+   },
+   {
+    "name": "Balcony Seating",
+    "price": 120,
+    "soldOut": false
+   },
+   {
+    "name": "Cactus Jack VIP Pass",
+    "price": 300,
+    "soldOut": false
+   }
+  ]
+ },
+ {
+  "id": 4,
+  "slug": "c4",
+  "title": "Ruby Solo Showcase - Live in Concert",
+  "artist": "Jennie",
+  "date": "2026-11-28",
+  "time": "19:00",
+  "location": "Tokyo Dome, Tokyo, Japan",
+  "poster": "https://www.acfc.com.vn/acfc_wp/wp-content/uploads/2026/01/image-20.png",
+  "description": "The global fashion and music icon Jennie takes the spotlight with sensational solo performances, dazzling choreography, and chic visuals.",
+  "zones": [
+   {
+    "name": "General Floor Standing",
+    "price": 85,
+    "soldOut": false
+   },
+   {
+    "name": "Lower Bowl Seated",
+    "price": 170,
+    "soldOut": false
+   },
+   {
+    "name": "OA VIP Soundcheck Package",
+    "price": 380,
+    "soldOut": false
+   }
+  ]
+ },
+ {
+  "id": 5,
+  "slug": "c5",
+  "title": "Alter Ego Exclusive Live Experience",
+  "artist": "Lisa",
+  "date": "2026-12-15",
+  "time": "20:00",
+  "location": "Rajamangala National Stadium, Bangkok, Thailand",
+  "poster": "https://kenh14cdn.com/203336854389633024/2021/8/29/title-16302503606451337225511.jpeg",
+  "description": "Witness Lisa's explosive stage presence, fierce rap verses, and electrifying choreography on her milestone solo world tour.",
+  "zones": [
+   {
+    "name": "Rockstar Standing Zone",
+    "price": 95,
+    "soldOut": false
+   },
+   {
+    "name": "Tier 1 Center Seated",
+    "price": 200,
+    "soldOut": false
+   },
+   {
+    "name": "LLOUD Ultimate VIP Meet & Greet",
+    "price": 450,
+    "soldOut": true
+   }
+  ]
+ },
+ {
+  "id": 6,
+  "slug": "c6",
+  "title": "The Eras Tour",
+  "artist": "Taylor Swift",
+  "date": "2026-11-14",
+  "time": "19:00",
+  "location": "Wembley Stadium, London, UK",
+  "poster": "https://s2.r29static.com/bin/entry/4b0/720x864,85/2218651/image.webp",
+  "description": "Experience every era of Taylor Swift's historic discography in a breathtaking, multi-hour stadium masterpiece.",
+  "zones": [
+   {
+    "name": "Standard Floor GA",
+    "price": 95,
+    "soldOut": false
+   },
+   {
+    "name": "Lower Bowl Reserved",
+    "price": 220,
+    "soldOut": false
+   },
+   {
+    "name": "Karma Is My Boyfriend VIP",
+    "price": 490,
+    "soldOut": true
+   }
+  ]
+ },
+ {
+  "id": 7,
+  "slug": "c7",
+  "title": "24K Magic World Tour",
+  "artist": "Bruno Mars",
+  "date": "2026-12-12",
+  "time": "20:00",
+  "location": "Singapore National Stadium, Singapore",
+  "poster": "https://retropopmagazine.com/wp-content/uploads/2026/01/Bruno-Mars-The-Romantic-I-Just-Might-Press-Handout-2026-4.jpeg",
+  "description": "An explosive night of funk, soul, and pure pop showmanship brought to life by Bruno Mars and the Hooligans.",
+  "zones": [
+   {
+    "name": "Silver Tribune",
+    "price": 85,
+    "soldOut": false
+   },
+   {
+    "name": "Gold Standing Pit",
+    "price": 180,
+    "soldOut": false
+   },
+   {
+    "name": "24K Magic VIP Experience",
+    "price": 390,
+    "soldOut": false
+   }
+  ]
+ },
+ {
+  "id": 8,
+  "slug": "c8",
+  "title": "Justice World Tour",
+  "artist": "Justin Bieber",
+  "date": "2026-12-24",
+  "time": "19:30",
+  "location": "Mercedes-Benz Arena, Berlin, Germany",
+  "poster": "https://cdn2.tuoitre.vn/thumb_w/730/471584752817336320/2026/2/4/49e12861b96737396e76-1770177690443746537378.jpg",
+  "description": "Celebrate Christmas Eve with Justin Bieber performing massive anthems from Justice and his record-breaking catalog.",
+  "zones": [
+   {
+    "name": "General Admission",
+    "price": 75,
+    "soldOut": false
+   },
+   {
+    "name": "Belieber Standing Pit",
+    "price": 160,
+    "soldOut": false
+   },
+   {
+    "name": "Ghost VIP Lounge",
+    "price": 350,
+    "soldOut": false
+   }
+  ]
+ },
+ {
+  "id": 9,
+  "slug": "c9",
+  "title": "Love Yourself: Speak Yourself Tour",
+  "artist": "BTS",
+  "date": "2027-01-09",
+  "time": "18:30",
+  "location": "Seoul Olympic Stadium, Seoul, South Korea",
+  "poster": "https://m.media-amazon.com/images/M/MV5BYzU5NjA3Y2YtY2UwZi00ZDMwLWE5NjAtOTljNTA4NTI4ZjYyXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+  "description": "The historic stadium tour of BTS featuring synchronized choreography, stunning visual stages, and anthems of self-love.",
+  "zones": [
+   {
+    "name": "CAT 3 Seating",
+    "price": 90,
+    "soldOut": false
+   },
+   {
+    "name": "Soundcheck Standing",
+    "price": 280,
+    "soldOut": false
+   },
+   {
+    "name": "ARMY Ultimate VIP Pass",
+    "price": 550,
+    "soldOut": true
+   }
+  ]
+ },
+ {
+  "id": 10,
+  "slug": "c10",
+  "title": "ACT III: M.O.T.T.E World Tour",
+  "artist": "G-Dragon",
+  "date": "2027-01-22",
+  "time": "20:00",
+  "location": "Kyocera Dome Osaka, Osaka, Japan",
+  "poster": "https://vcdn1-giaitri.vnecdn.net/2025/11/14/G-dragon-1763088129-2463-1763088149.jpg?w=1020&h=0&q=100&dpr=2&fit=crop&s=4m6EzLXVDe4_2PRvpE-OQA",
+  "description": "Witness the sheer magnetism and avant-garde artistry of G-Dragon in a dramatic, crimson-lit live performance.",
+  "zones": [
+   {
+    "name": "Standard Tier",
+    "price": 85,
+    "soldOut": false
+   },
+   {
+    "name": "Coup D'Etat Pit",
+    "price": 210,
+    "soldOut": false
+   },
+   {
+    "name": "One of a Kind VIP",
+    "price": 420,
+    "soldOut": false
+   }
+  ]
+ }
+]
