@@ -114,3 +114,108 @@ def test_stress_many_users_random_seats_no_double_booking(db, concert, seat_ids)
     assert_consistent()
 
 
+def test_concurrent_checkout_of_same_reservation_creates_one_order(db, users, concert, seat_ids):
+    for _ in range(REPEAT):
+        view = res_svc.hold_seats(db, users["a"], concert, [seat_ids[0], seat_ids[1]])
+        results = race([lambda s: checkout_svc.checkout(s, users["a"], view.id, "card") for _ in range(8)])
+        assert not failures(results), [str(f) for f in failures(results)]
+        assert len({o["id"] for o in wins(results)}) == 1  # idempotent: everyone sees the same order
+        assert_consistent()
+        orders_svc.cancel_order(db, users["a"], wins(results)[0]["id"])  # free the seats for the next round
+    assert scalar("SELECT count(*) FROM orders") == REPEAT
+
+
+def test_checkout_racing_with_expiry_sweeper_never_sells_unheld_seats(db, users, concert, seat_ids):
+    for _ in range(REPEAT):
+        view = res_svc.hold_seats(db, users["a"], concert, [seat_ids[0]])
+        expire_reservation(view.id)
+        results = race([
+            lambda s: checkout_svc.checkout(s, users["a"], view.id, "card"),
+            lambda s: res_svc.expire_stale_holds(s),
+            lambda s: res_svc.hold_seats(s, users["b"], concert, [seat_ids[0]]),
+        ])
+        assert not any(kind == "ok" and isinstance(v, dict) for kind, v in results), "expired hold was paid"
+        assert_consistent()
+        with engine.begin() as conn:
+            conn.execute(text("UPDATE reservations SET status='cancelled' WHERE status='active'"))
+            conn.execute(text("UPDATE seats SET status='available', held_until=NULL, reservation_id=NULL"))
+
+
+def test_buyer_checkout_vs_other_user_grabbing_expired_seat_has_single_owner(db, users, concert, seat_ids):
+    """A's hold lapses a moment before A pays; B tries to take the same seat. Whoever the
+    DB serialises first wins, but the seat must end up owned by exactly one person."""
+    for _ in range(REPEAT):
+        view = res_svc.hold_seats(db, users["a"], concert, [seat_ids[0]])
+        expire_reservation(view.id)
+        results = race([
+            lambda s: checkout_svc.checkout(s, users["a"], view.id, "card"),
+            lambda s: res_svc.hold_seats(s, users["b"], concert, [seat_ids[0]]),
+        ])
+        owners = scalar("SELECT count(*) FROM seats WHERE id=:i AND status IN ('held','sold')", i=seat_ids[0])
+        assert owners <= 1 and scalar("SELECT count(*) FROM tickets") == 0
+        assert_consistent()
+        with engine.begin() as conn:
+            conn.execute(text("UPDATE reservations SET status='cancelled' WHERE status='active'"))
+            conn.execute(text("UPDATE seats SET status='available', held_until=NULL, reservation_id=NULL"))
+        assert results
+
+
+def test_concurrent_cancel_refunds_once(db, users, concert, seat_ids):
+    view = res_svc.hold_seats(db, users["a"], concert, [seat_ids[0], seat_ids[1]])
+    order = checkout_svc.checkout(db, users["a"], view.id, "card")
+    results = race([lambda s: orders_svc.cancel_order(s, users["a"], order["id"]) for _ in range(6)])
+    assert len(wins(results)) == 1
+    assert {e.code for e in failures(results)} == {"already_cancelled"}
+    assert scalar("SELECT refund_amount FROM orders") == 2000
+    assert scalar("SELECT count(*) FROM tickets WHERE status='refunded'") == 2
+    assert_consistent()
+
+
+def test_cancel_racing_with_rebuy_of_freed_seat(db, users, concert, seat_ids):
+    view = res_svc.hold_seats(db, users["a"], concert, [seat_ids[0]])
+    order = checkout_svc.checkout(db, users["a"], view.id, "card")
+    results = race([
+        lambda s: orders_svc.cancel_order(s, users["a"], order["id"]),
+        lambda s: res_svc.hold_seats(s, users["b"], concert, [seat_ids[0]]),
+    ])
+    assert_consistent()
+    assert results[0][0] == "ok"
+    # B either lost the race (seat still sold) or won it after the refund; never both owning it
+    assert scalar("SELECT count(*) FROM seats WHERE id=:i AND status='held'", i=seat_ids[0]) == (1 if results[1][0] == "ok" else 0)
+
+
+def test_concurrent_check_in_admits_ticket_once(db, users, concert, seat_ids):
+    view = res_svc.hold_seats(db, users["a"], concert, [seat_ids[0]])
+    order = checkout_svc.checkout(db, users["a"], view.id, "card")
+    code = order["tickets"][0]["ticket_code"]
+    results = race([lambda s: orders_svc.check_in_ticket(s, users["staff"], code) for _ in range(8)])
+    assert len(wins(results)) == 1
+    assert {e.code for e in failures(results)} == {"ticket_already_used"}
+
+
+def test_concurrent_sweepers_do_not_conflict(db, users, concert, seat_ids):
+    for i in range(6):
+        u = make_user(db, f"sw{i}@test.dev")
+        expire_reservation(res_svc.hold_seats(db, u, concert, [seat_ids[i]]).id)
+    results = race([lambda s: res_svc.expire_stale_holds(s) for _ in range(6)])
+    assert sum(v for _, v in results) == 6  # each seat released by exactly one sweeper
+    assert scalar("SELECT count(*) FROM seats WHERE status='held'") == 0
+    assert_consistent()
+
+
+def test_full_flow_many_buyers_sell_every_seat_exactly_once(db, concert, seat_ids):
+    """15 buyers each try to hold-and-pay for a random seat pair; no seat is ever sold twice
+    and the sum of paid orders equals the sold seats."""
+    rng = random.Random(11)
+    users = [make_user(db, f"f{i}@test.dev") for i in range(15)]
+
+    def buy(session, user, ids):
+        view = res_svc.hold_seats(session, user, concert, ids)
+        return checkout_svc.checkout(session, user, view.id, "card")
+
+    results = race([lambda s, u=u, ids=rng.sample(seat_ids, 2): buy(s, u, ids) for u in users])
+    sold = sum(len(o["tickets"]) for o in wins(results))
+    assert scalar("SELECT count(*) FROM seats WHERE status='sold'") == sold
+    assert scalar("SELECT count(*) FROM tickets") == sold
+    assert scalar("SELECT coalesce(sum(total_amount),0) FROM orders") == scalar("SELECT coalesce(sum(price),0) FROM tickets")
+    assert_consistent()
