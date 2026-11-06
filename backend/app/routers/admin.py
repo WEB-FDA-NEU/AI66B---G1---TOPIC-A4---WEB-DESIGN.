@@ -7,8 +7,17 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import require_admin
-from app.schemas import AdminOrderDetailOut, AdminOrderPageOut, AdminStatsOut
+from app.deps import CurrentUser
+from app.schemas import (
+    AdminCheckInRequest,
+    AdminOrderDetailOut,
+    AdminOrderPageOut,
+    AdminStatsOut,
+    AttendeeListOut,
+    AttendeeOut,
+)
 from app.services import admin as svc
+from app.services import checkin as checkin_svc
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 
@@ -33,3 +42,13 @@ def list_orders(
 @router.get("/orders/{order_id}", response_model=AdminOrderDetailOut)
 def order_detail(order_id: int, db: Session = Depends(get_db)):
     return svc.get_order(db, order_id)
+
+
+@router.get("/concerts/{concert_id}/attendees", response_model=AttendeeListOut)
+def attendees(concert_id: int, db: Session = Depends(get_db)):
+    return checkin_svc.attendees(db, concert_id)
+
+
+@router.post("/checkin", response_model=AttendeeOut)
+def check_in(body: AdminCheckInRequest, db: Session = Depends(get_db), admin: CurrentUser = Depends(require_admin)):
+    return checkin_svc.check_in(db, admin.id, body.concertId, body.ticketId)
