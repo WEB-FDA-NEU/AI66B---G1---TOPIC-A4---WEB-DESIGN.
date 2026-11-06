@@ -56,12 +56,19 @@ class TicketOut(BaseModel):
     venue: str
     city: str
     starts_at: datetime
+    poster_url: Optional[str] = None
     zone: str
     row: str
     seat_number: int
     price: int
     status: str
     checked_in_at: Optional[datetime] = None
+    qr_data: Optional[str] = None
+
+
+class TicketDetailOut(TicketOut):
+    holder_name: str
+    qr_image: Optional[str] = None  # SVG data URI of qr_data; null unless the ticket is valid
 
 
 class OrderSummaryOut(BaseModel):
@@ -69,6 +76,10 @@ class OrderSummaryOut(BaseModel):
     order_number: int
     concert_id: int
     concert_title: str
+    artist: str
+    venue: str
+    city: str
+    poster_url: Optional[str] = None
     starts_at: datetime
     total_amount: int
     status: str
@@ -172,3 +183,19 @@ class AttendeeListOut(BaseModel):
     checked_in: int
     not_checked_in: int
     items: list[AttendeeOut]
+
+
+# ------------------------------------------------------------------- auth (login)
+
+class AuthUserOut(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    phone: Optional[str] = None
+    role: str
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: AuthUserOut
