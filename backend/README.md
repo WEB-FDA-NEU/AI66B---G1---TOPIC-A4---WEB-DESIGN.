@@ -18,7 +18,10 @@ If the API is not running, the ticket page falls back to the old zone + quantity
 
 ## Authentication
 
-Send `Authorization: Bearer <jwt>`. Tokens are HS256 JWTs signed with `JWT_SECRET` whose `sub`
+Sign in with `POST /api/auth/login` (form fields `username` = e-mail, `password`), which returns
+`{access_token, token_type, user}`; `GET /api/auth/me` returns the signed-in user. The frontend keeps
+the token in `localStorage.token` (`js/api.js`). Registration and password changes belong to the auth
+task (#47). Send `Authorization: Bearer <jwt>`. Tokens are HS256 JWTs signed with `JWT_SECRET` whose `sub`
 is the user's e-mail (`app/security.py`); the user and role are always re-read from the database.
 Missing/invalid/expired token or inactive user → **401**; a valid user without the right role → **403**.
 
@@ -35,9 +38,10 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | `GET /reservations/{id}` | Hold status and `seconds_left` |
 | `DELETE /reservations/{id}` | Release a hold |
 | `POST /checkout` `{reservation_id, payment_method}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
-| `GET /orders`, `GET /orders/{id}` | The caller's orders |
+| `POST /auth/login`, `GET /auth/me` | Sign in (OAuth2 password form) / current user |
+| `GET /orders/me` (alias `/orders`), `GET /orders/{id}` | The caller's orders (someone else's order → 404) |
 | `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
-| `GET /tickets`, `GET /tickets/{id}` | The caller's tickets |
+| `GET /tickets/me` (alias `/tickets`), `GET /tickets/{id}` | The caller's tickets. `qr_data` (the ticket code) is set only while the ticket is `valid`; the detail also returns `qr_image`, an SVG data URI rendered by the server |
 | `POST /tickets/check-in` `{ticket_code}` | Staff scan; a ticket can be admitted once |
 | `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts` |
 | `GET /admin/orders?status=&concert_id=&q=&page=&page_size=` | Admin: all orders with customer, newest first. `status`: `pending`, `paid`, `cancelled`, `failed`, `refunded`; `q` matches order number, customer e-mail/name, concert title/artist |

@@ -11,6 +11,7 @@ from app.schemas import (
     CheckoutRequest,
     OrderDetailOut,
     OrderSummaryOut,
+    TicketDetailOut,
     TicketOut,
 )
 from app.services import checkout as checkout_svc
@@ -24,6 +25,10 @@ def checkout(body: CheckoutRequest, db: Session = Depends(get_db), user: Current
     return checkout_svc.checkout(db, user.id, body.reservation_id, body.payment_method)
 
 
+# "/orders/me" and "/tickets/me" are the documented paths for the account pages; the bare
+# "/orders" and "/tickets" are kept for existing clients. Both are declared before the
+# "/{id}" routes so "me" is never parsed as an id.
+@router.get("/orders/me", response_model=list[OrderSummaryOut])
 @router.get("/orders", response_model=list[OrderSummaryOut])
 def my_orders(
     status: Optional[str] = Query(default=None, pattern="^(pending|paid|cancelled|failed)$"),
@@ -50,6 +55,7 @@ def cancel_order(
     return svc.cancel_order(db, user.id, order_id, body.reason if body else None)
 
 
+@router.get("/tickets/me", response_model=list[TicketOut])
 @router.get("/tickets", response_model=list[TicketOut])
 def my_tickets(
     status: Optional[str] = Query(default=None, pattern="^(valid|used|cancelled|refunded)$"),
@@ -66,6 +72,6 @@ def check_in(body: CheckInRequest, db: Session = Depends(get_db), user: CurrentU
     return svc.check_in_ticket(db, user.id, body.ticket_code)
 
 
-@router.get("/tickets/{ticket_id}", response_model=TicketOut)
+@router.get("/tickets/{ticket_id}", response_model=TicketDetailOut)
 def ticket_detail(ticket_id: int, db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)):
     return svc.get_ticket(db, user.id, ticket_id, user.role)
