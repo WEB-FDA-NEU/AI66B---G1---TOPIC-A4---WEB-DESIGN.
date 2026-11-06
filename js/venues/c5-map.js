@@ -81,13 +81,13 @@ sections:[
 {
 id:"c5-vip",
 
-name:"OA VIP Soundcheck Package",
+name:"LLOUD Ultimate VIP Meet & Greet",
 
-labelText:"VIP SOUNDCHECK",
+labelText:"VIP MEET & GREET",
 
-category:"OA VIP Soundcheck Package",
+category:"LLOUD Ultimate VIP Meet & Greet",
 
-price:"$380",
+price:"$450",
 
 
 shape:"polygon",
@@ -128,7 +128,7 @@ labelText:"CENTER PREMIUM",
 
 category:"Tier 1 Center Seated",
 
-price:"$170",
+price:"$200",
 
 
 shape:"polygon",
