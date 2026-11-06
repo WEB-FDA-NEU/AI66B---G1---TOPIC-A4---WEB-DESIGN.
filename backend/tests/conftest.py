@@ -18,6 +18,9 @@ if "test" not in TEST_URL.rsplit("/", 1)[-1].split("?")[0].lower():
 
 os.environ["DATABASE_URL"] = TEST_URL  # must happen before app.database is imported
 os.environ["DISABLE_SWEEPER"] = "1"
+os.environ["JWT_SECRET"] = "test-only-jwt-secret-not-used-anywhere-else"
+# The booking tests identify callers with the development X-User-Id header.
+os.environ["ALLOW_DEV_USER_HEADER"] = "1"
 
 from datetime import datetime, timedelta, timezone  # noqa: E402
 
@@ -128,3 +131,10 @@ def expire_reservation(reservation_id):
 def scalar(sql, **params):
     with engine.connect() as conn:
         return conn.execute(text(sql), params).scalar_one()
+
+
+def bearer(session, user_id):
+    """Authorization header with a real JWT for the given user."""
+    from app.security import create_access_token
+
+    return {"Authorization": f"Bearer {create_access_token(session.get(User, user_id).email)}"}
