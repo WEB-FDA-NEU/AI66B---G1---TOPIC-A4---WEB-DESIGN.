@@ -1,23 +1,30 @@
-// Thin client for the Concertly backend (backend/app). Used by ticket selection and checkout.
+// Thin client for the Concertly backend (backend/app). Used by ticket selection, checkout
+// and the account pages.
 //
 // Base URL: set window.CONCERTLY_API_BASE before this script to override.
-// Identity: there is no login API yet, so requests carry an X-User-Id header
-// (localStorage "concertlyUserId", default 1 = the seeded demo customer).
-// When real auth lands, only authHeaders() needs to change.
+// Identity: the JWT from POST /auth/login, kept in localStorage "token", is sent as
+// "Authorization: Bearer ...". For local development without logging in, a backend started
+// with ALLOW_DEV_USER_HEADER=1 also accepts localStorage "concertlyUserId" as X-User-Id.
 const ConcertlyAPI = (() => {
   const base = (window.CONCERTLY_API_BASE || "http://localhost:8000/api").replace(/\/$/, "");
+  const TOKEN_KEY = "token";
 
   function authHeaders() {
-    return { "X-User-Id": localStorage.getItem("concertlyUserId") || "1" };
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) return { Authorization: `Bearer ${token}` };
+    const devUserId = localStorage.getItem("concertlyUserId");
+    return devUserId ? { "X-User-Id": devUserId } : {};
   }
 
-  async function request(method, path, body) {
+  async function request(method, path, body, { form = false } = {}) {
     let response;
     try {
+      const headers = { ...authHeaders() };
+      if (body) headers["Content-Type"] = form ? "application/x-www-form-urlencoded" : "application/json";
       response = await fetch(base + path, {
         method,
-        headers: { ...authHeaders(), ...(body ? { "Content-Type": "application/json" } : {}) },
-        body: body ? JSON.stringify(body) : undefined,
+        headers,
+        body: body ? (form ? new URLSearchParams(body).toString() : JSON.stringify(body)) : undefined,
       });
     } catch (cause) {
       const error = new Error("Cannot reach the booking server.");
@@ -46,6 +53,26 @@ const ConcertlyAPI = (() => {
     release: (id) => request("DELETE", `/reservations/${id}`),
     checkout: (reservationId, paymentMethod) =>
       request("POST", "/checkout", { reservation_id: reservationId, payment_method: paymentMethod }),
+
+    // Session
+    login: (email, password) => request("POST", "/auth/login", { username: email, password }, { form: true }),
+    me: () => request("GET", "/auth/me"),
+    hasToken: () => Boolean(localStorage.getItem(TOKEN_KEY)),
+    saveSession(session) {
+      localStorage.setItem(TOKEN_KEY, session.access_token);
+      localStorage.setItem("concertlyUser", session.user.full_name);
+      localStorage.setItem("userRole", session.user.role);
+    },
+    clearSession() {
+      [TOKEN_KEY, "concertlyUser", "userRole"].forEach((key) => localStorage.removeItem(key));
+    },
+
+    // Account pages
+    myOrders: () => request("GET", "/orders/me"),
+    order: (id) => request("GET", `/orders/${encodeURIComponent(id)}`),
+    cancelOrder: (id, reason) => request("POST", `/orders/${encodeURIComponent(id)}/cancel`, reason ? { reason } : undefined),
+    myTickets: () => request("GET", "/tickets/me"),
+    ticket: (id) => request("GET", `/tickets/${encodeURIComponent(id)}`),
   };
 })();
 

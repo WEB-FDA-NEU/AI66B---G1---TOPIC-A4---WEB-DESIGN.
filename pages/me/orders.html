@@ -14,8 +14,7 @@
     <link rel="stylesheet" href="../../css/responsive.css" />
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/me.css" />
-    <script src="../../js/mock-data.js"></script>
-    <script src="../../js/purchases.js"></script>
+    <script src="../../js/api.js"></script>
     <script src="../../js/me.js"></script>
   </head>
   <body>
@@ -114,6 +113,8 @@
 
           <div class="order-cards" id="orderCards"></div>
 
+          <div id="loadState"></div>
+
           <div id="emptyState" class="empty" style="display: none">
             <h3>No orders in this status</h3>
             <p>Your Concertly orders will appear here.</p>
@@ -129,16 +130,18 @@
         { key: "paid", label: "Paid" },
         { key: "refunded", label: "Refunded" },
         { key: "cancelled", label: "Cancelled" },
+        { key: "failed", label: "Failed" },
       ];
       let activeFilter = "all";
+      let orders = [];
 
       function renderTabs() {
         const wrap = document.getElementById("filterTabs");
         wrap.innerHTML = FILTERS.map((f) => {
           const count =
             f.key === "all"
-              ? CUSTOMER_ORDERS.length
-              : CUSTOMER_ORDERS.filter((o) => o.status === f.key).length;
+              ? orders.length
+              : orders.filter((o) => orderDisplayStatus(o) === f.key).length;
           return `<button class="filter-tab ${f.key === activeFilter ? "is-active" : ""}" data-key="${f.key}">
       ${f.label} <span class="count">${count}</span>
     </button>`;
@@ -152,69 +155,76 @@
         });
       }
 
-      function renderOrders() {
-        const tbody = document.getElementById("orderTableBody");
-        const cardsWrap = document.getElementById("orderCards");
-        const table = document.getElementById("orderTable");
-        const empty = document.getElementById("emptyState");
+      function showOnly(element) {
+        const ids = ["orderTable", "orderCards", "emptyState", "loadState"];
+        ids.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = id === element ? (id === "emptyState" ? "block" : "") : "none";
+        });
+      }
 
-        const list = CUSTOMER_ORDERS.filter(
-          (o) => activeFilter === "all" || o.status === activeFilter,
-        )
-          .slice()
-          .sort((a, b) => new Date(b.orderedAt) - new Date(a.orderedAt));
+      function renderOrders() {
+        const list = orders.filter(
+          (o) => activeFilter === "all" || orderDisplayStatus(o) === activeFilter,
+        ); // the API already returns newest first
 
         if (list.length === 0) {
-          table.style.display = "none";
-          cardsWrap.style.display = "none";
-          empty.style.display = "block";
+          showOnly("emptyState");
           return;
         }
-        table.style.display = "";
-        cardsWrap.style.display = "";
-        empty.style.display = "none";
+        showOnly("orderTable");
+        document.getElementById("orderCards").style.display = "";
 
-        tbody.innerHTML = list
-          .map((order) => {
-            const concert = MOCK_CONCERTS.find(
-              (item) => item.id === order.concertId,
-            );
-            const status = ORDER_STATUS_MAP[order.status];
-            return `
+        const detailUrl = (o) => `order-detail.html?id=${encodeURIComponent(o.id)}`;
+        const meta = (o) =>
+          `${escapeHtml(o.artist)} · ${formatDateTime(o.starts_at)}<br>${escapeHtml(concertLocation(o))}`;
+
+        document.getElementById("orderTableBody").innerHTML = list
+          .map(
+            (o) => `
     <tr>
-      <td class="order-code mono"><a href="order-detail.html?id=${encodeURIComponent(order.id)}">${order.id}</a></td>
-          <td><div class="order-concert">${concert.title}</div><div class="order-concert-meta">${concert.artist} · ${formatDateTime(`${concert.date}T${concert.time}`)}<br>${concert.location}</div></td>
-      <td class="order-date">${formatDateShort(order.orderedAt)}</td>
-      <td class="order-total mono">${formatCurrency(orderTotal(order))}</td>
-      <td><span class="badge ${status.cls}">${status.label}</span></td>
-      <td class="chev"><a href="order-detail.html?id=${encodeURIComponent(order.id)}" aria-label="View order ${order.id}">View</a></td>
-    </tr>`;
-          })
+      <td class="order-code mono"><a href="${detailUrl(o)}">${orderCode(o)}</a></td>
+      <td><div class="order-concert">${escapeHtml(o.concert_title)}</div><div class="order-concert-meta">${meta(o)}</div></td>
+      <td class="order-date">${formatDateShort(o.created_at)}</td>
+      <td class="order-total mono">${formatCurrency(o.total_amount)}</td>
+      <td>${statusBadge(ORDER_STATUS_MAP, orderDisplayStatus(o))}</td>
+      <td class="chev"><a href="${detailUrl(o)}" aria-label="View order ${orderCode(o)}">View</a></td>
+    </tr>`,
+          )
           .join("");
 
-        cardsWrap.innerHTML = list
-          .map((order) => {
-            const concert = MOCK_CONCERTS.find(
-              (item) => item.id === order.concertId,
-            );
-            const status = ORDER_STATUS_MAP[order.status];
-            return `
-    <a class="order-card" href="order-detail.html?id=${encodeURIComponent(order.id)}">
+        document.getElementById("orderCards").innerHTML = list
+          .map(
+            (o) => `
+    <a class="order-card" href="${detailUrl(o)}">
       <div class="order-card__top">
-        <span class="order-code mono">${order.id}</span>
-        <span class="badge ${status.cls}">${status.label}</span>
+        <span class="order-code mono">${orderCode(o)}</span>
+        ${statusBadge(ORDER_STATUS_MAP, orderDisplayStatus(o))}
       </div>
-      <div class="order-concert">${concert.title}</div>
-      <div class="order-concert-meta">${concert.artist} · ${formatDateTime(`${concert.date}T${concert.time}`)}<br>${concert.location}</div>
-      <div class="order-card__row"><span>Order date</span><span>${formatDateShort(order.orderedAt)}</span></div>
-      <div class="order-card__row"><span>Total</span><span class="order-card__total mono">${formatCurrency(orderTotal(order))}</span></div>
-    </a>`;
-          })
+      <div class="order-concert">${escapeHtml(o.concert_title)}</div>
+      <div class="order-concert-meta">${meta(o)}</div>
+      <div class="order-card__row"><span>Order date</span><span>${formatDateShort(o.created_at)}</span></div>
+      <div class="order-card__row"><span>Total</span><span class="order-card__total mono">${formatCurrency(o.total_amount)}</span></div>
+    </a>`,
+          )
           .join("");
       }
 
-      renderTabs();
-      renderOrders();
+      async function load() {
+        const state = document.getElementById("loadState");
+        state.innerHTML = loadingHTML("Loading your orders…");
+        showOnly("loadState");
+        try {
+          orders = await ConcertlyAPI.myOrders();
+        } catch (error) {
+          state.innerHTML = errorHTML(error);
+          return;
+        }
+        renderTabs();
+        renderOrders();
+      }
+
+      load();
     </script>
     <div id="site-footer" data-root="../../"></div>
     <script src="../../js/footer.js"></script>

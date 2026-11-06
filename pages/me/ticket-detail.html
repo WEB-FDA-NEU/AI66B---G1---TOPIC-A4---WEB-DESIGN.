@@ -14,8 +14,7 @@
     <link rel="stylesheet" href="../../css/responsive.css" />
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/me.css" />
-    <script src="../../js/mock-data.js"></script>
-    <script src="../../js/purchases.js"></script>
+    <script src="../../js/api.js"></script>
     <script src="../../js/me.js"></script>
   </head>
   <body>
@@ -98,46 +97,60 @@
     </div>
     <script>
       const ticketId = new URLSearchParams(window.location.search).get("id");
-      const ticket = CUSTOMER_TICKETS.find((item) => item.id === ticketId);
       const container = document.getElementById("ticket-container");
-      if (!ticket) {
+
+      function renderNotFound() {
         document.getElementById("ticketBreadcrumb").textContent = "Not found";
         container.innerHTML = `<div class="empty empty--detail"><h3>Ticket not found</h3><p>Open a ticket from your ticket list to view its QR code.</p><a class="btn btn--primary" href="tickets.html">Back to My Tickets</a></div>`;
-      } else {
-        const concert = MOCK_CONCERTS.find(
-          (item) => item.id === ticket.concertId,
-        );
-        const order = getOrderById(ticket.orderId);
-        const orderTicket = order?.tickets.find(
-          (item) => item.id === ticket.id,
-        );
-        const status = TICKET_STATUS_MAP[ticket.status];
-        const ticketHolder = localStorage.getItem("concertlyUser");
-        const qrPayload = encodeURIComponent(ticket.id);
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrPayload}`;
+      }
 
-        document.title = `${ticket.id} — Concertly`;
-        document.getElementById("ticketBreadcrumb").textContent = ticket.id;
+      function render(t) {
+        const status = TICKET_STATUS_MAP[t.status] || { label: t.status };
+        const orderUrl = `order-detail.html?id=${encodeURIComponent(t.order_id)}`;
+        document.title = `${t.ticket_code} — Concertly`;
+        document.getElementById("ticketBreadcrumb").textContent = t.ticket_code;
+        // The QR image is rendered by the backend from the ticket code (qr_data) and is
+        // only provided while the ticket is valid.
+        const qr = t.qr_image
+          ? `<div class="digital-ticket-qr"><img src="${escapeHtml(t.qr_image)}" alt="QR code for ticket ${escapeHtml(t.ticket_code)}" width="180" height="180"><p>Show this QR code at the venue entrance.</p></div>`
+          : `<div class="digital-ticket-notice">QR code is unavailable because this ticket is ${escapeHtml(status.label.toLowerCase())}${t.checked_in_at ? ` (checked in ${formatDateTime(t.checked_in_at)})` : ""}.</div>`;
+
         container.innerHTML = `
           <article class="digital-ticket-card">
-            <img class="digital-ticket-poster" src="${concert.poster}" alt="${concert.title}">
+            ${t.poster_url ? `<img class="digital-ticket-poster" src="${escapeHtml(t.poster_url)}" alt="${escapeHtml(t.concert_title)}">` : ""}
             <div class="digital-ticket-details">
-              <div class="digital-ticket-heading"><div><p class="digital-ticket-kicker">${concert.artist} · ${concert.category}</p><h2>${concert.title}</h2></div><span class="badge ${status.cls}">${status.label}</span></div>
+              <div class="digital-ticket-heading"><div><p class="digital-ticket-kicker">${escapeHtml(t.artist)}</p><h2>${escapeHtml(t.concert_title)}</h2></div>${statusBadge(TICKET_STATUS_MAP, t.status)}</div>
               <dl class="digital-ticket-facts">
-                <div><dt>Date &amp; time</dt><dd>${formatDateTime(`${concert.date}T${concert.time}`)}</dd></div>
-                <div><dt>Venue</dt><dd>${concert.location}</dd></div>
-                <div><dt>Seat</dt><dd>${ticket.seat}</dd></div>
-                <div><dt>Ticket type</dt><dd>${ticket.type}${orderTicket ? ` · ${formatCurrency(orderTicket.price)}` : ""}</dd></div>
-                <div><dt>Ticket holder</dt><dd>${ticketHolder}</dd></div>
-                <div><dt>Ticket ID</dt><dd class="mono">${ticket.id}</dd></div>
-                <div><dt>Order ID</dt><dd><a href="order-detail.html?id=${encodeURIComponent(ticket.orderId)}" class="mono">${ticket.orderId}</a></dd></div>
+                <div><dt>Date &amp; time</dt><dd>${formatDateTime(t.starts_at)}</dd></div>
+                <div><dt>Venue</dt><dd>${escapeHtml(concertLocation(t))}</dd></div>
+                <div><dt>Seat</dt><dd>${escapeHtml(seatLabel(t))}</dd></div>
+                <div><dt>Ticket type</dt><dd>${escapeHtml(t.zone)} · ${formatCurrency(t.price)}</dd></div>
+                <div><dt>Ticket holder</dt><dd>${escapeHtml(t.holder_name)}</dd></div>
+                <div><dt>Ticket ID</dt><dd class="mono">${escapeHtml(t.ticket_code)}</dd></div>
+                <div><dt>Order ID</dt><dd><a href="${orderUrl}" class="mono">#CT-${t.order_number}</a></dd></div>
               </dl>
-              ${ticket.status === "valid" ? `<div class="digital-ticket-qr"><img src="${qrUrl}" alt="QR code for ticket ${ticket.id}"><p>Show this QR code at the venue entrance.</p></div>` : `<div class="digital-ticket-notice">QR code is unavailable because this ticket is ${status.label.toLowerCase()}.</div>`}
+              ${qr}
             </div>
           </article>
           <a class="btn btn--ghost" href="tickets.html">Back to My Tickets</a>
         `;
       }
+
+      async function load() {
+        if (!ticketId || !/^\d+$/.test(ticketId)) {
+          renderNotFound();
+          return;
+        }
+        container.innerHTML = loadingHTML("Loading ticket…");
+        try {
+          render(await ConcertlyAPI.ticket(ticketId));
+        } catch (error) {
+          if (error.status === 404) renderNotFound();
+          else container.innerHTML = errorHTML(error);
+        }
+      }
+
+      load();
     </script>
     <div id="site-footer" data-root="../../"></div>
     <script src="../../js/footer.js"></script>
