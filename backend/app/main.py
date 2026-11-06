@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from app.config import EXPIRY_SWEEP_INTERVAL
 from app.database import SessionLocal
 from app.errors import DomainError
-from app.routers import orders, reservations, seats
+from app.routers import admin, orders, reservations, seats
 from app.services.reservations import expire_stale_holds
 
 log = logging.getLogger("concertly")
@@ -65,7 +65,10 @@ async def domain_error_handler(_: Request, exc: DomainError):
 @app.exception_handler(HTTPException)
 async def http_error_handler(_: Request, exc: HTTPException):
     detail = exc.detail if isinstance(exc.detail, dict) else {"code": "http_error", "message": str(exc.detail)}
-    return _error(exc.status_code, detail["code"], detail["message"])
+    response = _error(exc.status_code, detail["code"], detail["message"])
+    if exc.headers:
+        response.headers.update(exc.headers)
+    return response
 
 
 @app.exception_handler(RequestValidationError)
@@ -79,5 +82,5 @@ def health():
     return {"status": "ok"}
 
 
-for router in (seats.router, reservations.router, orders.router):
+for router in (seats.router, reservations.router, orders.router, admin.router):
     app.include_router(router, prefix="/api")

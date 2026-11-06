@@ -11,3 +11,17 @@ PAYMENT_METHODS = ("card", "ewallet", "bank_transfer")
 EXPIRY_SWEEP_INTERVAL = 30
 # Retries when PostgreSQL aborts a transaction because of a deadlock/serialization clash.
 MAX_TX_RETRIES = 3
+
+# Authentication. Tokens are HS256 JWTs whose "sub" is the user's e-mail (the same format
+# the login endpoint of the auth task issues). JWT_SECRET must be set in the environment.
+JWT_ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+
+
+def jwt_secret() -> str | None:
+    return os.getenv("JWT_SECRET") or None
+
+
+def dev_user_header_enabled() -> bool:
+    """X-User-Id identification is a development stub; it is OFF unless explicitly enabled."""
+    return os.getenv("ALLOW_DEV_USER_HEADER") == "1"
