@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../../css/components.css" />
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/checkout.css" />
+    <link rel="stylesheet" href="../../css/seats.css" />
   </head>
 
   <body>
@@ -49,11 +50,11 @@
           <div id="payment-summary"></div>
 
           <select>
-            <option>Credit Card</option>
+            <option value="card">Credit Card</option>
 
-            <option>PayPal</option>
+            <option value="ewallet">PayPal</option>
 
-            <option>Bank Transfer</option>
+            <option value="bank_transfer">Bank Transfer</option>
           </select>
 
           <button id="confirm-payment" class="btn btn-primary">
@@ -70,6 +71,7 @@
     <script src="../../js/footer.js"></script>
 
     <script src="../../js/purchases.js"></script>
+    <script src="../../js/api.js"></script>
     <script src="../../js/checkout.js"></script>
   </body>
 </html>
