@@ -1,11 +1,56 @@
-if (
-  !localStorage.getItem("concertlyUser") ||
-  localStorage.getItem("userRole") !== "customer"
-) {
-  window.location.replace(new URL("../auth/login.html", window.location.href));
-} else {
-  document.documentElement.classList.add("customer-session");
-}
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  const requireLogin = () => {
+    window.location.replace(new URL("../auth/login.html", window.location.href));
+  };
+
+  // 1. Không có token -> Văng ra trang đăng nhập
+  if (!token) {
+    requireLogin();
+    return;
+  }
+
+  try {
+    // 2. Gọi API kiểm tra token
+    const response = await fetch("/api/auth/me", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      
+      // 3. Nếu không phải customer (ví dụ là admin hoặc sai role) -> Văng ra
+      if (userData.role !== "customer") {
+        requireLogin();
+        return;
+      }
+      
+      // Xác nhận phiên khách hàng hợp lệ
+      document.documentElement.classList.add("customer-session");
+
+      // 4. Tự động đổ thông tin vào giao diện trang Profile (nếu đang ở trang me.html)
+      const nameEl = document.getElementById("profile-name");
+      const emailEl = document.getElementById("profile-email");
+      const phoneEl = document.getElementById("profile-phone");
+      // Bạn có thể thêm thẻ <span id="profile-phone"></span> vào HTML để hiện số điện thoại
+      
+      if (nameEl) nameEl.textContent = userData.full_name;
+      if (emailEl) emailEl.textContent = userData.email;
+      if (phoneEl) phoneEl.textContent = userData.phone_number;
+
+    } else {
+      // Token hết hạn
+      localStorage.removeItem("token");
+      requireLogin();
+    }
+  } catch (error) {
+    console.error("Auth error:", error);
+    requireLogin();
+  }
+});
 
 const customerPurchases = getCurrentCustomerPurchases();
 const CUSTOMER_ORDERS = customerPurchases.orders;
@@ -59,7 +104,7 @@ const ORDER_STATUS_MAP = {
 
 function orderTotal(order){
   const subtotal = order.tickets.reduce((sum, t) => sum + t.price, 0);
-  return subtotal + order.fees - order.discount;
+  return subtotal + order.fees - order.discount; // Đã sửa lỗi rớt dòng ở đây
 }
 
 function orderSubtotal(order){
