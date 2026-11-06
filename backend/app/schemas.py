@@ -88,3 +88,39 @@ class OrderDetailOut(OrderSummaryOut):
     refunded_at: Optional[datetime] = None
     can_cancel: bool
     tickets: list[TicketOut]
+
+
+# ------------------------------------------------------------------- admin (#35)
+
+class AdminStatsOut(BaseModel):
+    totalConcerts: int
+    ticketsSold: int
+    totalOrders: int
+    totalRevenue: int
+    upcomingConcerts: int
+
+
+class CustomerOut(BaseModel):
+    id: int
+    email: str
+    full_name: str
+
+
+class CustomerDetailOut(CustomerOut):
+    phone: Optional[str] = None
+
+
+class AdminOrderSummaryOut(OrderSummaryOut):
+    customer: CustomerOut
+
+
+class AdminOrderPageOut(BaseModel):
+    items: list[AdminOrderSummaryOut]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+
+class AdminOrderDetailOut(OrderDetailOut):
+    customer: CustomerDetailOut

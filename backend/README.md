@@ -7,20 +7,24 @@ FastAPI + SQLAlchemy + PostgreSQL. Covers seat holds, mock checkout, orders and 
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env            # set DATABASE_URL
+cp .env.example .env            # set DATABASE_URL and JWT_SECRET
 psql "$DATABASE_URL" -f schema.sql   # once, on an empty database
-python seed.py                  # demo concerts + users 1 (customer) / 2 (staff)
+python scripts/seed.py          # concerts c1-c11, admin + 2 customers, sample orders (idempotent)
 uvicorn app.main:app --reload --port 8000
 ```
 
 The static frontend calls `http://localhost:8000/api` (override with `window.CONCERTLY_API_BASE`).
 If the API is not running, the ticket page falls back to the old zone + quantity mock flow.
 
-## Authentication is a stub
+## Authentication
 
-There is no login API yet. Requests identify the user with an `X-User-Id` header
-(`app/deps.py::get_current_user`). **This is not secure**; replace that one function when real
-auth exists. Role `staff`/`admin` is required for check-in.
+Send `Authorization: Bearer <jwt>`. Tokens are HS256 JWTs signed with `JWT_SECRET` whose `sub`
+is the user's e-mail (`app/security.py`); the user and role are always re-read from the database.
+Missing/invalid/expired token or inactive user → **401**; a valid user without the right role → **403**.
+
+The old `X-User-Id` header still works **only** when `ALLOW_DEV_USER_HEADER=1` (local development,
+until the frontend sends real tokens). Never enable it in production: anyone can forge it.
+Role `staff`/`admin` is required for check-in; `admin` for everything under `/api/admin`.
 
 ## Endpoints (`/api`)
 
@@ -35,6 +39,13 @@ auth exists. Role `staff`/`admin` is required for check-in.
 | `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
 | `GET /tickets`, `GET /tickets/{id}` | The caller's tickets |
 | `POST /tickets/check-in` `{ticket_code}` | Staff scan; a ticket can be admitted once |
+| `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts` |
+| `GET /admin/orders?status=&concert_id=&q=&page=&page_size=` | Admin: all orders with customer, newest first. `status`: `pending`, `paid`, `cancelled`, `failed`, `refunded`; `q` matches order number, customer e-mail/name, concert title/artist |
+| `GET /admin/orders/{id}` | Admin: order detail with customer and tickets |
+
+Dashboard rules (`app/services/admin.py`): revenue = `total_amount - refund_amount` of orders with
+`payment_status = 'paid'` (pending, failed and refunded orders count for nothing); tickets sold =
+tickets `valid` or `used`; upcoming = not started yet and `on_sale`/`sold_out`.
 
 Errors always look like `{"error": {"code", "message", ...}}`.
 
