@@ -109,6 +109,23 @@ class AdminStatsOut(BaseModel):
     totalOrders: int
     totalRevenue: int
     upcomingConcerts: int
+    checkinsToday: int
+
+
+class AdminConcertStatsOut(BaseModel):
+    id: int
+    title: str
+    artist: str
+    venue: str
+    city: str
+    poster_url: Optional[str] = None
+    starts_at: datetime
+    status: str
+    upcoming: bool
+    capacity: int
+    ticketsSold: int
+    checkedIn: int
+    revenue: int
 
 
 class CustomerOut(BaseModel):

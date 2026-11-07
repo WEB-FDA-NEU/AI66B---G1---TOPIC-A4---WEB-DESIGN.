@@ -12,6 +12,11 @@ Business rules
 * ``totalConcerts``: every concert in the catalogue.
 * ``upcomingConcerts``: concerts that have not started yet and are published for sale
   (``on_sale`` or ``sold_out``); drafts, cancelled and completed shows are excluded.
+* ``checkinsToday`` (dashboard card, #38): tickets checked in since midnight, database
+  time zone.
+
+``concert_stats`` applies the same rules per concert; ``capacity`` is the sum of the
+concert's tier capacities.
 """
 from __future__ import annotations
 
@@ -19,7 +24,7 @@ from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.errors import not_found
-from app.models import Concert, Order, Ticket, User
+from app.models import Concert, Order, Ticket, User, Zone
 from app.services.orders import order_detail, order_summary
 
 ORDER_STATUS_FILTERS = ("pending", "paid", "cancelled", "failed", "refunded")
@@ -45,7 +50,72 @@ def stats(db: Session) -> dict:
             .select_from(Concert)
             .where(Concert.starts_at > now, Concert.status.in_(UPCOMING_STATUSES))
         ).scalar_one(),
+        "checkinsToday": db.execute(
+            select(func.count())
+            .select_from(Ticket)
+            .where(Ticket.status == "used", Ticket.checked_in_at >= func.date_trunc("day", now))
+        ).scalar_one(),
     }
+
+
+def concert_stats(db: Session) -> list[dict]:
+    """Every concert with capacity, tickets sold and revenue, soonest first."""
+    capacity = (
+        select(Zone.concert_id, func.sum(Zone.capacity).label("capacity"))
+        .group_by(Zone.concert_id)
+        .subquery()
+    )
+    sold = (
+        select(Ticket.concert_id, func.count().label("sold"))
+        .where(Ticket.status.in_(("valid", "used")))
+        .group_by(Ticket.concert_id)
+        .subquery()
+    )
+    checked_in = (
+        select(Ticket.concert_id, func.count().label("checked_in"))
+        .where(Ticket.status == "used")
+        .group_by(Ticket.concert_id)
+        .subquery()
+    )
+    revenue = (
+        select(Order.concert_id, func.sum(Order.total_amount - Order.refund_amount).label("revenue"))
+        .where(Order.payment_status == "paid")
+        .group_by(Order.concert_id)
+        .subquery()
+    )
+    rows = db.execute(
+        select(
+            Concert,
+            func.coalesce(capacity.c.capacity, 0),
+            func.coalesce(sold.c.sold, 0),
+            func.coalesce(checked_in.c.checked_in, 0),
+            func.coalesce(revenue.c.revenue, 0),
+            Concert.starts_at > func.now(),
+        )
+        .outerjoin(capacity, capacity.c.concert_id == Concert.id)
+        .outerjoin(sold, sold.c.concert_id == Concert.id)
+        .outerjoin(checked_in, checked_in.c.concert_id == Concert.id)
+        .outerjoin(revenue, revenue.c.concert_id == Concert.id)
+        .order_by(Concert.starts_at, Concert.id)
+    ).all()
+    return [
+        {
+            "id": c.id,
+            "title": c.title,
+            "artist": c.artist,
+            "venue": c.venue,
+            "city": c.city,
+            "poster_url": c.poster_url,
+            "starts_at": c.starts_at,
+            "status": c.status,
+            "upcoming": bool(future) and c.status in UPCOMING_STATUSES,
+            "capacity": int(cap),
+            "ticketsSold": int(n_sold),
+            "checkedIn": int(n_in),
+            "revenue": int(rev),
+        }
+        for c, cap, n_sold, n_in, rev, future in rows
+    ]
 
 
 def _customer(user: User, *, with_phone: bool = False) -> dict:

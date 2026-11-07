@@ -10,6 +10,7 @@ from app.deps import require_admin
 from app.deps import CurrentUser
 from app.schemas import (
     AdminCheckInRequest,
+    AdminConcertStatsOut,
     AdminOrderDetailOut,
     AdminOrderPageOut,
     AdminStatsOut,
@@ -25,6 +26,11 @@ router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(requir
 @router.get("/stats", response_model=AdminStatsOut)
 def stats(db: Session = Depends(get_db)):
     return svc.stats(db)
+
+
+@router.get("/stats/concerts", response_model=list[AdminConcertStatsOut])
+def concert_stats(db: Session = Depends(get_db)):
+    return svc.concert_stats(db)
 
 
 @router.get("/orders", response_model=AdminOrderPageOut)

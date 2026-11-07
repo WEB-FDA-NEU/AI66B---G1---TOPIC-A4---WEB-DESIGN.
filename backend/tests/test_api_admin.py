@@ -172,6 +172,9 @@ def test_stats_follow_business_rules(client, db, shop, admin):
         "totalOrders": 5,
         "totalRevenue": 2000 + 1000,  # paid orders only; refunded/pending/failed excluded
         "upcomingConcerts": 2,  # on-sale fixture + sold-out; not draft/cancelled/past
+        "checkinsToday": scalar(
+            "SELECT count(*) FROM tickets WHERE status = 'used' AND checked_in_at >= date_trunc('day', now())"
+        ),
     }
 
 
@@ -182,6 +185,7 @@ def test_stats_on_empty_database(client, db, admin):
         "totalOrders": 0,
         "totalRevenue": 0,
         "upcomingConcerts": 0,
+        "checkinsToday": 0,
     }
 
 
@@ -292,3 +296,42 @@ def test_order_detail_404(client, db, admin):
     r = client.get("/api/admin/orders/999999", headers=bearer(db, admin))
     assert r.status_code == 404
     assert r.json()["error"]["code"] == "not_found"
+
+
+# ----------------------------------------------------------- per-concert stats (#38)
+
+
+def test_checkins_today_counts_only_today(client, db, shop, admin):
+    db.execute(text("UPDATE tickets SET checked_in_at = now() WHERE status = 'used'"))
+    db.commit()
+    assert client.get("/api/admin/stats", headers=bearer(db, admin)).json()["checkinsToday"] == 1
+    db.execute(text("UPDATE tickets SET checked_in_at = now() - interval '2 days' WHERE status = 'used'"))
+    db.commit()
+    assert client.get("/api/admin/stats", headers=bearer(db, admin)).json()["checkinsToday"] == 0
+
+
+def test_concert_stats(client, db, shop, admin):
+    r = client.get("/api/admin/stats/concerts", headers=bearer(db, admin))
+    assert r.status_code == 200
+    rows = {c["id"]: c for c in r.json()}
+    assert len(rows) == 5
+    main = rows[shop["concert"]]
+    assert (main["capacity"], main["ticketsSold"], main["checkedIn"], main["revenue"], main["upcoming"]) == (15, 2, 0, 2000, True)
+    past = rows[shop["past"]]
+    assert (past["capacity"], past["ticketsSold"], past["checkedIn"], past["revenue"], past["upcoming"]) == (2, 2, 1, 1000, False)
+    titles = {c["title"]: c for c in rows.values()}
+    assert titles["Draft Show"]["upcoming"] is False and titles["Sold Out Show"]["upcoming"] is True
+    assert titles["Draft Show"]["capacity"] == 0 and titles["Draft Show"]["revenue"] == 0
+    # soonest first
+    starts = [c["starts_at"] for c in r.json()]
+    assert starts == sorted(starts)
+    # totals agree with the dashboard figures
+    totals = client.get("/api/admin/stats", headers=bearer(db, admin)).json()
+    assert sum(c["revenue"] for c in rows.values()) == totals["totalRevenue"]
+    assert sum(c["ticketsSold"] for c in rows.values()) == totals["ticketsSold"]
+    assert sum(c["upcoming"] for c in rows.values()) == totals["upcomingConcerts"]
+
+
+def test_concert_stats_requires_admin(client, db, users):
+    assert client.get("/api/admin/stats/concerts").status_code == 401
+    assert client.get("/api/admin/stats/concerts", headers=bearer(db, users["a"])).status_code == 403
