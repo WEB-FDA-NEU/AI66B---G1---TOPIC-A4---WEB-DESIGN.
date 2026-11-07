@@ -1,3 +1,45 @@
+function escapeHtml(value) {
+	return String(value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+}
+
+// Mirror a server order into the localStorage purchases the "My tickets / My orders"
+// pages still read, so a real purchase shows up there until those pages call the API.
+function saveServerOrderLocally(order, data, paymentName) {
+	const orderId = `#CT-${order.order_number}`;
+	const customer = localStorage.getItem("concertlyUser") || "Guest";
+	const tickets = order.tickets.map((ticket, index) => ({
+		id: `CT${order.order_number}-${index + 1}`,
+		serverTicketId: ticket.id,
+		ticketCode: ticket.ticket_code,
+		concertId: data.concertId,
+		seat: `${ticket.zone} ${ticket.row}${ticket.seat_number}`,
+		type: ticket.zone,
+		orderId,
+		status: "valid",
+		customer,
+	}));
+	saveConcertlyPurchase(
+		{
+			id: orderId,
+			serverOrderId: order.id,
+			concertId: data.concertId,
+			orderedAt: order.created_at,
+			status: "paid",
+			customer,
+			paymentMethod: { name: paymentName, sub: "Payment completed" },
+			tickets: tickets.map((ticket, index) => ({
+				id: ticket.id,
+				seat: ticket.seat,
+				type: ticket.type,
+				price: order.tickets[index].price,
+			})),
+			fees: 0,
+			discount: 0,
+		},
+		tickets,
+	);
+}
+
 document.addEventListener(
 "DOMContentLoaded",
 ()=>{
@@ -230,7 +272,77 @@ window.location.href =
 
 };
 
+// ---------------------------------------------------------------------------------
+// Server-backed checkout: runs when the seats were held through the booking API
+// (data.reservationId). It replaces the mock handler above; without a reservation the
+// original localStorage-only flow is untouched.
+// ---------------------------------------------------------------------------------
+if (data.reservationId && window.ConcertlyAPI) {
+	const api = window.ConcertlyAPI;
+	const confirmBtn = document.getElementById("confirm-payment");
+	const methodSelect = document.querySelector("select");
+	const timer = document.createElement("div");
+	timer.className = "checkout-timer";
+	timer.setAttribute("role", "timer");
+	payment.before(timer);
 
+	const seatLabels = (data.seats || []).map((seat) => seat.zone + " " + seat.label);
+	concertInfo.insertAdjacentHTML(
+		"beforeend",
+		`<p>Seats: <strong>${seatLabels.map(escapeHtml).join(", ")}</strong></p>`,
+	);
 
+	const expire = () => {
+		localStorage.removeItem("checkoutData");
+		window.location.href = "session-expired.html";
+	};
+
+	let deadline = 0;
+	let tick = null;
+	const render = () => {
+		const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+		timer.textContent = `Seats held for ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+		timer.classList.toggle("urgent", left <= 60);
+		if (left === 0) {
+			clearInterval(tick);
+			api.release(data.reservationId).catch(() => {}).finally(expire);
+		}
+	};
+
+	// Ask the server how long is really left (the browser clock may be off).
+	confirmBtn.disabled = true;
+	api.getReservation(data.reservationId).then((hold) => {
+		if (hold.status !== "active") return expire();
+		deadline = Date.now() + hold.seconds_left * 1000;
+		confirmBtn.disabled = false;
+		render();
+		tick = setInterval(render, 1000);
+	}).catch((error) => {
+		if (error.code === "network") {
+			timer.textContent = "Cannot reach the booking server. Please try again.";
+		} else {
+			expire();
+		}
+	});
+
+	confirmBtn.onclick = async () => {
+		confirmBtn.disabled = true;
+		try {
+			const order = await api.checkout(data.reservationId, methodSelect.value);
+			clearInterval(tick);
+			saveServerOrderLocally(order, data, methodSelect.options[methodSelect.selectedIndex].text);
+			localStorage.removeItem("checkoutData");
+			alert("Payment Successful!");
+			window.location.href = "../me/tickets.html";
+		} catch (error) {
+			if (error.code === "reservation_expired" || error.code === "seat_unavailable") {
+				expire();
+				return;
+			}
+			alert(error.message);
+			confirmBtn.disabled = false;
+		}
+	};
+}
 
 });

@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
       accountButton.setAttribute("aria-expanded", "false");
       localStorage.removeItem("concertlyUser");
       localStorage.removeItem("userRole");
+      localStorage.removeItem("token");
       window.location.href = "../auth/login.html";
     });
   }

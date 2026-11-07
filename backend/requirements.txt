@@ -1,5 +1,9 @@
 sqlalchemy>=2.0
 psycopg2-binary
 python-dotenv
+bcrypt
+PyJWT
+python-multipart
+segno
 fastapi
 uvicorn[standard]

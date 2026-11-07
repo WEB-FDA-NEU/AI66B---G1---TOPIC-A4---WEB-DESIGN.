@@ -67,6 +67,11 @@
       .btn:hover {
         background: #e01b82;
       }
+      .login-error {
+        margin: 8px 0 0;
+        color: #ff6b6b;
+        font-size: 14px;
+      }
       .link {
         text-align: center;
         margin-top: 20px;
@@ -85,11 +90,12 @@
       <h2>Sign In</h2>
       <form onsubmit="handleLogin(event)">
         <div class="input-group">
-          <label>Email or Username</label>
+          <label for="username">Email</label>
           <input
-            type="text"
+            type="email"
             id="username"
-            placeholder="name@example.com or acbd"
+            autocomplete="username"
+            placeholder="name@example.com"
             required
           />
         </div>
@@ -98,51 +104,52 @@
           <input
             type="password"
             id="password"
+            autocomplete="current-password"
             placeholder="••••••••"
             required
           />
         </div>
+        <p id="login-error" class="login-error" role="alert" hidden></p>
         <button type="submit" class="btn">Login</button>
       </form>
       <div class="link">
         Don't have an account? <a href="register.html">Register</a>
       </div>
     </div>
+    <script src="../../js/api.js"></script>
     <script>
-      function handleLogin(e) {
+      async function handleLogin(e) {
         e.preventDefault();
-
-        const username = document.getElementById("username").value;
+        const form = e.target;
+        const button = form.querySelector("button[type=submit]");
+        const errorBox = document.getElementById("login-error");
+        const email = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
 
-        // Kiểm tra nếu người dùng gõ "admin" (có thể quy định mật khẩu tùy ý cho nguyên mẫu)
-        if (username.toLowerCase() === "admin" && password === "admin123") {
-          // Lưu tên hiển thị và gán thêm quyền (role) là quản trị viên
-          localStorage.setItem("concertlyUser", "Admin");
-          localStorage.setItem("userRole", "admin");
-
-          alert("Welcome back, Admin!");
-          window.location.href = "../admin/index.html";
-        } else {
-          // Logic cho khách hàng bình thường: cắt lấy phần trước chữ @
-          const displayPrefix = username.includes("@")
-            ? username.split("@")[0]
-            : username;
-
-          localStorage.setItem("concertlyUser", displayPrefix);
-          localStorage.setItem("userRole", "customer"); // Gán quyền khách hàng
-
-          const redirect = new URLSearchParams(window.location.search).get(
-            "redirect",
-          );
+        errorBox.hidden = true;
+        button.disabled = true;
+        button.textContent = "Signing in…";
+        try {
+          const session = await ConcertlyAPI.login(email, password);
+          ConcertlyAPI.saveSession(session);
+          if (session.user.role === "admin") {
+            window.location.href = "../admin/index.html";
+            return;
+          }
+          const redirect = new URLSearchParams(window.location.search).get("redirect");
           const destination = redirect
             ? new URL(redirect, window.location.href)
             : new URL("../../index.html", window.location.href);
-
           window.location.href =
-            destination.origin === window.location.origin
-              ? destination.href
-              : "../../index.html";
+            destination.origin === window.location.origin ? destination.href : "../../index.html";
+        } catch (error) {
+          errorBox.textContent =
+            error.code === "network"
+              ? "Cannot reach the Concertly server. Please try again later."
+              : error.message || "Sign in failed.";
+          errorBox.hidden = false;
+          button.disabled = false;
+          button.textContent = "Login";
         }
       }
     </script>

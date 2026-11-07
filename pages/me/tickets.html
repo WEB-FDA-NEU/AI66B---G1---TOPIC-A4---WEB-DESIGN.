@@ -14,8 +14,7 @@
     <link rel="stylesheet" href="../../css/responsive.css" />
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/me.css" />
-    <script src="../../js/mock-data.js"></script>
-    <script src="../../js/purchases.js"></script>
+    <script src="../../js/api.js"></script>
     <script src="../../js/me.js"></script>
   </head>
   <body>
@@ -116,17 +115,20 @@
       const FILTERS = [
         { key: "all", label: "All" },
         { key: "valid", label: "Valid" },
+        { key: "used", label: "Used" },
+        { key: "refunded", label: "Refunded" },
         { key: "cancelled", label: "Cancelled" },
       ];
       let activeFilter = "all";
+      let tickets = [];
 
       function renderTabs() {
         const wrap = document.getElementById("filterTabs");
         wrap.innerHTML = FILTERS.map((f) => {
           const count =
             f.key === "all"
-              ? CUSTOMER_TICKETS.length
-              : CUSTOMER_TICKETS.filter((t) => t.status === f.key).length;
+              ? tickets.length
+              : tickets.filter((t) => t.status === f.key).length;
           return `<button class="filter-tab ${f.key === activeFilter ? "is-active" : ""}" data-key="${f.key}">
       ${f.label} <span class="count">${count}</span>
     </button>`;
@@ -143,7 +145,7 @@
       function renderTickets() {
         const grid = document.getElementById("ticketGrid");
         const empty = document.getElementById("emptyState");
-        const list = CUSTOMER_TICKETS.filter(
+        const list = tickets.filter(
           (t) => activeFilter === "all" || t.status === activeFilter,
         );
 
@@ -156,36 +158,34 @@
         empty.style.display = "none";
 
         grid.innerHTML = list
-          .map((ticket) => {
-            const concert = MOCK_CONCERTS.find(
-              (item) => item.id === ticket.concertId,
-            );
-            const status = TICKET_STATUS_MAP[ticket.status];
+          .map((t) => {
+            const orderUrl = `order-detail.html?id=${encodeURIComponent(t.order_id)}`;
+            const order = `#CT-${t.order_number}`;
             return `
     <article class="ticket-card">
-      <img class="ticket-card__poster" src="${concert.poster}" alt="${concert.title}" loading="lazy">
+      ${t.poster_url ? `<img class="ticket-card__poster" src="${escapeHtml(t.poster_url)}" alt="${escapeHtml(t.concert_title)}" loading="lazy">` : ""}
       <div class="ticket-card__main">
         <div class="ticket-card__top">
-          <div class="ticket-card__title">${concert.title}</div>
-          <span class="badge ${status.cls}">${status.label}</span>
+          <div class="ticket-card__title">${escapeHtml(t.concert_title)}</div>
+          ${statusBadge(TICKET_STATUS_MAP, t.status)}
         </div>
         <div class="ticket-card__meta">
-          <div class="ticket-card__artist">${concert.artist} · ${concert.category}</div>
-          <div>${icoCalendar} ${formatDateTime(`${concert.date}T${concert.time}`)}</div>
-          <div>${icoPin} ${concert.location}</div>
-          <div>${icoSeat} ${ticket.seat}</div>
-          <div class="muted">Ticket ID: <span class="mono">${ticket.id}</span> · Order <a href="order-detail.html?id=${encodeURIComponent(ticket.orderId)}" class="mono">${ticket.orderId}</a></div>
+          <div class="ticket-card__artist">${escapeHtml(t.artist)}</div>
+          <div>${icoCalendar} ${formatDateTime(t.starts_at)}</div>
+          <div>${icoPin} ${escapeHtml(concertLocation(t))}</div>
+          <div>${icoSeat} ${escapeHtml(seatLabel(t))}</div>
+          <div class="muted">Ticket ID: <span class="mono">${escapeHtml(t.ticket_code)}</span> · Order <a href="${orderUrl}" class="mono">${order}</a></div>
         </div>
       </div>
       <div class="ticket-card__stub">
         <div>
-          <div class="ticket-card__type">${ticket.type}</div>
-          <div class="ticket-card__seat"><span>Seat</span>${seatCode(ticket.seat)}</div>
+          <div class="ticket-card__type">${escapeHtml(t.zone)}</div>
+          <div class="ticket-card__seat"><span>Seat</span>${escapeHtml(seatCode(t))}</div>
         </div>
-        <div class="ticket-card__id mono">${ticket.id}</div>
+        <div class="ticket-card__id mono">${escapeHtml(t.ticket_code)}</div>
         <div class="ticket-card__actions">
-          <a class="text-link" href="ticket-detail.html?id=${encodeURIComponent(ticket.id)}">Open QR ticket</a>
-          <a class="text-link" href="order-detail.html?id=${encodeURIComponent(ticket.orderId)}">View order</a>
+          <a class="text-link" href="ticket-detail.html?id=${encodeURIComponent(t.id)}">${t.qr_data ? "Open QR ticket" : "View ticket"}</a>
+          <a class="text-link" href="${orderUrl}">View order</a>
         </div>
       </div>
     </article>`;
@@ -193,8 +193,21 @@
           .join("");
       }
 
-      renderTabs();
-      renderTickets();
+      async function load() {
+        const grid = document.getElementById("ticketGrid");
+        grid.style.display = "block";
+        grid.innerHTML = loadingHTML("Loading your tickets…");
+        try {
+          tickets = await ConcertlyAPI.myTickets();
+        } catch (error) {
+          grid.innerHTML = errorHTML(error);
+          return;
+        }
+        renderTabs();
+        renderTickets();
+      }
+
+      load();
     </script>
     <div id="site-footer" data-root="../../"></div>
     <script src="../../js/footer.js"></script>

@@ -116,22 +116,32 @@
           <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
           <div>
             <span class="stat-label">Total Revenue</span>
-            <span class="stat-value" id="stat-total-revenue">$0</span>
-            <span class="stat-change up"
-              ><i class="fa-solid fa-arrow-trend-up"></i> 12.4% vs last
-              month</span
-            >
+            <span class="stat-value" id="stat-total-revenue">…</span>
+            <span class="stat-change neutral">Paid orders, refunds excluded</span>
           </div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon blue"><i class="fa-solid fa-ticket"></i></div>
           <div>
             <span class="stat-label">Tickets Sold</span>
-            <span class="stat-value" id="stat-tickets-sold">0</span>
-            <span class="stat-change up"
-              ><i class="fa-solid fa-arrow-trend-up"></i> 6.8% vs last
-              month</span
-            >
+            <span class="stat-value" id="stat-tickets-sold">…</span>
+            <span class="stat-change neutral">Valid and used tickets</span>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+          <div>
+            <span class="stat-label">Total Orders</span>
+            <span class="stat-value" id="stat-total-orders">…</span>
+            <span class="stat-change neutral">All statuses</span>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-music"></i></div>
+          <div>
+            <span class="stat-label">Total Concerts</span>
+            <span class="stat-value" id="stat-total-concerts">…</span>
+            <span class="stat-change neutral">In the catalogue</span>
           </div>
         </div>
         <div class="card stat-card">
@@ -140,7 +150,7 @@
           </div>
           <div>
             <span class="stat-label">Upcoming Concerts</span>
-            <span class="stat-value" id="stat-upcoming-count">12</span>
+            <span class="stat-value" id="stat-upcoming-count">…</span>
             <span class="stat-change neutral" id="upcoming-month-count"></span>
           </div>
         </div>
@@ -148,14 +158,12 @@
           <div class="stat-icon green"><i class="fa-solid fa-qrcode"></i></div>
           <div>
             <span class="stat-label">Check-ins Today</span>
-            <span class="stat-value" id="stat-checkins-today">0</span>
-            <span
-              class="stat-change neutral"
-              id="checkins-today-context"
-            ></span>
+            <span class="stat-value" id="stat-checkins-today">…</span>
+            <span class="stat-change neutral">Tickets scanned since midnight</span>
           </div>
         </div>
       </div>
+      <p class="checkin-feedback checkin-feedback--error" id="stats-error" role="alert" hidden></p>
 
       <!-- Chart + upcoming concerts -->
       <div class="dashboard-grid">
@@ -182,7 +190,7 @@
             <a href="concerts.html" class="panel-link">View all</a>
           </div>
           <div class="mini-list" id="upcoming-concerts-list">
-            <!-- rendered from MOCK_CONCERTS by js/admin/dashboard.js -->
+            <!-- rendered from GET /api/admin/stats/concerts by js/dashboard.js -->
           </div>
         </div>
       </div>
@@ -235,10 +243,8 @@
       <span>&copy; 2026 Concertly Admin &middot; v1.0</span>
     </footer>
 
-    <script src="../../js/mock-data.js"></script>
-    <script src="../../js/utils.js"></script>
-    <script src="../../js/purchases.js"></script>
-    <script src="../../js/orders.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/admin-common.js"></script>
     <script src="../../js/noti.js"></script>
     <script src="../../js/admin-account.js"></script>
     <script src="../../js/dashboard.js"></script>
