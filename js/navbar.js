@@ -4,14 +4,40 @@
 // 2. A single sliding underline ("nav-indicator") animates to whichever
 //    nav link is hovered, and glides back to the current page's link
 //    when the mouse leaves the nav — instead of a static underline.
-document.addEventListener("DOMContentLoaded", () => {
+
+document.addEventListener("DOMContentLoaded", async () => {
   initStickyHeader();
   initNavIndicator();
   initMobileNav();
   initMobileNavMotion();
-  initAuthMenu();
-  initAuthGuards();
+  
+  // NEW: Lấy thông tin user từ API thật bằng Token
+  const userData = await fetchCurrentUser();
+  
+  initAuthMenu(userData);
+  initAuthGuards(userData);
 });
+
+// Hàm gọi API để kiểm tra Token
+async function fetchCurrentUser() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const response = await fetch("/api/auth/me", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      localStorage.removeItem("token"); // Xóa token nếu hết hạn
+      return null;
+    }
+  } catch (error) {
+    console.error("Lỗi xác thực:", error);
+    return null;
+  }
+}
 
 function initMobileNav() {
   const header = document.querySelector(".site-header");
@@ -151,8 +177,6 @@ function initNavIndicator() {
   moveIndicatorTo(activeLink);
   requestAnimationFrame(() => { indicator.style.transition = ""; });
 
-  // Mark JS as initialized so the CSS-only fallback underline (::after)
-  // hides itself and the sliding indicator takes over.
   nav.classList.add("js-ready");
 
   links.forEach((link) => {
@@ -161,9 +185,6 @@ function initNavIndicator() {
 
   nav.addEventListener("mouseleave", () => moveIndicatorTo(activeLink));
   window.addEventListener("resize", () => moveIndicatorTo(activeLink));
-
-  // Safety net: recompute once everything (fonts/images) has fully loaded,
-  // in case layout shifted slightly after the first paint.
   window.addEventListener("load", () => moveIndicatorTo(activeLink));
 }
 
@@ -202,7 +223,8 @@ function initMobileNavMotion() {
   window.addEventListener("resize", () => placeHighlight(activeIndex, false));
 }
 
-function initAuthMenu() {
+// Cập nhật nhận dữ liệu userData từ API
+function initAuthMenu(userData) {
   const auth = document.querySelector(".site-auth");
   if (!auth) return;
 
@@ -211,8 +233,8 @@ function initAuthMenu() {
   if (!menu || !headerActions) return;
 
   const rootUrl = new URL(headerActions.dataset.home || "index.html", window.location.href);
-  const activeUser = localStorage.getItem("concertlyUser");
-  if (!activeUser) {
+  
+  if (!userData) {
     const guestLinks = [
       ["data-auth-login", "Sign in", "pages/auth/login.html"],
       ["data-auth-register", "Sign up", "pages/auth/register.html"],
@@ -234,11 +256,12 @@ function initAuthMenu() {
 
   const greeting = document.createElement("span");
   greeting.className = "auth-menu-greeting";
-  greeting.textContent = `Hi, ${activeUser}`;
+  greeting.textContent = `Hi, ${userData.full_name}`;
   menu.replaceChildren(greeting);
 
-  if (localStorage.getItem("userRole") === "customer") {
+  if (userData.role === "customer") {
     const accountLinks = [
+      ["My Profile", "pages/me/me.html"], // Thêm link Profile nếu cần
       ["My Tickets", "pages/me/tickets.html"],
       ["My Orders", "pages/me/orders.html"],
     ];
@@ -261,24 +284,26 @@ function initAuthMenu() {
   const logoutLabel = document.createElement("span");
   logoutLabel.textContent = "Log out";
   logout.append(logoutIcon, logoutLabel);
+  
+  // Logic đăng xuất thực tế
   logout.addEventListener("click", () => {
-    localStorage.removeItem("concertlyUser");
-    localStorage.removeItem("userRole");
+    localStorage.removeItem("token");
     window.location.reload();
   });
   menu.append(logout);
 }
 
+// Cập nhật xóa token thay vì dữ liệu cũ
 window.handleLogout = function(e) {
   e.preventDefault();
-  localStorage.removeItem("concertlyUser");
-  localStorage.removeItem("userRole");
+  localStorage.removeItem("token");
   window.location.reload();
 };
 
-function initAuthGuards() {
+// Phân quyền cho các nút chức năng
+function initAuthGuards(userData) {
   const guardedElements = document.querySelectorAll("[data-requires-auth]");
-  if (!guardedElements.length || localStorage.getItem("concertlyUser")) return;
+  if (!guardedElements.length || userData) return;
 
   const loginLink = document.querySelector("[data-auth-login]");
   const loginUrl = loginLink ? loginLink.href : "#";

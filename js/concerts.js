@@ -28,65 +28,76 @@ function getConcertFormTicketRows() {
     .filter(Boolean);
 }
 
-function renderConcertTable() {
+async function renderConcertTable() {
   const tbody = document.getElementById("concert-table-body");
+  const caption = document.getElementById("concert-count-caption");
   if (!tbody) return;
 
+  // 1. Hiển thị trạng thái Loading
+  tbody.innerHTML = `<tr><td colspan="6" class="text-muted" style="text-align: center;">Đang tải dữ liệu sự kiện...</td></tr>`;
+
+  // 2. Lấy giá trị bộ lọc
   const search = document.getElementById("concert-search").value.trim().toLowerCase();
   const status = document.getElementById("concert-status-filter").value;
-  filteredConcerts = sortedByDate(MOCK_CONCERTS).filter(c => {
-    const matchesSearch = `${c.title} ${c.artist}`.toLowerCase().includes(search);
-    const matchesStatus = status === "all" || getConcertStatus(c) === status;
-    return matchesSearch && matchesStatus;
-  });
 
-  const pageCount = Math.max(1, Math.ceil(filteredConcerts.length / CONCERTS_PER_PAGE));
-  concertPage = Math.min(concertPage, pageCount);
-  const start = (concertPage - 1) * CONCERTS_PER_PAGE;
+  try {
+    // 3. Gọi thẳng vào API thật thay vì dùng MOCK_CONCERTS
+    let apiUrl = `http://127.0.0.1:8000/api/concerts?page=${concertPage}&size=${CONCERTS_PER_PAGE}`;
+    
+    // Gắn thêm filter nếu có
+    if (search) apiUrl += `&search=${encodeURIComponent(search)}`;
+    // Lưu ý: Nếu status là "all", ta không truyền filter này vào URL
+    if (status && status !== "all") apiUrl += `&status=${encodeURIComponent(status)}`;
 
-  tbody.innerHTML = filteredConcerts.slice(start, start + CONCERTS_PER_PAGE).map(c => `
-    <tr>
-      <td>
-        <div class="cell-concert">
-          <img class="cell-thumb" src="${c.poster}" alt="">
-          <span class="cell-title">${c.title}</span>
-        </div>
-      </td>
-      <td>${c.artist}</td>
-      <td>${formatDateTime(c.date, c.time)}</td>
-      <td>${c.location}</td>
-      <td><span class="badge ${badgeClassFor(getConcertStatus(c))}">${getConcertStatus(c)}</span></td>
-      <td>
-        <div class="row-actions">
-          <button class="row-action-btn" aria-label="Edit" onclick="loadConcertIntoForm('${c.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="row-action-btn danger" aria-label="Delete ${c.title}" data-delete-concert="${c.id}"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      </td>
-    </tr>
-  `).join("") || `<tr><td colspan="6" class="text-muted">No concerts found.</td></tr>`;
+    const response = await fetch(apiUrl);
+    
+    if (!response.ok) {
+      throw new Error("Lỗi khi tải dữ liệu từ server");
+    }
 
-  const caption = document.getElementById("concert-count-caption");
-  const firstResult = filteredConcerts.length ? start + 1 : 0;
-  const lastResult = Math.min(start + CONCERTS_PER_PAGE, filteredConcerts.length);
-  if (caption) caption.textContent = `Showing ${firstResult}–${lastResult} of ${filteredConcerts.length} concerts`;
-  renderConcertPagination(pageCount);
-}
+    const data = await response.json();
+    
+    // 4. Cập nhật lại số trang từ API trả về
+    const pageCount = data.pages || 1;
+    concertPage = data.page || 1;
 
-function renderConcertPagination(pageCount) {
-  const pagination = document.getElementById("concert-pagination");
-  if (!pagination) return;
+    // 5. Vẽ dữ liệu ra giao diện (dùng data.items thay cho filteredConcerts)
+    tbody.innerHTML = data.items.map(c => `
+      <tr>
+        <td>
+          <div class="cell-concert">
+            <img class="cell-thumb" src="${c.poster}" alt="">
+            <span class="cell-title">${c.title}</span>
+          </div>
+        </td>
+        <td>${c.artist}</td>
+        <td>${formatDateTime(c.date, c.time)}</td>
+        <td>${c.location}</td>
+        <td><span class="badge ${badgeClassFor(c.status)}">${c.status}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="row-action-btn" aria-label="Edit" onclick="loadConcertIntoForm('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="row-action-btn danger" aria-label="Delete ${c.title}" data-delete-concert="${c.id}"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `).join("") || `<tr><td colspan="6" class="text-muted" style="text-align: center;">Không tìm thấy sự kiện nào.</td></tr>`;
 
-  pagination.innerHTML = `
-    <button class="page-btn" data-page-action="previous" aria-label="Previous page" ${concertPage === 1 ? "disabled" : ""}>
-      <i class="fa-solid fa-angle-left"></i>
-    </button>
-    ${Array.from({ length: pageCount }, (_, index) => `
-      <button class="page-btn${index + 1 === concertPage ? " active" : ""}" data-page="${index + 1}">${index + 1}</button>
-    `).join("")}
-    <button class="page-btn" data-page-action="next" aria-label="Next page" ${concertPage === pageCount ? "disabled" : ""}>
-      <i class="fa-solid fa-angle-right"></i>
-    </button>
-  `;
+    // 6. Cập nhật dòng text hiển thị số lượng
+    const start = (concertPage - 1) * CONCERTS_PER_PAGE;
+    const firstResult = data.items.length ? start + 1 : 0;
+    const lastResult = start + data.items.length;
+    if (caption) {
+      caption.textContent = `Showing ${firstResult}–${lastResult} of ${data.total} concerts`;
+    }
+
+    // 7. Vẽ thanh phân trang
+    renderConcertPagination(pageCount);
+
+  } catch (error) {
+    console.error("Fetch API Error:", error);
+    tbody.innerHTML = `<tr><td colspan="6" class="text-danger" style="text-align: center;">Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại Backend.</td></tr>`;
+  }
 }
 
 // mock-data.js tickets only have { type, price, status } — no quantity.

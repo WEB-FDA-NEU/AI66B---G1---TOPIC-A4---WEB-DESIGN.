@@ -1,10 +1,11 @@
 import os
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from typing import Optional, List
 
 from app import models, schemas, security, deps
 from app.database import engine, get_db
@@ -87,6 +88,90 @@ def get_my_profile(current_user: models.User = Depends(deps.get_current_user)):
 def admin_data(current_user: models.User = Depends(deps.require_role("admin"))):
     """Test endpoint for Admin role."""
     return {"message": f"Welcome Admin {current_user.full_name}, you have access to this data."}
+
+
+# ==========================================
+# CONCERTS API (TASK 48)
+# ==========================================
+
+@app.get("/api/concerts", response_model=schemas.PaginatedConcertsResponse)
+def get_concerts(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    sort_by: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Concert)
+
+    # 1. Tìm kiếm theo từ khóa (Title hoặc Artist)
+    if search:
+        query = query.filter(
+            (models.Concert.title.ilike(f"%{search}%")) | 
+            (models.Concert.artist.ilike(f"%{search}%"))
+        )
+    
+    # 2. Lọc theo Category và Status
+    if category:
+        query = query.filter(models.Concert.category == category)
+    if status:
+        query = query.filter(models.Concert.status == status)
+        
+    # 3. Sắp xếp (Theo ngày hoặc giá)
+    if sort_by == "date":
+        query = query.order_by(models.Concert.date)
+    elif sort_by == "price":
+        query = query.order_by(models.Concert.priceRange)
+
+    # 4. Phân trang
+    total = query.count()
+    pages = (total + size - 1) // size
+    items = query.offset((page - 1) * size).limit(size).all()
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "size": size,
+        "pages": pages
+    }
+
+@app.get("/api/concerts/{id}", response_model=schemas.ConcertResponse)
+def get_concert(id: str, db: Session = Depends(get_db)):
+    concert = db.query(models.Concert).filter(models.Concert.id == id).first()
+    
+    if not concert:
+        raise HTTPException(status_code=404, detail="Concert not found")
+        
+    return concert
+@app.post("/api/concerts/seed")
+def seed_concerts(concerts: List[schemas.ConcertResponse], db: Session = Depends(get_db)):
+    count = 0
+    for c in concerts:
+        # Kiểm tra xem concert đã tồn tại chưa để tránh bị lặp
+        existing = db.query(models.Concert).filter(models.Concert.id == c.id).first()
+        if not existing:
+            new_concert = models.Concert(
+                id=c.id, title=c.title, artist=c.artist, date=c.date, time=c.time,
+                location=c.location, priceRange=c.priceRange, poster=c.poster,
+                banner=c.banner, category=c.category, status=c.status,
+                ticketsSold=c.ticketsSold, ticketCapacity=c.ticketCapacity,
+                description=c.description
+            )
+            db.add(new_concert)
+            
+            # Thêm các hạng vé tương ứng
+            for t in c.tickets:
+                new_ticket = models.TicketClass(
+                    concert_id=c.id, type=t.type, price=t.price, status=t.status
+                )
+                db.add(new_ticket)
+            count += 1
+            
+    db.commit()
+    return {"message": f"Successfully seeded {count} concerts into the database!"}
 
 
 # ==========================================
