@@ -43,7 +43,8 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
 | `GET /tickets/me` (alias `/tickets`), `GET /tickets/{id}` | The caller's tickets. `qr_data` (the ticket code) is set only while the ticket is `valid`; the detail also returns `qr_image`, an SVG data URI rendered by the server |
 | `POST /tickets/check-in` `{ticket_code}` | Staff scan; a ticket can be admitted once |
-| `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts` |
+| `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts`, plus `checkinsToday` (tickets checked in since midnight) |
+| `GET /admin/stats/concerts` | Admin: every concert (soonest first) with `capacity`, `ticketsSold`, `checkedIn`, `revenue` and `upcoming`, same rules as `/admin/stats` |
 | `GET /admin/orders?status=&concert_id=&q=&page=&page_size=` | Admin: all orders with customer, newest first. `status`: `pending`, `paid`, `cancelled`, `failed`, `refunded`; `q` matches order number, customer e-mail/name, concert title/artist |
 | `GET /admin/orders/{id}` | Admin: order detail with customer and tickets |
 | `GET /admin/concerts/{id}/attendees` | Admin: holders of `valid`/`used` tickets with customer, seat and check-in time, plus `total` / `checked_in` / `not_checked_in` |
