@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.config import CANCEL_CUTOFF
 from app.errors import conflict, forbidden, not_found
-from app.models import Concert, Order, Seat, Ticket, Zone
+from app.models import Concert, Order, Seat, Ticket, User, Zone
 from app.services.reservations import db_now, free_seat, lock_seats
 from app.services.txn import transactional
 
@@ -37,12 +37,15 @@ def ticket_dict(ticket: Ticket, seat: Seat, zone: Zone, concert: Concert, order:
         "venue": concert.venue,
         "city": concert.city,
         "starts_at": concert.starts_at,
+        "poster_url": concert.poster_url,
         "zone": zone.name,
         "row": seat.row_label,
         "seat_number": seat.seat_number,
         "price": ticket.price,
         "status": ticket.status,
         "checked_in_at": ticket.checked_in_at,
+        # What the entrance scanner reads: the ticket code, only while it grants entry.
+        "qr_data": ticket.ticket_code if ticket.status == "valid" else None,
     }
     if order is not None:
         data["order_number"] = order.order_number
@@ -55,6 +58,10 @@ def order_summary(order: Order, concert: Concert, ticket_count: int) -> dict:
         "order_number": order.order_number,
         "concert_id": concert.id,
         "concert_title": concert.title,
+        "artist": concert.artist,
+        "venue": concert.venue,
+        "city": concert.city,
+        "poster_url": concert.poster_url,
         "starts_at": concert.starts_at,
         "total_amount": order.total_amount,
         "status": order.status,
@@ -149,7 +156,17 @@ def get_ticket(db: Session, user_id: int, ticket_id: int, role: str = "customer"
     if row is None or (row[4].user_id != user_id and role not in STAFF_ROLES):
         raise not_found("Ticket not found.")
     t, s, z, c, o = row
-    return ticket_dict(t, s, z, c, order=o)
+    data = ticket_dict(t, s, z, c, order=o)
+    data["holder_name"] = db.get(User, o.user_id).full_name
+    data["qr_image"] = qr_data_uri(data["qr_data"]) if data["qr_data"] else None
+    return data
+
+
+def qr_data_uri(payload: str) -> str:
+    """The QR code as an SVG data URI, rendered server-side (no third-party QR service)."""
+    import segno
+
+    return segno.make(payload, error="m").svg_data_uri(scale=6, border=2)
 
 
 # -------------------------------------------------------------------- mutations

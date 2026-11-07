@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from app.config import EXPIRY_SWEEP_INTERVAL
 from app.database import SessionLocal
 from app.errors import DomainError
-from app.routers import admin, orders, reservations, seats
+from app.routers import admin, auth, orders, reservations, seats
 from app.services.reservations import expire_stale_holds
 
 log = logging.getLogger("concertly")
@@ -82,5 +82,5 @@ def health():
     return {"status": "ok"}
 
 
-for router in (seats.router, reservations.router, orders.router, admin.router):
+for router in (auth.router, seats.router, reservations.router, orders.router, admin.router):
     app.include_router(router, prefix="/api")

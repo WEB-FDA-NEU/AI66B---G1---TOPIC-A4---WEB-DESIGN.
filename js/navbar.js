@@ -264,6 +264,7 @@ function initAuthMenu() {
   logout.addEventListener("click", () => {
     localStorage.removeItem("concertlyUser");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("token");
     window.location.reload();
   });
   menu.append(logout);
@@ -273,6 +274,7 @@ window.handleLogout = function(e) {
   e.preventDefault();
   localStorage.removeItem("concertlyUser");
   localStorage.removeItem("userRole");
+  localStorage.removeItem("token");
   window.location.reload();
 };
 
