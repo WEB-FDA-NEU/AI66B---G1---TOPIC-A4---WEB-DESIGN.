@@ -42,6 +42,8 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts` |
 | `GET /admin/orders?status=&concert_id=&q=&page=&page_size=` | Admin: all orders with customer, newest first. `status`: `pending`, `paid`, `cancelled`, `failed`, `refunded`; `q` matches order number, customer e-mail/name, concert title/artist |
 | `GET /admin/orders/{id}` | Admin: order detail with customer and tickets |
+| `GET /admin/concerts/{id}/attendees` | Admin: holders of `valid`/`used` tickets with customer, seat and check-in time, plus `total` / `checked_in` / `not_checked_in` |
+| `POST /admin/checkin` `{ticketId, concertId}` | Admin gate check-in. `ticketId` is the ticket id or its code (QR). Sets the ticket to `used` with `checked_in_at` (the "used at" time) and `checked_in_by`. **404** unknown ticket, **409 `ticket_already_used`**, **400 `wrong_concert`** / **`ticket_not_valid`** (cancelled or refunded). One atomic conditional UPDATE, so concurrent scans admit a ticket once |
 
 Dashboard rules (`app/services/admin.py`): revenue = `total_amount - refund_amount` of orders with
 `payment_status = 'paid'` (pending, failed and refunded orders count for nothing); tickets sold =
