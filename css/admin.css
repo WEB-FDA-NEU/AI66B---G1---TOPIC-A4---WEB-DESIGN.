@@ -418,7 +418,7 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-lg);
     margin-bottom: var(--space-xl);
 }
@@ -1147,4 +1147,20 @@ textarea.form-input {
 .checkin-feedback--success {
     border-left-color: var(--color-success);
     color: var(--color-success);
+}
+
+.checkin-feedback--error {
+    border-left-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.ticket-entry-form {
+    display: flex;
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+.ticket-entry-form .form-input {
+    flex: 1;
+    min-width: 0;
 }

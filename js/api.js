@@ -73,6 +73,18 @@ const ConcertlyAPI = (() => {
     cancelOrder: (id, reason) => request("POST", `/orders/${encodeURIComponent(id)}/cancel`, reason ? { reason } : undefined),
     myTickets: () => request("GET", "/tickets/me"),
     ticket: (id) => request("GET", `/tickets/${encodeURIComponent(id)}`),
+
+    // Admin (role admin required)
+    adminStats: () => request("GET", "/admin/stats"),
+    adminConcertStats: () => request("GET", "/admin/stats/concerts"),
+    adminOrders: (params = {}) => {
+      const query = new URLSearchParams(
+        Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ""),
+      ).toString();
+      return request("GET", `/admin/orders${query ? `?${query}` : ""}`);
+    },
+    adminAttendees: (concertId) => request("GET", `/admin/concerts/${encodeURIComponent(concertId)}/attendees`),
+    adminCheckIn: (ticketId, concertId) => request("POST", "/admin/checkin", { ticketId, concertId }),
   };
 })();
 
