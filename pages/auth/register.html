@@ -63,11 +63,6 @@
         margin-bottom: 12px;
         display: none;
       }
-      #password-strength {
-        font-size: 12px;
-        margin-top: 6px;
-        font-weight: bold;
-      }
       .btn {
         width: 100%;
         padding: 12px;
@@ -97,7 +92,9 @@
   <body>
     <div class="box">
       <h2>Create Account</h2>
-      <div id="reg-error" class="error-msg"></div>
+      <div id="reg-error" class="error-msg">
+        Passwords do not match! Please check again.
+      </div>
       <form onsubmit="handleRegister(event)">
         <div class="input-group">
           <label>Full Name</label>
@@ -110,11 +107,7 @@
         </div>
         <div class="input-group">
           <label>Email Address</label>
-          <input type="text" id="email" placeholder="name@example.com" required />
-        </div>
-        <div class="input-group">
-          <label>Phone Number</label>
-          <input type="tel" id="phoneNumber" placeholder="0901234567" required />
+          <input type="email" placeholder="name@example.com" required />
         </div>
         <div class="input-group">
           <label>Password</label>
@@ -124,7 +117,6 @@
             placeholder="Create a strong password"
             required
           />
-          <div id="password-strength"></div>
         </div>
         <div class="input-group">
           <label>Confirm Password</label>
@@ -142,118 +134,22 @@
       </div>
     </div>
     <script>
-      // 1. Password Strength Checker
-      const passwordInput = document.getElementById("password");
-      const strengthText = document.getElementById("password-strength");
-
-      passwordInput.addEventListener("input", function() {
-        const val = passwordInput.value;
-        
-        if (val.length === 0) {
-          strengthText.textContent = "";
-          return;
-        }
-
-        if (val.length < 8) {
-          strengthText.textContent = "Requirement: At least 8 characters";
-          strengthText.style.color = "#ff4d4d";
-        } else if (!/[A-Z]/.test(val)) {
-          strengthText.textContent = "Requirement: At least 1 uppercase letter";
-          strengthText.style.color = "#ffa64d";
-        } else if (!/[0-9]/.test(val)) {
-          strengthText.textContent = "Requirement: At least 1 number";
-          strengthText.style.color = "#ffa64d";
-        } else if (!/[^A-Za-z0-9]/.test(val)) {
-          strengthText.textContent = "Requirement: At least 1 special character (@, #, !, etc.)";
-          strengthText.style.color = "#ffa64d";
-        } else {
-          strengthText.textContent = "Strength: Strong! ✨";
-          strengthText.style.color = "#2eb82e";
-        }
-      });
-
-      // 2. Real-time Confirm Password Checker
-      const confirmPasswordInput = document.getElementById("confirm-password");
-      
-      confirmPasswordInput.addEventListener("input", function() {
-        const errorBox = document.getElementById("reg-error");
-        
-        if (confirmPasswordInput.value === "") {
-          errorBox.style.display = "none";
-          return;
-        }
-
-        if (confirmPasswordInput.value !== passwordInput.value) {
-          errorBox.textContent = "Passwords do not match! Please check again.";
-          errorBox.style.display = "block";
-        } else {
-          errorBox.style.display = "none";
-        }
-      });
-
-      // 3. Form Submit & Validation
-      async function handleRegister(e) {
+      function handleRegister(e) {
         e.preventDefault();
-        
-        const fullName = document.getElementById("registerName").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const phone = document.getElementById("phoneNumber").value.trim();
+        const fullName = document.getElementById("registerName").value;
         const pass = document.getElementById("password").value;
         const confirmPass = document.getElementById("confirm-password").value;
         const errorBox = document.getElementById("reg-error");
 
-        errorBox.style.display = "none";
-
-        // Validate Email Format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-          errorBox.textContent = "Invalid email format. Example: name@example.com";
-          errorBox.style.display = "block";
-          return;
-        }
-
-        // Validate Password Strength
-        if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) {
-          errorBox.textContent = "Please meet all password requirements before registering.";
-          errorBox.style.display = "block";
-          return;
-        }
-
-        // Validate Password Match
         if (pass !== confirmPass) {
-          errorBox.textContent = "Passwords do not match! Please check again.";
-          errorBox.style.display = "block";
+          errorBox.style.display = "block"; // Hiển thị thông báo lỗi nếu mật khẩu không khớp
           return;
         }
 
-        try {
-          const response = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              email: email,
-              full_name: fullName,
-              phone_number: phone,
-              password: pass
-            })
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            alert("Account registered successfully! Please log in.");
-            window.location.href = "login.html";
-          } else {
-            errorBox.textContent = data.detail || "Registration failed. Please try again.";
-            errorBox.style.display = "block";
-          }
-        } catch (error) {
-          console.error("Registration error:", error);
-          errorBox.textContent = "An error occurred while connecting to the server.";
-          errorBox.style.display = "block";
-        }
+        errorBox.style.display = "none";
+        localStorage.setItem("concertlyUser", fullName);
+        alert("Account registered successfully!");
+        window.location.href = "login.html";
       }
     </script>
     <script src="../../js/footer.js"></script>

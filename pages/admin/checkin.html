@@ -114,7 +114,7 @@
         <div class="form-group event-select">
           <label class="form-label" for="event">Checking in for</label>
           <select class="form-input" id="event">
-            <!-- rendered from MOCK_CONCERTS by js/admin/checkin.js -->
+            <!-- rendered from GET /api/admin/stats/concerts by js/checkin.js -->
           </select>
         </div>
       </div>
@@ -147,7 +147,7 @@
       </div>
 
       <div class="checkin-scan-grid">
-        <!-- Quick scan -->
+        <!-- Quick scan: a QR scanner types the ticket code like a keyboard -->
         <div class="card scan-card">
           <div class="scan-frame"><i class="fa-solid fa-qrcode"></i></div>
           <div>
@@ -161,13 +161,24 @@
               Quick Scan
             </p>
             <p>
-              Point the camera at a ticket's QR code to check the attendee in
-              instantly.
+              Scan the ticket's QR code or type its ticket code, then press
+              Enter to check the attendee in.
             </p>
           </div>
-          <button type="button" class="btn btn-primary" style="width: 100%">
-            <i class="fa-solid fa-camera"></i> Open Scanner
-          </button>
+          <form class="ticket-entry-form" id="ticket-entry-form" autocomplete="off">
+            <input
+              type="text"
+              class="form-input"
+              id="ticket-code-input"
+              aria-label="Ticket code"
+              placeholder="CTL-…"
+              maxlength="64"
+              required
+            />
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-right-to-bracket"></i> Check in
+            </button>
+          </form>
         </div>
 
         <!-- Attendee list -->
@@ -232,10 +243,8 @@
       <span>&copy; 2026 Concertly Admin &middot; v1.0</span>
     </footer>
 
-    <script src="../../js/mock-data.js"></script>
-    <script src="../../js/utils.js"></script>
-    <script src="../../js/purchases.js"></script>
-    <script src="../../js/orders.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/admin-common.js"></script>
     <script src="../../js/noti.js"></script>
     <script src="../../js/admin-account.js"></script>
     <script src="../../js/checkin.js"></script>

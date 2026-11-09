@@ -1,48 +1,27 @@
 import os
 from datetime import timedelta
-from pathlib import Path
-from dotenv import load_dotenv
 
-# Base directory for backend
-BASE_DIR = Path(__file__).resolve().parent.parent
+# A seat hold lasts 5 minutes (matches the countdown shown on the checkout page).
+RESERVATION_TTL = timedelta(seconds=int(os.getenv("RESERVATION_TTL_SECONDS", "300")))
+MAX_SEATS_PER_RESERVATION = 8
+# Customers may cancel a paid order until this long before the concert starts.
+CANCEL_CUTOFF = timedelta(hours=24)
+PAYMENT_METHODS = ("card", "ewallet", "bank_transfer")
+# How often the background sweeper releases expired holds (seconds).
+EXPIRY_SWEEP_INTERVAL = 30
+# Retries when PostgreSQL aborts a transaction because of a deadlock/serialization clash.
+MAX_TX_RETRIES = 3
 
-# Load environment variables from .env
-load_dotenv(BASE_DIR / ".env")
-
-
-class Settings:
-    APP_NAME: str = os.getenv("APP_NAME", "Concertly API")
-    APP_ENV: str = os.getenv("APP_ENV", "development")
-    DEBUG: bool = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
-    PORT: int = int(os.getenv("PORT", "8000"))
-
-    # Security & Auth
-    SECRET_KEY: str = os.getenv("JWT_SECRET", "default-dev-secret-key-change-in-production")
-    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
-
-    # Database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "sqlite:///./concertly.db",
-    )
-
-    # CORS
-    CORS_ORIGINS: list[str] = [
-        origin.strip()
-        for origin in os.getenv("CORS_ORIGINS", "*").split(",")
-        if origin.strip()
-    ]
-
-    # Business Rules
-    RESERVATION_TTL: timedelta = timedelta(
-        seconds=int(os.getenv("RESERVATION_TTL_SECONDS", "300"))
-    )
-    MAX_SEATS_PER_RESERVATION: int = int(os.getenv("MAX_SEATS_PER_RESERVATION", "8"))
-    CANCEL_CUTOFF: timedelta = timedelta(hours=24)
-    PAYMENT_METHODS: tuple[str, ...] = ("card", "ewallet", "bank_transfer")
-    EXPIRY_SWEEP_INTERVAL: int = int(os.getenv("EXPIRY_SWEEP_INTERVAL", "30"))
-    MAX_TX_RETRIES: int = int(os.getenv("MAX_TX_RETRIES", "3"))
+# Authentication. Tokens are HS256 JWTs whose "sub" is the user's e-mail (the same format
+# the login endpoint of the auth task issues). JWT_SECRET must be set in the environment.
+JWT_ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 
-settings = Settings()
+def jwt_secret() -> str | None:
+    return os.getenv("JWT_SECRET") or None
+
+
+def dev_user_header_enabled() -> bool:
+    """X-User-Id identification is a development stub; it is OFF unless explicitly enabled."""
+    return os.getenv("ALLOW_DEV_USER_HEADER") == "1"

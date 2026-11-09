@@ -49,20 +49,9 @@
         background: #222;
         color: #fff;
         outline: none;
-        box-sizing: border-box;
       }
       .input-group input:focus {
         border-color: #ff3399;
-      }
-      .error-msg {
-        background: rgba(255, 51, 153, 0.1);
-        border: 1px solid #ff3399;
-        color: #ff3399;
-        padding: 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        margin-bottom: 12px;
-        display: none;
       }
       .btn {
         width: 100%;
@@ -77,6 +66,11 @@
       }
       .btn:hover {
         background: #e01b82;
+      }
+      .login-error {
+        margin: 8px 0 0;
+        color: #ff6b6b;
+        font-size: 14px;
       }
       .link {
         text-align: center;
@@ -94,15 +88,14 @@
   <body>
     <div class="box">
       <h2>Sign In</h2>
-      <div id="login-error" class="error-msg"></div>
       <form onsubmit="handleLogin(event)">
         <div class="input-group">
-          <!-- Đổi nhãn thành Email hoặc Số điện thoại -->
-          <label>Email or Phone Number</label>
+          <label for="username">Email</label>
           <input
-            type="text"
+            type="email"
             id="username"
-            placeholder="name@example.com or 0901234567"
+            autocomplete="username"
+            placeholder="name@example.com"
             required
           />
         </div>
@@ -111,79 +104,52 @@
           <input
             type="password"
             id="password"
+            autocomplete="current-password"
             placeholder="••••••••"
             required
           />
         </div>
+        <p id="login-error" class="login-error" role="alert" hidden></p>
         <button type="submit" class="btn">Login</button>
       </form>
       <div class="link">
         Don't have an account? <a href="register.html">Register</a>
       </div>
     </div>
+    <script src="../../js/api.js"></script>
     <script>
       async function handleLogin(e) {
         e.preventDefault();
-
-        const usernameInput = document.getElementById("username").value;
-        const passwordInput = document.getElementById("password").value;
+        const form = e.target;
+        const button = form.querySelector("button[type=submit]");
         const errorBox = document.getElementById("login-error");
+        const email = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
 
-        errorBox.style.display = "none";
-
-        // OAuth2 yêu cầu dữ liệu gửi lên dưới dạng form-urlencoded
-        const formData = new URLSearchParams();
-        formData.append("username", usernameInput); // Biến vẫn phải tên là 'username' theo chuẩn OAuth2
-        formData.append("password", passwordInput);
-
+        errorBox.hidden = true;
+        button.disabled = true;
+        button.textContent = "Signing in…";
         try {
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: formData,
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            // 1. Lưu token vào trình duyệt
-            localStorage.setItem("token", data.access_token);
-            
-            // 2. Gọi API /api/auth/me để lấy role (quyền) của user vừa đăng nhập
-            const meResponse = await fetch("/api/auth/me", {
-              headers: {
-                "Authorization": `Bearer ${data.access_token}`
-              }
-            });
-            
-            if (meResponse.ok) {
-              const userData = await meResponse.json();
-              
-              // 3. Phân luồng chuyển hướng dựa trên role
-              if (userData.role === "admin") {
-                window.location.href = "../admin/index.html";
-              } else {
-                const redirect = new URLSearchParams(window.location.search).get("redirect");
-                const destination = redirect
-                  ? new URL(redirect, window.location.href)
-                  : new URL("../../index.html", window.location.href);
-
-                window.location.href =
-                  destination.origin === window.location.origin
-                    ? destination.href
-                    : "../../index.html";
-              }
-            }
-          } else {
-            errorBox.textContent = data.detail || "Incorrect email/phone or password.";
-            errorBox.style.display = "block";
+          const session = await ConcertlyAPI.login(email, password);
+          ConcertlyAPI.saveSession(session);
+          if (session.user.role === "admin") {
+            window.location.href = "../admin/index.html";
+            return;
           }
+          const redirect = new URLSearchParams(window.location.search).get("redirect");
+          const destination = redirect
+            ? new URL(redirect, window.location.href)
+            : new URL("../../index.html", window.location.href);
+          window.location.href =
+            destination.origin === window.location.origin ? destination.href : "../../index.html";
         } catch (error) {
-          console.error("Login error:", error);
-          errorBox.textContent = "An error occurred while connecting to the server.";
-          errorBox.style.display = "block";
+          errorBox.textContent =
+            error.code === "network"
+              ? "Cannot reach the Concertly server. Please try again later."
+              : error.message || "Sign in failed.";
+          errorBox.hidden = false;
+          button.disabled = false;
+          button.textContent = "Login";
         }
       }
     </script>
