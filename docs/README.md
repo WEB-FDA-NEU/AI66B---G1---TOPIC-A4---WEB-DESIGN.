@@ -160,8 +160,8 @@ public catalogue list/detail và form Admin lưu PostgreSQL. Admin chọn Standi
 tại mỗi hạng vé; đổi tên không đổi loại. Thiếu booking_type trên request sửa giữ
 loại cũ; khu mới mặc định Seated. Đổi loại khi có ticket hoặc inventory occupied
 trả 409 booking_type_has_bookings. Database cũ cần migration tường minh trước khi
-chạy code mới, xem [backend README](../backend/README.md). Dashboard “tickets remaining” còn
-hạn chế tính tồn kho, đã ghi nhận [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
+chạy code mới, xem [backend README](../backend/README.md). Dashboard “tickets remaining” đã sửa để lấy availableInventory, loại hold
+chưa hết hạn và sold; tham chiếu [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
 
 ## 7. Trạng thái nghiệm thu Task #57
 

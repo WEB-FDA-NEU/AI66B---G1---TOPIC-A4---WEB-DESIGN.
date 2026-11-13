@@ -1,7 +1,7 @@
 /* Run with Node, or via check_project.py using macOS JavaScriptCore. No packages needed. */
 (async () => {
   const sources = typeof require === "function"
-    ? Object.fromEntries(["components", "checkout", "purchases", "tickets", "venue-engine"].map(name => [name, require("fs").readFileSync(`${__dirname}/../js/${name}.js`, "utf8")]))
+    ? Object.fromEntries(["components", "checkout", "purchases", "tickets", "venue-engine", "dashboard"].map(name => [name, require("fs").readFileSync(`${__dirname}/../js/${name}.js`, "utf8")]))
     : globalThis.__sources;
   const results = [];
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -253,6 +253,25 @@
     const after=geometry.zone(map,"Seated",changed).flatMap(v=>v.positions);
     assert(after.every((p,i)=>p.seat.status==="sold" && p.x===before[i].x && p.y===before[i].y),"cache changed positions or returned stale status");
     assert(seats.every(s=>s.status==="available"),"inventory objects mutated");
+  });
+  await test("Dashboard remaining uses real available inventory, not issued ticket totals", () => {
+    const elements = {};
+    const context = {
+      document: { addEventListener() {}, getElementById(id) { return elements[id] ||= {}; } },
+      adminEscape: String, adminDate: String, adminConcertBadge: () => "",
+      rows: [
+        { title: "Held", upcoming: true, capacity: 100, ticketsSold: 2, availableInventory: 7 },
+        { title: "Blocked soldOut", upcoming: true, capacity: 100, ticketsSold: 0, availableInventory: 0 },
+        { title: "Expired hold", upcoming: true, capacity: 100, ticketsSold: 2, availableInventory: 98 },
+      ],
+    };
+    run(sources.dashboard + "\nconcertStats = context.rows; renderUpcomingConcerts();", context);
+    const html = elements["upcoming-concerts-list"].innerHTML;
+    assert(html.includes("7 tickets remaining") && html.includes("0 tickets remaining") && html.includes("98 tickets remaining"), "inventory count ignored");
+    assert(html.includes("2 / 100 sold"), "ticketsSold progress changed");
+    context.rows = [{ title: "Old backend", upcoming: true, capacity: 100, ticketsSold: 0 }];
+    run(sources.dashboard + "\nconcertStats = context.rows; renderUpcomingConcerts();", context);
+    assert(elements["upcoming-concerts-list"].innerHTML.includes("Availability unavailable"), "old API invented availability");
   });
   globalThis.__testResults = results;
   if (typeof process !== "undefined") {

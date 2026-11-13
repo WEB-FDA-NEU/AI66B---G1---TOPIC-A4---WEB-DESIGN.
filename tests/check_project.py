@@ -110,7 +110,7 @@ def main():
                 runtime.execute(source, syntax=True)
             except AssertionError as error:
                 raise AssertionError(f'{name}: {error}') from error
-        sources = {name: (ROOT / f'js/{name}.js').read_text() for name in ['components', 'checkout', 'purchases', 'tickets', 'venue-engine']}
+        sources = {name: (ROOT / f'js/{name}.js').read_text() for name in ['components', 'checkout', 'purchases', 'tickets', 'venue-engine', 'dashboard']}
         runtime.execute(f'globalThis.__sources = {json.dumps(sources)};')
         runtime.execute((ROOT / 'tests/frontend.test.js').read_text())
         result = runtime.execute('JSON.stringify(globalThis.__testResults || null)')

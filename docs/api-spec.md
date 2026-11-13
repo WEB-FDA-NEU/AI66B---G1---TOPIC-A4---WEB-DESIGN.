@@ -316,7 +316,7 @@ Không có request body.
 - **Response thành công:** HTTP **200**, `application/json`, array<`AdminConcertStatsOut`>.
 - **Lỗi chính:** 403 `forbidden`; áp dụng lỗi chung. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
-**Lưu ý hợp đồng:** Cùng quy tắc doanh thu/vé bán như thống kê chung. capacity là tổng capacity các zone; upcoming cần cả starts_at tương lai và status on_sale/sold_out. checkedIn đếm used toàn thời gian của concert, khác checkinsToday. Response không có available/held/sold inventory; không coi capacity − ticketsSold là số vé mua được ngay (xem issue #87 trong tài liệu Dashboard).
+**Lưu ý hợp đồng:** Cùng quy tắc doanh thu/vé bán như thống kê chung. capacity là tổng capacity các zone; upcoming cần cả starts_at tương lai và status on_sale/sold_out. checkedIn đếm used toàn thời gian của concert, khác checkinsToday. Response bổ sung availableInventory/heldInventory/soldInventory từ tồn kho seats. Hold hết hạn tính available, không chờ sweeper; Dashboard dùng availableInventory cho tickets remaining, không suy ra từ ticketsSold. Đây là mở rộng hợp đồng sửa #87, không thay công thức doanh thu/vé bán.
 
 ### 19. `GET /api/admin/orders`
 
@@ -514,6 +514,9 @@ Các bảng sau lấy tên trường/kiểu/required/default trực tiếp từ 
 | `ticketsSold` | integer | Có | — |
 | `checkedIn` | integer | Có | — |
 | `revenue` | integer | Có | — |
+| `availableInventory` | integer | Có | Available + held có held_until ≤ thời điểm DB đọc |
+| `heldInventory` | integer | Có | Held chưa hết hạn |
+| `soldInventory` | integer | Có | Inventory sold, kể cả khóa bán demo không có ticket |
 
 ### AdminOrderDetailOut
 
@@ -1040,12 +1043,15 @@ Các điểm bổ sung so với bản #53/#54:
 | Seat map/health thiếu response_model đầy đủ | routers/seats.py và main.py, schema response object rỗng | Đã ghi nhận, cần developer bổ sung nếu muốn Swagger đầy đủ |
 | Register báo thành công dù chưa tạo user PostgreSQL | pages/auth/register.html handleRegister, không có route register | Chưa tích hợp; README đã cảnh báo rõ |
 | Lưu buyer contact trên order | routers/orders.py không truyền buyer vào checkout service | Chưa triển khai, cần quyết định nghiệp vụ nếu yêu cầu lưu |
-| Nhãn Dashboard remaining chưa phản ánh inventory available | js/dashboard.js và số liệu QA task #56 | Đã có [issue #87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87) |
+| Nhãn Dashboard remaining chưa phản ánh inventory available | js/dashboard.js và số liệu QA task #56 | Đã sửa trong code bản làm việc; tham chiếu [issue #87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87) |
 | Concert CRUD/public list-detail | Đã tích hợp từ #81, endpoint 23–30 | Đã có API |
 | Tự cấp ghế Seated theo khu/số lượng | Không có endpoint tương ứng | Chưa có API |
 
 Task #57 không khẳng định đã thực hiện review TV2/TV3, triển khai các chức năng
 thiếu hoặc sửa các lỗi runtime trên. Không thay đổi backend để khớp tài liệu.
+
+
+Cập nhật sửa #87: AdminConcertStatsOut bổ sung ba trường inventory ở trên. Khi backend cũ chưa trả availableInventory, frontend hiển thị Availability unavailable; không fallback capacity − ticketsSold. Cập nhật này chưa có nghĩa PR đã merge hoặc issue đã đóng.
 
 ### Bổ sung review #83 sau tích hợp #81
 

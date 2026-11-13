@@ -245,7 +245,8 @@ Với dữ liệu một concert từ API, frontend tính chính xác:
 D = max(capacity, 1)
 S = min(ticketsSold, D)
 Tỷ lệ hiển thị (%) = Math.round(100 × S / D)
-Nhãn tickets remaining = capacity − S
+Nhãn tickets remaining = availableInventory (API)
+Nếu API cũ thiếu trường: Availability unavailable
 ```
 
 Đây là tỷ lệ **vé còn hiệu lực trên sức chứa**, không phải tỷ lệ ghế đang có người
@@ -253,8 +254,10 @@ ngồi, không phải tỷ lệ inventory sold, cũng không đếm hold. Áp d�
 và Seated. Hủy/hoàn làm ticketsSold giảm; failed không tăng số bán. Chặn mẫu số 0
 và kẹp S là hành vi frontend, không sửa dữ liệu nguồn bất thường.
 
-Nhãn remaining chưa phản ánh lượng mua được ngay: có thể tính cả inventory held
-và sold không gắn ticket vào phần còn lại. Sai lệch đã ghi tại
+Nhãn remaining trước bản sửa #87 tính capacity − S nên bao gồm cả inventory held
+và sold không gắn ticket. Bản làm việc đã chuyển sang availableInventory: available
+cộng hold hết hạn, loại held còn hạn và sold. API còn trả heldInventory và
+soldInventory độc lập; việc đọc không giải phóng row DB. Sai lệch gốc ghi tại
 [issue #87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
 Không sửa công thức Tickets Sold để che sai lệch này.
 
@@ -336,7 +339,7 @@ hai request API hoặc giữa API với SQL khi có giao dịch đồng thời.
 | --- | --- | --- |
 | Đã triển khai, có bằng chứng QA trước đó | Hold 300 giây, giới hạn 6, Standing/Seated, checkout và QR, hủy/hoàn toàn phần, thống kê | Test QA không đại diện mọi tải và cấu hình; không chạy lại ở Task #58 |
 | Đã triển khai, chưa kiểm chứng đầy đủ | Sweeper khi vận hành lâu dài, cạnh tranh tải lớn, dữ liệu đang thay đổi, đồng bộ timezone giữa trình duyệt và DB | Cần đánh giá vận hành/stress test riêng; không đưa chỉ tiêu hiệu năng chưa đo |
-| Đã triển khai nhưng còn hạn chế | Nhãn remaining; buyer chỉ validate; giá không khóa tại hold; UI chưa có giỏ mixed nhiều hạng | Ghi nhận #87; các phần còn lại cần thống nhất nghiệp vụ trước khi mở rộng |
+| Đã triển khai nhưng còn hạn chế | Remaining đã sửa nguồn inventory trong bản làm việc; buyer chỉ validate; giá không khóa tại hold; UI chưa có giỏ mixed nhiều hạng | Ghi nhận #87; các phần còn lại cần thống nhất nghiệp vụ trước khi mở rộng |
 | Chưa triển khai | Register backend, tự cấp ghế Seated, refresh token, lưu buyer riêng/gửi email vé | Không xem giao diện demo hay trường DB dự phòng là workflow hoàn chỉnh |
 | Chưa triển khai | Hủy từng vé/hoàn một phần, duyệt refund requested/rejected, tự hoàn tất cả khi concert cancelled | Luồng hiện tại chỉ hủy toàn đơn theo điều kiện và mock refund thành công |
 | Ngoài phạm vi demo hiện tại | Gateway/hoàn tiền thật, webhook và đối soát ngân hàng, phí/thuế/voucher, đa tiền tệ | Cần thiết kế hợp đồng thanh toán và quy tắc tài chính trước khi triển khai |
@@ -362,6 +365,11 @@ tự ghi là đã nghiệm thu chung.
 - [Công thức và đối chiếu Dashboard](dashboard-metrics.md).
 - [Dữ liệu mẫu](seed-data.md) và [seed_data.json](../backend/scripts/seed_data.json).
 
+
+**Cập nhật sau Task #58 — sửa #87:** Phần remaining và hợp đồng inventory trong báo
+cáo được đồng bộ với bản sửa hiện tại. Các số liệu/bằng chứng QA lịch sử ở mục 5
+vẫn giữ đúng mốc đã ghi; không coi chúng là dữ liệu mới sau bản sửa. Chưa có đánh
+giá tải hoặc nghiệm thu production cho mở rộng inventory này.
 
 ### Cập nhật review #83 sau #81 — 14/11/2026
 
