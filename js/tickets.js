@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
     seatTitle.textContent = `${zone.name} · ${isSeated() ? "Seated" : "Standing"}`;
     if (!isSeated()) {
       fittedLayout = null;
-      seatPicker.textContent = `Standing: choose a quantity (maximum 8). ${availableForMe(zone)} tickets available. No assigned rows or seats.`;
+      seatPicker.textContent = `Standing: choose a quantity (maximum ${MAX_SEATS}). ${availableForMe(zone)} tickets available. No assigned rows or seats.`;
       return;
     }
     if (!venueMap || !window.SeatGeometry) {

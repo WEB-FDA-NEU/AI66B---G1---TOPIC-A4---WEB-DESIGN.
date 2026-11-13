@@ -68,8 +68,9 @@ def test_checkout_rejects_foreign_cancelled_and_bad_method(db, users, concert, s
 
 
 def test_last_seat_sold_marks_concert_sold_out_and_cancel_reopens(db, users, concert, seat_ids):
-    for start in (0, 8):
-        ids = seat_ids[start : start + 8] if start == 0 else seat_ids[8:]
+    from app.config import MAX_SEATS_PER_RESERVATION
+    for start in range(0, len(seat_ids), MAX_SEATS_PER_RESERVATION):
+        ids = seat_ids[start : start + MAX_SEATS_PER_RESERVATION]
         order = pay(db, users["a"], res_svc.hold_seats(db, users["a"], concert, ids))
     assert scalar("SELECT status FROM concerts WHERE id=:i", i=concert) == "sold_out"
     with pytest.raises(DomainError) as e:
@@ -77,3 +78,20 @@ def test_last_seat_sold_marks_concert_sold_out_and_cancel_reopens(db, users, con
     assert e.value.code == "concert_not_on_sale"
     orders_svc.cancel_order(db, users["a"], order["id"])
     assert scalar("SELECT status FROM concerts WHERE id=:i", i=concert) == "on_sale"
+
+@pytest.mark.parametrize('count', [7, 8])
+def test_new_limit_rejects_legacy_active_holds_but_preserves_paid_orders(db, users, concert, seat_ids, monkeypatch, count):
+    # Build a hold/order using the former limit, without changing production config.
+    import app.services.reservations as reservations_module
+    monkeypatch.setattr(reservations_module, 'MAX_SEATS_PER_RESERVATION', 8)
+    hold = res_svc.hold_seats(db, users['a'], concert, seat_ids[:count])
+    with pytest.raises(DomainError) as error:
+        pay(db, users['a'], hold)
+    assert error.value.code == 'too_many_seats'
+    assert scalar('SELECT count(*) FROM orders') == 0
+    # A paid legacy order is still readable/retryable after the cap is reduced.
+    with monkeypatch.context() as old_policy:
+        old_policy.setattr(checkout_svc, 'MAX_SEATS_PER_RESERVATION', 8)
+        order = pay(db, users['a'], hold)
+    assert len(pay(db, users['a'], hold)['tickets']) == count
+    assert orders_svc.get_order(db, users['a'], order['id'])['id'] == order['id']

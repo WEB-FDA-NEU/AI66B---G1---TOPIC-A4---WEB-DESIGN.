@@ -13,7 +13,7 @@ window.ConcertlyCodes = {
 };
 
 window.ConcertlyBooking = {
-  maxTickets: 8,
+  maxTickets: 6,
   holdMilliseconds: 5 * 60 * 1000,
   itemLabel(item) {
     const zone = item.zone_name ?? item.zone ?? "";

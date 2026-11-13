@@ -34,13 +34,13 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | Method & path | Purpose |
 | --- | --- |
 | `GET /concerts/{id}/seats` | Zones and seat availability (lapsed holds show as available) |
-| `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 8 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
+| `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 6 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
 | `GET /reservations/{id}` | Hold status and `seconds_left` |
 | `DELETE /reservations/{id}` | Release a hold |
 | `POST /checkout` `{reservation_id, payment_method, buyer: {full_name, email, phone}}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
 | `POST /auth/login`, `GET /auth/me` | Sign in (OAuth2 password form) / current user |
 | `GET /orders/me` (alias `/orders`), `GET /orders/{id}` | The caller's orders (someone else's order → 404) |
-| `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
+| `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Owner only; pending/paid, no used tickets; more than 24 h before the show, except cancelled concerts waive the cutoff |
 | `GET /tickets/me` (alias `/tickets`), `GET /tickets/{id}` | The caller's tickets. `qr_data` (the ticket code) is set only while the ticket is `valid`; the detail also returns `qr_image`, an SVG data URI rendered by the server |
 | `POST /tickets/check-in` `{ticket_code}` | Staff scan; a ticket can be admitted once |
 | `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts`, plus `checkinsToday` (tickets checked in since midnight) |
@@ -91,7 +91,7 @@ overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
 - Seated zones expose PostgreSQL seat IDs, rows, numbers and live availability. Reserve specific IDs via `seat_ids`.
 - Standing zones expose availability counts, never numbered seats. Reserve a zone and quantity via `standing`.
 - Both modes reuse the existing `seats` inventory rows, row locks, five-minute expiry, checkout, refund and QR lifecycle. Standing rows act as inventory units internally, not assigned seats. No database schema changes or migration of existing bookings is required.
-- HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 8 applies to the combined request.
+- HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 6 applies to the combined request.
 - `booking_type` is added to reservation items and tickets. Public standing `row`/`row_label`/`seat_number` are null. Existing IDs, stored row values, ticket codes and QR payloads are not rewritten.
 - Unknown legacy zones retain their existing numbered-seat contract. Configure new zones explicitly before advertising them as Standing.
 - Multiple SVG sections with the same ticket-tier name share that tier's inventory; the existing seats are allocated once across its SVG fragments for display. This configuration is not an assertion about the artists' real seating plans.

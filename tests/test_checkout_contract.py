@@ -7,6 +7,8 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'backend'))
+
 SCHEMA = Path(__file__).resolve().parents[1] / 'backend/app/schemas.py'
 spec = importlib.util.spec_from_file_location('concertly_checkout_schema', SCHEMA)
 schemas = importlib.util.module_from_spec(spec)
@@ -43,9 +45,9 @@ class CheckoutContractTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.checkout(buyer={'full_name': 'Buyer'})
 
-    def test_eight_seat_boundary(self):
-        self.assertEqual(len(schemas.HoldRequest(concert_id=1, seat_ids=list(range(1, 9))).seat_ids), 8)
-        for ids in [[], list(range(1, 10))]:
+    def test_six_seat_boundary(self):
+        self.assertEqual(len(schemas.HoldRequest(concert_id=1, seat_ids=list(range(1, 7))).seat_ids), 6)
+        for ids in [[], list(range(1, 8)), list(range(1, 9))]:
             with self.subTest(ids=ids), self.assertRaises(ValidationError):
                 schemas.HoldRequest(concert_id=1, seat_ids=ids)
 

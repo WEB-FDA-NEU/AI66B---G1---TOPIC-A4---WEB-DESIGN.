@@ -155,11 +155,11 @@ def main():
         status, seats = request('/concerts/1/seats', token)
         available = [s['id'] for z in seats['zones'] for s in z['seats'] if s['status'] == 'available']
         assert status == 200 and len(available) > 10
-        for seat_ids, expected in [([], 422), (available[:9], 422)]:
+        for seat_ids, expected in [([], 422), (available[:7], 422), (available[:8], 422)]:
             assert request('/reservations', token, {'concert_id': 1, 'seat_ids': seat_ids})[0] == expected
-        results['flows'].append('API rejects 0 and 9 seats')
-        assert request('/reservations', token, {'concert_id': 1, 'seat_ids': available[:8]})[0] == 201
-        results['flows'].append('API accepts exactly 8 seats')
+        results['flows'].append('API rejects 0, 7 and 8 seats')
+        assert request('/reservations', token, {'concert_id': 1, 'seat_ids': available[:6]})[0] == 201
+        results['flows'].append('API accepts exactly 6 seats')
         # Browser: choose -> hold -> validate -> pay -> order -> QR.
         browser.navigate('pages/concerts/tickets.html?id=c1&ticketType=Standard%20Tier%202')
         browser.wait('document.querySelector(".venue-svg") !== null')
@@ -168,10 +168,10 @@ def main():
         assert browser.evaluate('document.querySelector(".venue-svg").getBoundingClientRect().width > document.getElementById("concert-map").clientWidth * 1.4')
         browser.click('[data-map-zoom="reset"]')
         browser.evaluate('document.querySelector(".venue-section[data-name=\\"Standard Tier 2\\"]").dispatchEvent(new KeyboardEvent("keydown", {key:"Enter", bubbles:true}))')
-        browser.evaluate('for(let i=0;i<9;i++)document.querySelectorAll(".seat:not(:disabled)")[i].click()')
-        assert browser.evaluate('document.querySelectorAll(".seat.selected").length===8')
+        browser.evaluate('for(let i=0;i<7;i++)document.querySelectorAll(".seat:not(:disabled)")[i].click()')
+        assert browser.evaluate('document.querySelectorAll(".seat.selected").length===6')
         browser.evaluate('while(document.querySelectorAll(".seat.selected").length>1)document.querySelector(".seat.selected").click()')
-        results['flows'].append('SVG zoom/reset and keyboard zone selection work; API seat UI stops at 8 selections')
+        results['flows'].append('SVG zoom/reset and keyboard zone selection work; API seat UI stops at 6 selections')
         browser.click('#continue-payment')
         browser.wait('location.pathname.endsWith("/checkout/index.html") && !document.getElementById("confirm-payment").disabled')
         assert browser.evaluate('document.getElementById("checkout-timer").textContent.includes("Seats held")')
@@ -301,6 +301,33 @@ def main():
         browser.navigate('pages/checkout/index.html')
         browser.wait('location.pathname.endsWith("/session-expired.html")')
         results['flows'].append('Expired API checkout redirects before payment')
+        # Regression: cancelled concert within 24h exposes the existing cancel button.
+        _, inventory = request('/concerts/1/seats', token)
+        remaining = next(s['id'] for z in inventory['zones'] for s in z['seats'] if s['status']=='available')
+        _, cancellation_hold = request('/reservations', token, {'concert_id':1,'seat_ids':[remaining]})
+        code, cancellation_order = request('/checkout', token, {'reservation_id':cancellation_hold['id'],'payment_method':'card','buyer':{'full_name':'QA Buyer','email':'qa@example.com','phone':'0912345678'}})
+        assert code==201
+        with db.cursor() as cursor:
+            cursor.execute('SELECT starts_at,status FROM concerts WHERE id=1')
+            original_concert=cursor.fetchone()
+            cursor.execute("UPDATE concerts SET starts_at=now()+interval '1 hour',status='cancelled' WHERE id=1")
+        db.commit()
+        try:
+            _, detail=request('/orders/'+str(cancellation_order['id']),token)
+            assert detail['can_cancel'] is True
+            browser.navigate('pages/me/order-detail.html?id='+str(cancellation_order['id']))
+            browser.wait('document.getElementById("cancelOrderButton")!==null')
+            browser.evaluate('window.confirm=()=>true')
+            browser.click('#cancelOrderButton')
+            browser.wait('document.getElementById("cancelOrderButton")===null')
+            _, refunded=request('/orders/'+str(cancellation_order['id']),token)
+            assert refunded['refund_status']=='refunded' and refunded['refund_amount']==cancellation_order['total_amount']
+            assert refunded['can_cancel'] is False
+            assert request('/orders/'+str(cancellation_order['id'])+'/cancel',token,{},method='POST')[0]==409
+            results['flows'].append('Cancelled concert within 24h: can_cancel true -> visible cancel button -> full mock refund -> button removed; duplicate cancellation rejected')
+        finally:
+            with db.cursor() as cursor:cursor.execute('UPDATE concerts SET starts_at=%s,status=%s WHERE id=1',original_concert)
+            db.commit()
         results['errors'] = browser.errors
     except Exception as error:
         results['fatal'] = str(error)
