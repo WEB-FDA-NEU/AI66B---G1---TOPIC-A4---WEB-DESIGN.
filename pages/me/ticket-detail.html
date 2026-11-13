@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../../css/me.css" />
     <script src="../../js/api.js"></script>
     <script src="../../js/me.js"></script>
+    <script src="../../js/components.js"></script>
   </head>
   <body>
     <div class="shell">
@@ -107,12 +108,12 @@
       function render(t) {
         const status = TICKET_STATUS_MAP[t.status] || { label: t.status };
         const orderUrl = `order-detail.html?id=${encodeURIComponent(t.order_id)}`;
-        document.title = `${t.ticket_code} — Concertly`;
-        document.getElementById("ticketBreadcrumb").textContent = t.ticket_code;
+        document.title = `${ConcertlyCodes.ticket(t)} — Concertly`;
+        document.getElementById("ticketBreadcrumb").textContent = ConcertlyCodes.ticket(t);
         // The QR image is rendered by the backend from the ticket code (qr_data) and is
         // only provided while the ticket is valid.
         const qr = t.qr_image
-          ? `<div class="digital-ticket-qr"><img src="${escapeHtml(t.qr_image)}" alt="QR code for ticket ${escapeHtml(t.ticket_code)}" width="180" height="180"><p>Show this QR code at the venue entrance.</p></div>`
+          ? `<div class="digital-ticket-qr"><img src="${escapeHtml(t.qr_image)}" alt="QR code for ticket ${escapeHtml(ConcertlyCodes.ticket(t))}" width="180" height="180"><p>Show this QR code at the venue entrance.</p></div>`
           : `<div class="digital-ticket-notice">QR code is unavailable because this ticket is ${escapeHtml(status.label.toLowerCase())}${t.checked_in_at ? ` (checked in ${formatDateTime(t.checked_in_at)})` : ""}.</div>`;
 
         container.innerHTML = `
@@ -123,11 +124,12 @@
               <dl class="digital-ticket-facts">
                 <div><dt>Date &amp; time</dt><dd>${formatDateTime(t.starts_at)}</dd></div>
                 <div><dt>Venue</dt><dd>${escapeHtml(concertLocation(t))}</dd></div>
-                <div><dt>Seat</dt><dd>${escapeHtml(seatLabel(t))}</dd></div>
+                <div><dt>${t.booking_type === "standing" ? "Zone" : "Seat"}</dt><dd>${escapeHtml(seatLabel(t))}</dd></div>
                 <div><dt>Ticket type</dt><dd>${escapeHtml(t.zone)} · ${formatCurrency(t.price)}</dd></div>
+                ${t.booking_type === "standing" ? "<div><dt>Quantity</dt><dd>1 admission</dd></div>" : ""}
                 <div><dt>Ticket holder</dt><dd>${escapeHtml(t.holder_name)}</dd></div>
-                <div><dt>Ticket ID</dt><dd class="mono">${escapeHtml(t.ticket_code)}</dd></div>
-                <div><dt>Order ID</dt><dd><a href="${orderUrl}" class="mono">#CT-${t.order_number}</a></dd></div>
+                <div><dt>Ticket ID</dt><dd class="mono">${escapeHtml(ConcertlyCodes.ticket(t))}</dd></div>
+                <div><dt>Order ID</dt><dd><a href="${orderUrl}" class="mono">${ConcertlyCodes.order(t)}</a></dd></div>
               </dl>
               ${qr}
             </div>

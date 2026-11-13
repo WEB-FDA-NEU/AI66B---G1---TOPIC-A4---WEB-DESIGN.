@@ -192,7 +192,7 @@ def test_stats_on_empty_database(client, db, admin):
 def test_stats_track_checkout_and_cancellation(client, db, users, concert, seat_ids, admin):
     a, boss = bearer(db, users["a"]), bearer(db, admin)
     hold = client.post("/api/reservations", json={"concert_id": concert, "seat_ids": seat_ids[:3]}, headers=a).json()
-    order = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "card"}, headers=a).json()
+    order = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "card", "buyer": {"full_name": "Test Buyer", "email": "buyer@example.com", "phone": "0912345678"}}, headers=a).json()
     s = client.get("/api/admin/stats", headers=boss).json()
     assert (s["ticketsSold"], s["totalOrders"], s["totalRevenue"]) == (3, 1, 3000)
 

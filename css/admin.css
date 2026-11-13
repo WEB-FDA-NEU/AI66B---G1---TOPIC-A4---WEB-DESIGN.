@@ -1154,6 +1154,36 @@ textarea.form-input {
     color: var(--color-error);
 }
 
+.admin-table-scroll { max-width: 100%; overflow-x: auto; }
+.admin-table-scroll:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.admin-table-scroll .data-table { min-width: 620px; }
+.admin-wrapper, .table-card, .dashboard-grid > * { min-width: 0; }
+.data-table td { overflow-wrap: anywhere; }
+@media (max-width: 1080px) {
+  .admin-topbar { height: auto; min-height: var(--navbar-height); flex-wrap: wrap; gap: 12px; padding: 12px 20px; }
+  .admin-nav { display: flex; order: 3; flex: 1 0 100%; overflow-x: auto; }
+  .admin-nav-link { white-space: nowrap; min-height: 44px; }
+  .admin-topbar-right { margin-left: auto; gap: 12px; }
+}
+@media (max-width: 680px) {
+  .admin-body { padding-bottom: 0; }
+  .admin-wrapper { width: calc(100% - 32px); padding-top: 24px; }
+  .admin-page-header, .table-pagination, .checkin-toolbar { flex-wrap: wrap; }
+  .admin-page-title { font-size: 28px; }
+  .admin-topbar { padding: 10px 16px; gap: 8px; }
+  .admin-view-site { font-size: 12px; }
+  .admin-nav { gap: 0; }
+  .admin-nav-link { padding: 8px 10px; font-size: 12px; }
+  .filter-tabs { flex-wrap: wrap; }
+  .scan-card, .panel { padding: 18px; }
+  .ticket-entry-form { flex-wrap: wrap; }
+  .ticket-entry-form .form-input { flex-basis: 100%; }
+  .table-filters { flex-wrap: wrap; }
+  .form-actions { flex-wrap: wrap; }
+  .cover-upload { flex-wrap: wrap; }
+  .pagination-controls { flex-wrap: wrap; }
+}
+
 .ticket-entry-form {
     display: flex;
     gap: var(--space-sm);
@@ -1163,4 +1193,8 @@ textarea.form-input {
 .ticket-entry-form .form-input {
     flex: 1;
     min-width: 0;
+}
+
+@media (max-width: 680px) {
+  .ticket-entry-form .form-input { flex: 1 1 100%; }
 }

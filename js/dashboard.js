@@ -165,7 +165,7 @@ async function renderRecentOrders() {
     const [label, cls] = ORDER_STATUS_BADGE[orderStatusKey(order)] || [order.status, "badge-gray"];
     return `
     <tr>
-      <td class="text-muted">#CT-${order.order_number}</td>
+      <td class="text-muted">${adminEscape(ConcertlyCodes.order(order))}</td>
       <td>${adminEscape(order.customer.full_name)}<div class="text-muted">${adminEscape(order.customer.email)}</div></td>
       <td>${adminEscape(order.concert_title)}</td>
       <td>${adminMoney(order.total_amount, 2)}</td>

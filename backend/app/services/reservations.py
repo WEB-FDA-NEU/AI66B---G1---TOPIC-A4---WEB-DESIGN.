@@ -26,6 +26,7 @@ from app.config import MAX_SEATS_PER_RESERVATION, RESERVATION_TTL
 from app.errors import DomainError, bad_request, conflict, not_found
 from app.models import Concert, Reservation, Seat, Zone
 from app.services.txn import transactional
+from app.venue_catalog import booking_type
 
 
 @dataclass
@@ -33,9 +34,10 @@ class SeatView:
     id: int
     zone_id: int
     zone_name: str
-    row_label: str
-    seat_number: int
+    row_label: str | None
+    seat_number: int | None
     price: Decimal
+    booking_type: str = "seated"
 
 
 @dataclass
@@ -104,12 +106,57 @@ def release_expired(db: Session, seats: list[Seat], now: datetime) -> None:
 
 def seat_views(db: Session, seat_ids) -> list[SeatView]:
     rows = db.execute(
-        select(Seat.id, Zone.id, Zone.name, Seat.row_label, Seat.seat_number, Zone.price)
+        select(Seat.id, Zone.id, Zone.name, Seat.row_label, Seat.seat_number, Zone.price, Zone.concert_id)
         .join(Zone, Zone.id == Seat.zone_id)
         .where(Seat.id.in_(list(seat_ids)))
         .order_by(Zone.id, Seat.row_label, Seat.seat_number)
     ).all()
-    return [SeatView(*r) for r in rows]
+    return [SeatView(r[0], r[1], r[2], r[3] if booking_type(r[6], r[2]) == "seated" else None,
+                     r[4] if booking_type(r[6], r[2]) == "seated" else None, r[5], booking_type(r[6], r[2])) for r in rows]
+
+
+@transactional
+def hold_tickets(db: Session, user_id: int, concert_id: int, seat_ids: list[int], standing: list[tuple[int, int]]) -> ReservationView:
+    """Reserve numbered seats and/or standing quantities in one transaction.
+
+    Existing standing Seat rows are inventory units, never public seat assignments.
+    Lock the entire relevant inventory and the previous hold in the same ID order
+    as hold_seats, then reuse its expiry, validation and all-or-nothing assignment.
+    """
+    count = len(seat_ids) + sum(quantity for _, quantity in standing)
+    if not 1 <= count <= MAX_SEATS_PER_RESERVATION or any(not 1 <= q <= MAX_SEATS_PER_RESERVATION for _, q in standing):
+        raise bad_request("too_many_seats", "Select 1–8 tickets in total.")
+    if len(set(seat_ids)) != len(seat_ids) or len({z for z, _ in standing}) != len(standing):
+        raise bad_request("duplicate_seats", "Duplicate seats or standing zones.")
+    # Serialize replacement requests for the same user/concert without locking users
+    # or interfering with the global seats -> reservation -> order lock sequence.
+    db.execute(select(func.pg_advisory_xact_lock(func.hashtextextended(f"hold:{user_id}:{concert_id}", 0))))
+    requested_zones = {z for z, _ in standing}
+    zones = {z.id: z for z in db.execute(select(Zone).where(Zone.id.in_(requested_zones))).scalars()}
+    for zone_id in requested_zones:
+        if zone_id not in zones or zones[zone_id].concert_id != concert_id:
+            raise bad_request("seat_wrong_concert", "Standing zone does not belong to this concert.")
+        if zones[zone_id].booking_type != "standing":
+            raise bad_request("zone_requires_seats", "Select specific seats in this seated zone.")
+    explicit = db.execute(select(Seat.id, Zone.concert_id, Zone.name).join(Zone, Zone.id == Seat.zone_id).where(Seat.id.in_(seat_ids))).all()
+    if any(booking_type(cid, name) == "standing" for _, cid, name in explicit):
+        raise bad_request("zone_requires_quantity", "Standing zones are booked by quantity, not seat IDs.")
+    previous = select(Reservation.id).where(Reservation.user_id == user_id, Reservation.concert_id == concert_id, Reservation.status == "active")
+    old_ids = list(db.execute(select(Seat.id).where(Seat.reservation_id.in_(previous))).scalars())
+    pool_ids = list(db.execute(select(Seat.id).where(Seat.zone_id.in_(requested_zones))).scalars())
+    locked = lock_seats(db, [*seat_ids, *old_ids, *pool_ids])
+    now = db_now(db)
+    previous_ids = set(db.execute(previous).scalars())
+    allocated = []
+    for zone_id, quantity in standing:
+        candidates = [s.id for s in locked if s.zone_id == zone_id and (
+            s.status == "available" or (s.status == "held" and (s.held_until <= now or s.reservation_id in previous_ids))
+        )]
+        if len(candidates) < quantity:
+            raise conflict("standing_unavailable", "Not enough standing tickets remain. Please refresh availability.")
+        allocated.extend(candidates[:quantity])
+    # No nested commit: both modes become a single reservation or neither does.
+    return hold_seats.__wrapped__(db, user_id, concert_id, [*seat_ids, *allocated])
 
 
 @transactional
@@ -164,6 +211,10 @@ def hold_seats(
     )
 
     locked = {s.id: s for s in lock_seats(db, [*seat_ids, *old_seat_ids])}
+    # A request may have waited for locks; start the five-minute hold from now.
+    now = db_now(db)
+    if (concert.sale_end_at and now > concert.sale_end_at) or now >= concert.starts_at:
+        raise conflict("sale_ended", "Ticket sales for this concert have ended.")
     release_expired(db, list(locked.values()), now)
 
     if old_reservation_ids:

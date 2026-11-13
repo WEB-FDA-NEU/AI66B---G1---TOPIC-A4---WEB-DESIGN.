@@ -25,7 +25,7 @@ def test_full_purchase_flow(client, users, concert, seat_ids):
 
     assert client.get(f"/api/reservations/{hold['id']}", headers=a).json()["seats"][0]["zone_name"] == "VIP"
 
-    r = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "card"}, headers=a)
+    r = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "card", "buyer": {"full_name": "Test Buyer", "email": "buyer@example.com", "phone": "0912345678"}}, headers=a)
     assert r.status_code == 201
     order = r.json()
     assert order["status"] == "paid" and len(order["tickets"]) == 2 and order["total_amount"] == 2000
@@ -52,11 +52,11 @@ def test_release_expired_checkout_and_cancel(client, users, concert, seat_ids):
 
     hold = client.post("/api/reservations", json={"concert_id": concert, "seat_ids": [seat_ids[0]]}, headers=a).json()
     expire_reservation(hold["id"])
-    r = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "card"}, headers=a)
+    r = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "card", "buyer": {"full_name": "Test Buyer", "email": "buyer@example.com", "phone": "0912345678"}}, headers=a)
     assert r.status_code == 410 and r.json()["error"]["code"] == "reservation_expired"
 
     hold = client.post("/api/reservations", json={"concert_id": concert, "seat_ids": [seat_ids[0]]}, headers=a).json()
-    order = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "bank_transfer"}, headers=a).json()
+    order = client.post("/api/checkout", json={"reservation_id": hold["id"], "payment_method": "bank_transfer", "buyer": {"full_name": "Test Buyer", "email": "buyer@example.com", "phone": "0912345678"}}, headers=a).json()
     c = client.post(f"/api/orders/{order['id']}/cancel", json={"reason": "x"}, headers=a)
     assert c.status_code == 200 and c.json()["refund_status"] == "refunded"
     assert client.post(f"/api/orders/{order['id']}/cancel", headers=a).status_code == 409

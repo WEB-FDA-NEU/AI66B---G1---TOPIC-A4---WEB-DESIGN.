@@ -77,6 +77,7 @@ sections:[
 id:"vip",
 
 name:"One of a Kind VIP",
+bookingType:"standing",
 
 labelText:"VIP EXPERIENCE",
 
@@ -110,6 +111,7 @@ y:280
 id:"pit",
 
 name:"Coup D'Etat Pit",
+bookingType:"standing",
 
 labelText:"COUP D'ETAT PIT",
 
@@ -143,6 +145,7 @@ y:520
 id:"standard-left",
 
 name:"Standard Tier",
+bookingType:"seated",
 
 labelText:"STANDARD LEFT",
 
@@ -176,6 +179,7 @@ y:520
 id:"standard-right",
 
 name:"Standard Tier",
+bookingType:"seated",
 
 labelText:"STANDARD RIGHT",
 
@@ -209,6 +213,7 @@ y:520
 id:"upper-left",
 
 name:"Standard Tier",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -242,6 +247,7 @@ y:800
 id:"upper-right",
 
 name:"Standard Tier",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -275,6 +281,7 @@ y:800
 id:"back",
 
 name:"Standard Tier",
+bookingType:"seated",
 
 labelText:"BACK",
 

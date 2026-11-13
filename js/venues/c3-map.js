@@ -86,6 +86,7 @@ sections:[
 id:"c3-vip",
 
 name:"Cactus Jack VIP Pass",
+bookingType:"standing",
 
 labelText:"VIP EXPERIENCE",
 
@@ -127,6 +128,7 @@ y:250
 id:"c3-mosh",
 
 name:"Floor Standing Mosh",
+bookingType:"standing",
 
 labelText:"MOSH PIT",
 
@@ -168,6 +170,7 @@ y:560
 id:"c3-left",
 
 name:"Balcony Seating",
+bookingType:"seated",
 
 labelText:"BALCONY LEFT",
 
@@ -209,6 +212,7 @@ y:500
 id:"c3-right",
 
 name:"Balcony Seating",
+bookingType:"seated",
 
 labelText:"BALCONY RIGHT",
 
@@ -250,6 +254,7 @@ y:500
 id:"c3-back",
 
 name:"Balcony Seating",
+bookingType:"seated",
 
 labelText:"BACK BALCONY",
 

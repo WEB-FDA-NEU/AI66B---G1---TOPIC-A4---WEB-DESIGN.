@@ -42,8 +42,13 @@ def seat_map(db: Session, concert_id: int, user_id: int | None = None) -> dict:
                 "name": z.name,
                 "price": int(z.price),
                 "color": z.color,
+                "booking_type": z.booking_type,
                 "available": sum(1 for s in by_zone[z.id] if s["status"] == "available"),
-                "seats": by_zone[z.id],
+                "held": sum(1 for s in by_zone[z.id] if s["status"] == "held"),
+                "sold": sum(1 for s in by_zone[z.id] if s["status"] == "sold"),
+                "held_by_me_count": sum(1 for s in by_zone[z.id] if s["held_by_me"]),
+                # Standing inventory has no public row/seat assignments.
+                "seats": by_zone[z.id] if z.booking_type == "seated" else [],
             }
             for z in zones
         ],

@@ -82,6 +82,7 @@ VIP FRONT
 id:"c2-vip",
 
 name:"VIP After Hours Lounge",
+bookingType:"standing",
 
 labelText:"VIP LOUNGE",
 
@@ -123,6 +124,7 @@ CENTER FLOOR
 id:"c2-floor",
 
 name:"General Admission Standing",
+bookingType:"standing",
 
 labelText:"FLOOR STANDING",
 
@@ -164,6 +166,7 @@ LEFT LOWER BOWL
 id:"c2-left",
 
 name:"Cat 1 Seated",
+bookingType:"seated",
 
 labelText:"LOWER BOWL LEFT",
 
@@ -205,6 +208,7 @@ RIGHT LOWER BOWL
 id:"c2-right",
 
 name:"Cat 1 Seated",
+bookingType:"seated",
 
 labelText:"LOWER BOWL RIGHT",
 
@@ -246,6 +250,7 @@ UPPER LEFT
 id:"c2-upper-left",
 
 name:"Cat 1 Seated",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -287,6 +292,7 @@ UPPER RIGHT
 id:"c2-upper-right",
 
 name:"Cat 1 Seated",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -328,6 +334,7 @@ BACK
 id:"c2-back",
 
 name:"General Admission Standing",
+bookingType:"standing",
 
 labelText:"BACK STANDING",
 

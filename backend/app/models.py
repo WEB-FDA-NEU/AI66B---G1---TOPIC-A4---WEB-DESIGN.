@@ -113,6 +113,11 @@ class Zone(Base):
     concert: Mapped[Concert] = relationship(back_populates="zones")
     seats: Mapped[list[Seat]] = relationship(back_populates="zone", cascade="all, delete-orphan")
 
+    @property
+    def booking_type(self) -> str:
+        from app.venue_catalog import booking_type
+        return booking_type(self.concert_id, self.name)
+
 
 class Reservation(Base):
     __tablename__ = "reservations"

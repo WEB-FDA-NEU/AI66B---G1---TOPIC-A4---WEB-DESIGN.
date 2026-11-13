@@ -5,6 +5,7 @@
 //    nav link is hovered, and glides back to the current page's link
 //    when the mouse leaves the nav — instead of a static underline.
 document.addEventListener("DOMContentLoaded", () => {
+  renderSharedHeader();
   initStickyHeader();
   initNavIndicator();
   initMobileNav();
@@ -12,6 +13,49 @@ document.addEventListener("DOMContentLoaded", () => {
   initAuthMenu();
   initAuthGuards();
 });
+
+// One template for existing public headers and the previously empty navbar mounts.
+function renderSharedHeader() {
+  const mount = document.getElementById("site-navbar");
+  const existing = document.querySelector(".site-header");
+  if (!mount && !existing) return;
+  const home = new URL(mount ? `${mount.dataset.root || ""}index.html`
+    : existing.querySelector(".header-actions")?.dataset.home || "index.html", window.location.href);
+  const path = window.location.pathname;
+  const links = [
+    ["Home", "index.html", path === home.pathname],
+    ["Explore", "pages/concerts/index.html", path.includes("/pages/concerts/")],
+    ["Support", "pages/404.html", path.endsWith("/pages/404.html")],
+  ];
+  const header = document.createElement("header");
+  header.className = "site-header";
+  header.innerHTML = `<div class="container">
+    <a href="${home.href}" class="site-logo hover-glow">CONCERTLY</a>
+    <div class="header-actions" data-home="${home.href}">
+      <nav class="site-nav" aria-label="Main navigation">
+        ${links.map(([label, url, active]) => `<a href="${new URL(url, home).href}" class="hover-glow${active ? " active" : ""}" data-nav${active ? ' aria-current="page"' : ""}>${label}</a>`).join("")}
+        <span class="nav-indicator" aria-hidden="true"></span>
+      </nav>
+      <form class="header-search" action="${new URL("pages/concerts/index.html", home).href}" method="get" role="search">
+        <input class="header-search-input" type="search" name="search" placeholder="Find your next live show..." aria-label="Search concerts">
+        <button class="header-search-button" type="submit" aria-label="Search"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button>
+      </form>
+      <div class="site-auth">
+        <button class="avatar-button" type="button" aria-label="Account menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></svg></button>
+        <div class="auth-menu" role="menu">
+          <a href="${new URL("pages/auth/login.html", home).href}" data-auth-login role="menuitem">Sign in</a>
+          <a href="${new URL("pages/auth/register.html", home).href}" data-auth-register role="menuitem">Sign up</a>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  // Explore's inline controller may already hold a reference to this search field.
+  // Preserve it so clearing filters and restoring the query still affect the live input.
+  const searchInput = existing?.querySelector(".header-search-input");
+  if (searchInput) header.querySelector(".header-search-input").replaceWith(searchInput);
+  if (mount) mount.replaceChildren(header);
+  else existing.replaceWith(header);
+}
 
 function initMobileNav() {
   const header = document.querySelector(".site-header");
@@ -265,6 +309,7 @@ function initAuthMenu() {
     localStorage.removeItem("concertlyUser");
     localStorage.removeItem("userRole");
     localStorage.removeItem("token");
+    localStorage.removeItem("concertlyUserId");
     window.location.reload();
   });
   menu.append(logout);
@@ -275,6 +320,7 @@ window.handleLogout = function(e) {
   localStorage.removeItem("concertlyUser");
   localStorage.removeItem("userRole");
   localStorage.removeItem("token");
+    localStorage.removeItem("concertlyUserId");
   window.location.reload();
 };
 

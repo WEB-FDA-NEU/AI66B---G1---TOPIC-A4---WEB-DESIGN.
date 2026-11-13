@@ -84,8 +84,14 @@
         cursor: pointer;
       }
     </style>
+    <script src="../../js/components.js"></script>
+    <link rel="stylesheet" href="../../css/reset.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/responsive.css" />
   </head>
-  <body>
+  <body class="auth-page">
+    <div id="site-navbar" data-root="../../"></div>
     <div class="box">
       <h2>Sign In</h2>
       <form onsubmit="handleLogin(event)">
@@ -154,5 +160,8 @@
       }
     </script>
     <script src="../../js/theme.js"></script>
+  <div id="site-footer" data-root="../../"></div>
+  <script src="../../js/navbar.js"></script>
+  <script src="../../js/footer.js"></script>
   </body>
 </html>

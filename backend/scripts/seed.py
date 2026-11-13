@@ -10,7 +10,9 @@ Data comes from ``scripts/seed_data.json`` (converted from ``js/mock-data.js``):
 * Concert ids equal the number in the frontend id (``"c3"`` -> 3) and are kept as-is.
 * Tier (zone) names match the section names in ``js/venues/<slug>-map.js`` exactly and
   the tier capacities of a concert add up to its ``ticketCapacity``.
-* Every tier gets ``capacity`` numbered seats (rows A, B, ... of ``SEATS_PER_ROW``).
+* Every tier gets ``capacity`` inventory rows (rows A, B, ... of ``SEATS_PER_ROW``).
+  Explicitly Seated tiers expose these labels to buyers; Standing tiers use the same
+  rows internally as quantity inventory without public seat assignments.
   Tiers marked ``soldOut`` in the mock data get their seats created as ``sold`` so the
   seat map shows them as unavailable; they have no tickets, so they are not counted as
   tickets sold or revenue.

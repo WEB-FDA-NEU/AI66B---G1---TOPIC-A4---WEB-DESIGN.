@@ -77,6 +77,7 @@ Highest price
 id:"c1-vip",
 
 name:"VIP Diamond Experience",
+bookingType:"standing",
 
 labelText:"VIP EXPERIENCE",
 
@@ -118,6 +119,7 @@ Second highest
 id:"c1-center-premium",
 
 name:"Standard Tier 1",
+bookingType:"seated",
 
 labelText:"CENTER PREMIUM",
 
@@ -131,7 +133,7 @@ shape:"polygon",
 
 points:
 
-"330,390 870,390 920,620 280,620",
+"280,390 920,390 870,620 330,620",
 
 
 label:{
@@ -158,6 +160,7 @@ Left Bowl
 id:"c1-left-bowl",
 
 name:"Standard Tier 2",
+bookingType:"seated",
 
 labelText:"LEFT SIDE",
 
@@ -198,6 +201,7 @@ Right Bowl
 id:"c1-right-bowl",
 
 name:"Standard Tier 2",
+bookingType:"seated",
 
 labelText:"RIGHT SIDE",
 
@@ -238,6 +242,7 @@ Back Upper Left
 id:"c1-upper-left",
 
 name:"Standard Tier 2",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -278,6 +283,7 @@ Back Upper Right
 id:"c1-upper-right",
 
 name:"Standard Tier 2",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -318,6 +324,7 @@ Back Stadium
 id:"c1-back",
 
 name:"Standard Tier 2",
+bookingType:"seated",
 
 labelText:"BACK STADIUM",
 

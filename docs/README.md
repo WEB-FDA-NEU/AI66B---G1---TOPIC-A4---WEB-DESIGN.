@@ -71,8 +71,7 @@ Người dùng chọn ghế trực tiếp trên **sơ đồ chỗ ngồi**.
 - Hiển thị giá của ghế hoặc khu vực.
 - Tự động cập nhật số lượng ghế và tổng tiền.
 
-Phạm vi hiện tại chỉ hỗ trợ vé có ghế đánh số. Vé khu vực đứng (General
-Admission) theo số lượng chưa được hỗ trợ và nằm ngoài phạm vi phiên bản này.
+Hệ thống hỗ trợ đồng thời Standing (chọn khu và số lượng) và Seated (chọn từng ghế đánh số). Phân loại demo, API và kết quả kiểm thử được ghi tại [Standing/Seated](standing-seated.md).
 
 ### 3.4. Temporary Seat Reservation
 

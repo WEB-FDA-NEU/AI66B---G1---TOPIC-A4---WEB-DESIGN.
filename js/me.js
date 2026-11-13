@@ -43,7 +43,7 @@ function formatDateShort(iso) {
 
 /* ---- Server data -> display ---- */
 function orderCode(order) {
-  return `#CT-${order.order_number}`;
+  return ConcertlyCodes.order(order);
 }
 
 function concertLocation(item) {
@@ -51,10 +51,12 @@ function concertLocation(item) {
 }
 
 function seatLabel(ticket) {
+  if (ticket.booking_type === "standing") return `${ticket.zone} — Standing (no assigned seat)`;
   return `${ticket.zone} — Row ${ticket.row} — Seat ${ticket.seat_number}`;
 }
 
 function seatCode(ticket) {
+  if (ticket.booking_type === "standing") return "Standing";
   return `${ticket.row}${ticket.seat_number}`;
 }
 

@@ -77,6 +77,7 @@ sections:[
 id:"c8-vip",
 
 name:"Ghost VIP Lounge",
+bookingType:"standing",
 
 labelText:"VIP LOUNGE",
 
@@ -118,6 +119,7 @@ y:280
 id:"c8-pit",
 
 name:"Belieber Standing Pit",
+bookingType:"standing",
 
 labelText:"STANDING PIT",
 
@@ -159,6 +161,7 @@ y:520
 id:"c8-left",
 
 name:"General Admission",
+bookingType:"standing",
 
 labelText:"GENERAL LEFT",
 
@@ -200,6 +203,7 @@ y:520
 id:"c8-right",
 
 name:"General Admission",
+bookingType:"standing",
 
 labelText:"GENERAL RIGHT",
 
@@ -241,6 +245,7 @@ y:520
 id:"c8-upper-left",
 
 name:"General Admission",
+bookingType:"standing",
 
 labelText:"UPPER LEFT",
 
@@ -282,6 +287,7 @@ y:800
 id:"c8-upper-right",
 
 name:"General Admission",
+bookingType:"standing",
 
 labelText:"UPPER RIGHT",
 
@@ -323,6 +329,7 @@ y:800
 id:"c8-back",
 
 name:"General Admission",
+bookingType:"standing",
 
 labelText:"BACK AREA",
 

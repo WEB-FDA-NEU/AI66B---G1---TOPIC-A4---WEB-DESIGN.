@@ -18,11 +18,14 @@ const ConcertlyAPI = (() => {
 
   async function request(method, path, body, { form = false } = {}) {
     let response;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
     try {
       const headers = { ...authHeaders() };
       if (body) headers["Content-Type"] = form ? "application/x-www-form-urlencoded" : "application/json";
       response = await fetch(base + path, {
         method,
+        signal: controller.signal,
         headers,
         body: body ? (form ? new URLSearchParams(body).toString() : JSON.stringify(body)) : undefined,
       });
@@ -31,6 +34,8 @@ const ConcertlyAPI = (() => {
       error.code = "network";
       error.cause = cause;
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
@@ -49,10 +54,12 @@ const ConcertlyAPI = (() => {
     numericId: (mockId) => Number(String(mockId).replace(/^c/i, "")),
     seatMap: (concertId) => request("GET", `/concerts/${concertId}/seats`),
     hold: (concertId, seatIds) => request("POST", "/reservations", { concert_id: concertId, seat_ids: seatIds }),
+    holdTickets: (concertId, seatIds, standing = []) =>
+      request("POST", "/reservations", { concert_id: concertId, seat_ids: seatIds, standing }),
     getReservation: (id) => request("GET", `/reservations/${id}`),
     release: (id) => request("DELETE", `/reservations/${id}`),
-    checkout: (reservationId, paymentMethod) =>
-      request("POST", "/checkout", { reservation_id: reservationId, payment_method: paymentMethod }),
+    checkout: (reservationId, paymentMethod, buyer) =>
+      request("POST", "/checkout", { reservation_id: reservationId, payment_method: paymentMethod, ...(buyer ? { buyer } : {}) }),
 
     // Session
     login: (email, password) => request("POST", "/auth/login", { username: email, password }, { form: true }),
@@ -64,7 +71,7 @@ const ConcertlyAPI = (() => {
       localStorage.setItem("userRole", session.user.role);
     },
     clearSession() {
-      [TOKEN_KEY, "concertlyUser", "userRole"].forEach((key) => localStorage.removeItem(key));
+      [TOKEN_KEY, "concertlyUser", "userRole", "concertlyUserId"].forEach((key) => localStorage.removeItem(key));
     },
 
     // Account pages

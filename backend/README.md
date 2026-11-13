@@ -14,7 +14,7 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 The static frontend calls `http://localhost:8000/api` (override with `window.CONCERTLY_API_BASE`).
-If the API is not running, the ticket page falls back to the old zone + quantity mock flow.
+If the API cannot be reached, booking is disabled and a retry button is shown. New purchases never fall back to local mock orders. The old demo receipt reader remains only for saved legacy checkout sessions, clearly marked as demo and without admission QR codes.
 
 ## Authentication
 
@@ -34,10 +34,10 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | Method & path | Purpose |
 | --- | --- |
 | `GET /concerts/{id}/seats` | Zones and seat availability (lapsed holds show as available) |
-| `POST /reservations` `{concert_id, seat_ids}` | Hold seats for 5 min (all-or-nothing, max 8) — **409 `seat_unavailable`** |
+| `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 8 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
 | `GET /reservations/{id}` | Hold status and `seconds_left` |
 | `DELETE /reservations/{id}` | Release a hold |
-| `POST /checkout` `{reservation_id, payment_method}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
+| `POST /checkout` `{reservation_id, payment_method, buyer: {full_name, email, phone}}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
 | `POST /auth/login`, `GET /auth/me` | Sign in (OAuth2 password form) / current user |
 | `GET /orders/me` (alias `/orders`), `GET /orders/{id}` | The caller's orders (someone else's order → 404) |
 | `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
@@ -53,6 +53,8 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 Dashboard rules (`app/services/admin.py`): revenue = `total_amount - refund_amount` of orders with
 `payment_status = 'paid'` (pending, failed and refunded orders count for nothing); tickets sold =
 tickets `valid` or `used`; upcoming = not started yet and `on_sale`/`sold_out`.
+
+Checkout requires valid buyer contact details, including a 2–150 character name, an email address, and a phone number with 8–15 digits. These fields are validated without overwriting the account or changing the database schema. Existing order IDs, ticket codes and QR payloads are preserved; concert prefixes are display labels only.
 
 Errors always look like `{"error": {"code", "message", ...}}`.
 
@@ -81,3 +83,15 @@ TEST_DATABASE_URL=postgresql+psycopg2://USER@localhost/concertly_test \
 
 `tests/test_concurrency.py` runs simultaneous bookings from many threads (same seat,
 overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
+
+## Standing and Seated (demo configuration)
+
+`app/venue_zones.json` explicitly classifies the 33 existing ticket tiers. The 11 SVG map files carry matching `bookingType` metadata; no SVG coordinates, shapes or prices were changed. See `../docs/standing-seated.md` for the complete concert/tier matrix.
+
+- Seated zones expose PostgreSQL seat IDs, rows, numbers and live availability. Reserve specific IDs via `seat_ids`.
+- Standing zones expose availability counts, never numbered seats. Reserve a zone and quantity via `standing`.
+- Both modes reuse the existing `seats` inventory rows, row locks, five-minute expiry, checkout, refund and QR lifecycle. Standing rows act as inventory units internally, not assigned seats. No database schema changes or migration of existing bookings is required.
+- HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 8 applies to the combined request.
+- `booking_type` is added to reservation items and tickets. Public standing `row`/`row_label`/`seat_number` are null. Existing IDs, stored row values, ticket codes and QR payloads are not rewritten.
+- Unknown legacy zones retain their existing numbered-seat contract. Configure new zones explicitly before advertising them as Standing.
+- Multiple SVG sections with the same ticket-tier name share that tier's inventory and demo seat grid. This configuration is not an assertion about the artists' real seating plans.

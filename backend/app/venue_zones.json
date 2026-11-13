@@ -1,0 +1,57 @@
+{
+  "1": {
+    "Standard Tier 2": "seated",
+    "Standard Tier 1": "seated",
+    "VIP Diamond Experience": "standing"
+  },
+  "2": {
+    "General Admission Standing": "standing",
+    "Cat 1 Seated": "seated",
+    "VIP After Hours Lounge": "standing"
+  },
+  "3": {
+    "Floor Standing Mosh": "standing",
+    "Balcony Seating": "seated",
+    "Cactus Jack VIP Pass": "standing"
+  },
+  "4": {
+    "General Floor Standing": "standing",
+    "Lower Bowl Seated": "seated",
+    "OA VIP Soundcheck Package": "standing"
+  },
+  "5": {
+    "Rockstar Standing Zone": "standing",
+    "Tier 1 Center Seated": "seated",
+    "LLOUD Ultimate VIP Meet & Greet": "standing"
+  },
+  "6": {
+    "Standard Floor GA": "standing",
+    "Lower Bowl Reserved": "seated",
+    "Karma Is My Boyfriend VIP": "standing"
+  },
+  "7": {
+    "Silver Tribune": "seated",
+    "Gold Standing Pit": "standing",
+    "24K Magic VIP Experience": "standing"
+  },
+  "8": {
+    "General Admission": "standing",
+    "Belieber Standing Pit": "standing",
+    "Ghost VIP Lounge": "standing"
+  },
+  "9": {
+    "CAT 3 Seating": "seated",
+    "Soundcheck Standing": "standing",
+    "ARMY Ultimate VIP Pass": "standing"
+  },
+  "10": {
+    "Standard Tier": "seated",
+    "Coup D'Etat Pit": "standing",
+    "One of a Kind VIP": "standing"
+  },
+  "11": {
+    "Balcony Seated": "seated",
+    "Front Row Orchestra": "seated",
+    "Midnight VIP Pass": "standing"
+  }
+}
