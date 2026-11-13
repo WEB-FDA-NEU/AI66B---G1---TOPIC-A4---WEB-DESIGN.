@@ -142,6 +142,42 @@ function orderStatusKey(order) {
   return order.refund_status === "refunded" ? "refunded" : order.status;
 }
 
+async function openAdminOrder(id) {
+  const dialog = document.getElementById("admin-order-dialog");
+  const content = document.getElementById("admin-order-detail-content");
+  content.innerHTML = `<p class="text-muted">Loading order…</p>`;
+  dialog.showModal();
+  try {
+    const order = await ConcertlyAPI.adminOrder(id);
+    const tickets = order.tickets.map(ticket => `
+      <tr>
+        <td>${adminEscape(ticket.zone)} · ${adminEscape(ticket.row)}${ticket.seat_number}</td>
+        <td>${adminEscape(ticket.ticket_code)}</td>
+        <td><span class="badge ${ticket.status === "used" ? "badge-green" : ticket.status === "valid" ? "badge-pink" : "badge-gray"}">${adminEscape(ticket.status)}</span></td>
+        <td>${adminMoney(ticket.price, 2)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="4" class="text-muted">No tickets issued.</td></tr>`;
+    content.innerHTML = `
+      <dl class="admin-order-facts">
+        <div><dt>Order</dt><dd>#CT-${adminEscape(order.order_number)}</dd></div>
+        <div><dt>Customer</dt><dd>${adminEscape(order.customer.full_name)}<br>${adminEscape(order.customer.email)}${order.customer.phone ? `<br>${adminEscape(order.customer.phone)}` : ""}</dd></div>
+        <div><dt>Concert</dt><dd>${adminEscape(order.concert_title)}<br>${adminDateTime(order.starts_at)}</dd></div>
+        <div><dt>Payment</dt><dd>${adminEscape(order.payment_status)} · ${adminEscape(order.payment_method || "—")}</dd></div>
+        <div><dt>Total</dt><dd>${adminMoney(order.total_amount, 2)}</dd></div>
+        <div><dt>Refund</dt><dd>${adminEscape(order.refund_status)} · ${adminMoney(order.refund_amount, 2)}${order.refund_reason ? `<br>${adminEscape(order.refund_reason)}` : ""}</dd></div>
+      </dl>
+      <div class="table-card admin-order-tickets">
+        <table class="data-table">
+          <thead><tr><th>Seat</th><th>Ticket code</th><th>Status</th><th>Price</th></tr></thead>
+          <tbody>${tickets}</tbody>
+        </table>
+      </div>
+    `;
+  } catch (error) {
+    content.innerHTML = `<p class="text-muted" role="alert">${adminEscape(adminApiError(error))}</p>`;
+  }
+}
+
 async function renderRecentOrders() {
   const tbody = document.getElementById("recent-orders-body");
   if (!tbody) return;
@@ -165,7 +201,7 @@ async function renderRecentOrders() {
     const [label, cls] = ORDER_STATUS_BADGE[orderStatusKey(order)] || [order.status, "badge-gray"];
     return `
     <tr>
-      <td class="text-muted">#CT-${order.order_number}</td>
+      <td><button type="button" class="order-detail-trigger" data-order-id="${order.id}">#CT-${adminEscape(order.order_number)}</button></td>
       <td>${adminEscape(order.customer.full_name)}<div class="text-muted">${adminEscape(order.customer.email)}</div></td>
       <td>${adminEscape(order.concert_title)}</td>
       <td>${adminMoney(order.total_amount, 2)}</td>
@@ -225,5 +261,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (button.dataset.pageAction === "previous") recentOrdersPage--;
     if (button.dataset.pageAction === "next") recentOrdersPage++;
     renderRecentOrders();
+  });
+  document.getElementById("recent-orders-body").addEventListener("click", event => {
+    const button = event.target.closest("[data-order-id]");
+    if (button) openAdminOrder(Number(button.dataset.orderId));
+  });
+  document.getElementById("close-admin-order-dialog").addEventListener("click", () => {
+    document.getElementById("admin-order-dialog").close();
   });
 });

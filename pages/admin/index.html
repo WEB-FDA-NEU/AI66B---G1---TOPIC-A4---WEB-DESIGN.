@@ -237,13 +237,24 @@
           </div>
         </div>
       </div>
+      <dialog class="admin-order-dialog" id="admin-order-dialog" aria-labelledby="admin-order-title">
+        <div class="admin-order-dialog-header">
+          <h2 id="admin-order-title">Order details</h2>
+          <button type="button" class="admin-icon-btn" id="close-admin-order-dialog" aria-label="Close order details">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="admin-order-detail-content" class="admin-order-detail-content">
+          <p class="text-muted">Loading order…</p>
+        </div>
+      </dialog>
     </main>
 
     <footer class="admin-footer">
       <span>&copy; 2026 Concertly Admin &middot; v1.0</span>
     </footer>
 
-    <script src="../../js/api.js"></script>
+    <script src="../../js/api.js?v=admin-concert-crud-1"></script>
     <script src="../../js/admin-common.js"></script>
     <script src="../../js/noti.js"></script>
     <script src="../../js/admin-account.js"></script>

@@ -23,9 +23,11 @@ from __future__ import annotations
 from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.errors import not_found
-from app.models import Concert, Order, Ticket, User, Zone
+from app.errors import conflict, not_found
+from app.models import Concert, Order, Reservation, Seat, Ticket, User, Zone
+from app.schemas import AdminConcertInput
 from app.services.orders import order_detail, order_summary
+from app.services.txn import transactional
 
 ORDER_STATUS_FILTERS = ("pending", "paid", "cancelled", "failed", "refunded")
 UPCOMING_STATUSES = ("on_sale", "sold_out")
@@ -116,6 +118,224 @@ def concert_stats(db: Session) -> list[dict]:
         }
         for c, cap, n_sold, n_in, rev, future in rows
     ]
+
+
+def _concert_detail(db: Session, concert: Concert) -> dict:
+    return {
+        "id": concert.id,
+        "title": concert.title,
+        "artist": concert.artist,
+        "description": concert.description,
+        "venue": concert.venue,
+        "city": concert.city,
+        "poster_url": concert.poster_url,
+        "starts_at": concert.starts_at,
+        "status": concert.status,
+        "zones": [
+            {
+                "id": zone.id,
+                "name": zone.name,
+                "price": int(zone.price),
+                "capacity": zone.capacity,
+                "color": zone.color,
+            }
+            for zone in db.execute(
+                select(Zone).where(Zone.concert_id == concert.id).order_by(Zone.id)
+            ).scalars()
+        ],
+    }
+
+
+def list_concerts(db: Session) -> list[dict]:
+    concerts = db.execute(select(Concert).order_by(Concert.starts_at, Concert.id)).scalars()
+    return [_concert_detail(db, concert) for concert in concerts]
+
+
+def get_concert(db: Session, concert_id: int) -> dict:
+    concert = db.get(Concert, concert_id)
+    if concert is None:
+        raise not_found("Concert not found.")
+    return _concert_detail(db, concert)
+
+
+def _row_label(index: int) -> str:
+    label = ""
+    index += 1
+    while index:
+        index, remainder = divmod(index - 1, 26)
+        label = chr(65 + remainder) + label
+    return label
+
+
+def _seat_labels(capacity: int) -> list[tuple[str, int]]:
+    return [(_row_label(index // 10), index % 10 + 1) for index in range(capacity)]
+
+
+def _resize_zone_seats(db: Session, zone: Zone, capacity: int) -> None:
+    seats = list(
+        db.execute(
+            select(Seat)
+            .where(Seat.zone_id == zone.id)
+            .order_by(Seat.row_label, Seat.seat_number)
+            .with_for_update()
+        ).scalars()
+    )
+    if len(seats) > capacity:
+        removable = list(
+            db.execute(
+                select(Seat)
+                .where(
+                    Seat.zone_id == zone.id,
+                    Seat.status == "available",
+                    ~select(Ticket.id).where(Ticket.seat_id == Seat.id).exists(),
+                )
+                .order_by(Seat.row_label.desc(), Seat.seat_number.desc())
+                .limit(len(seats) - capacity)
+                .with_for_update()
+            ).scalars()
+        )
+        if len(removable) != len(seats) - capacity:
+            raise conflict(
+                "capacity_below_occupied",
+                f"Ticket type {zone.name} has seats that cannot be removed.",
+            )
+        for seat in removable:
+            db.delete(seat)
+        seats = [seat for seat in seats if seat not in removable]
+
+    if len(seats) < capacity:
+        existing = {(seat.row_label, seat.seat_number) for seat in seats}
+        additions = [
+            Seat(zone_id=zone.id, row_label=row, seat_number=number)
+            for row, number in _seat_labels(capacity)
+            if (row, number) not in existing
+        ][: capacity - len(seats)]
+        if len(additions) != capacity - len(seats):
+            raise conflict("capacity_update_failed", "Unable to create the requested seat inventory.")
+        db.add_all(additions)
+    zone.capacity = capacity
+
+
+def _update_concert_fields(concert: Concert, body: AdminConcertInput) -> None:
+    for field in ("title", "artist", "description", "venue", "city", "poster_url", "starts_at", "status"):
+        setattr(concert, field, getattr(body, field))
+
+
+@transactional
+def create_concert(db: Session, body: AdminConcertInput) -> dict:
+    concert = Concert(
+        title=body.title,
+        artist=body.artist,
+        description=body.description,
+        venue=body.venue,
+        city=body.city,
+        poster_url=body.poster_url,
+        starts_at=body.starts_at,
+        status=body.status,
+    )
+    db.add(concert)
+    db.flush()
+    for item in body.zones:
+        zone = Zone(
+            concert_id=concert.id,
+            name=item.name,
+            price=item.price,
+            capacity=item.capacity,
+            color=item.color,
+        )
+        db.add(zone)
+        db.flush()
+        db.add_all(
+            Seat(zone_id=zone.id, row_label=row, seat_number=number)
+            for row, number in _seat_labels(item.capacity)
+        )
+    db.flush()
+    return _concert_detail(db, concert)
+
+
+@transactional
+def update_concert(db: Session, concert_id: int, body: AdminConcertInput) -> dict:
+    concert = db.execute(
+        select(Concert).where(Concert.id == concert_id).with_for_update()
+    ).scalar_one_or_none()
+    if concert is None:
+        raise not_found("Concert not found.")
+
+    existing_zones = {
+        zone.id: zone
+        for zone in db.execute(
+            select(Zone).where(Zone.concert_id == concert_id).with_for_update()
+        ).scalars()
+    }
+    retained_ids = {item.id for item in body.zones if item.id is not None}
+    if not retained_ids.issubset(existing_zones):
+        raise conflict("invalid_ticket_type", "A ticket type does not belong to this concert.")
+
+    for zone_id, zone in existing_zones.items():
+        if zone_id in retained_ids:
+            continue
+        has_tickets = db.execute(
+            select(Ticket.id)
+            .join(Seat, Seat.id == Ticket.seat_id)
+            .where(Seat.zone_id == zone_id)
+            .limit(1)
+        ).first()
+        has_occupied_seats = db.execute(
+            select(Seat.id)
+            .where(Seat.zone_id == zone_id, (Seat.status != "available") | Seat.reservation_id.is_not(None))
+            .limit(1)
+        ).first()
+        if has_tickets or has_occupied_seats:
+            raise conflict(
+                "ticket_type_has_bookings",
+                f"Ticket type {zone.name} cannot be removed while it has bookings or active holds.",
+            )
+        db.delete(zone)
+
+    for item in body.zones:
+        zone = existing_zones.get(item.id) if item.id is not None else None
+        if zone is None:
+            zone = Zone(
+                concert_id=concert_id,
+                name=item.name,
+                price=item.price,
+                capacity=item.capacity,
+                color=item.color,
+            )
+            db.add(zone)
+            db.flush()
+            db.add_all(
+                Seat(zone_id=zone.id, row_label=row, seat_number=number)
+                for row, number in _seat_labels(item.capacity)
+            )
+        else:
+            zone.name = item.name
+            zone.price = item.price
+            zone.color = item.color
+            _resize_zone_seats(db, zone, item.capacity)
+
+    _update_concert_fields(concert, body)
+    db.flush()
+    return _concert_detail(db, concert)
+
+
+@transactional
+def delete_concert(db: Session, concert_id: int) -> None:
+    concert = db.execute(
+        select(Concert).where(Concert.id == concert_id).with_for_update()
+    ).scalar_one_or_none()
+    if concert is None:
+        raise not_found("Concert not found.")
+    has_orders = db.execute(select(Order.id).where(Order.concert_id == concert_id).limit(1)).first()
+    has_reservations = db.execute(
+        select(Reservation.id).where(Reservation.concert_id == concert_id).limit(1)
+    ).first()
+    if has_orders or has_reservations:
+        raise conflict(
+            "concert_has_bookings",
+            "Concerts with orders or reservations cannot be deleted. Cancel the concert instead.",
+        )
+    db.delete(concert)
 
 
 def _customer(user: User, *, with_phone: bool = False) -> dict:

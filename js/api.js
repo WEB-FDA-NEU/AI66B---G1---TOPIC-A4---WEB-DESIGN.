@@ -16,15 +16,17 @@ const ConcertlyAPI = (() => {
     return devUserId ? { "X-User-Id": devUserId } : {};
   }
 
-  async function request(method, path, body, { form = false } = {}) {
+  async function request(method, path, body, { form = false, multipart = false } = {}) {
     let response;
     try {
       const headers = { ...authHeaders() };
-      if (body) headers["Content-Type"] = form ? "application/x-www-form-urlencoded" : "application/json";
+      if (body && !multipart) headers["Content-Type"] = form ? "application/x-www-form-urlencoded" : "application/json";
       response = await fetch(base + path, {
         method,
         headers,
-        body: body ? (form ? new URLSearchParams(body).toString() : JSON.stringify(body)) : undefined,
+        body: body
+          ? multipart ? body : form ? new URLSearchParams(body).toString() : JSON.stringify(body)
+          : undefined,
       });
     } catch (cause) {
       const error = new Error("Cannot reach the booking server.");
@@ -74,15 +76,32 @@ const ConcertlyAPI = (() => {
     myTickets: () => request("GET", "/tickets/me"),
     ticket: (id) => request("GET", `/tickets/${encodeURIComponent(id)}`),
 
+    // Public concert catalogue
+    concerts: () => request("GET", "/concerts"),
+    concert: (id) => request("GET", `/concerts/${encodeURIComponent(id)}`),
+
     // Admin (role admin required)
     adminStats: () => request("GET", "/admin/stats"),
     adminConcertStats: () => request("GET", "/admin/stats/concerts"),
+    adminConcerts: () => request("GET", "/admin/concerts"),
+    adminConcert: (id) => request("GET", `/admin/concerts/${encodeURIComponent(id)}`),
+    adminCreateConcert: (concert) => request("POST", "/admin/concerts", concert),
+    adminUpdateConcert: (id, concert) =>
+      request("PUT", `/admin/concerts/${encodeURIComponent(id)}`, concert),
+    adminDeleteConcert: (id) => request("DELETE", `/admin/concerts/${encodeURIComponent(id)}`),
+    async adminUploadConcertImage(file) {
+      const formData = new FormData();
+      formData.append("image", file);
+      const result = await request("POST", "/admin/concerts/upload-image", formData, { multipart: true });
+      return { ...result, url: new URL(result.url, `${base}/`).href };
+    },
     adminOrders: (params = {}) => {
       const query = new URLSearchParams(
         Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ""),
       ).toString();
       return request("GET", `/admin/orders${query ? `?${query}` : ""}`);
     },
+    adminOrder: (id) => request("GET", `/admin/orders/${encodeURIComponent(id)}`),
     adminAttendees: (concertId) => request("GET", `/admin/concerts/${encodeURIComponent(concertId)}/attendees`),
     adminCheckIn: (ticketId, concertId) => request("POST", "/admin/checkin", { ticketId, concertId }),
   };
