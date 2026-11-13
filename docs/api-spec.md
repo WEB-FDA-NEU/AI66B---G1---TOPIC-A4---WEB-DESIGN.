@@ -8,7 +8,7 @@ Issue: [#53](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./
 
 - Base URL local: `http://localhost:8000/api`. Các đường dẫn dưới đây đã gồm `/api`.
 - Swagger UI: `http://localhost:8000/docs`; schema nguồn: `http://localhost:8000/openapi.json`. `/docs`, `/redoc`, `/openapi.json` là hạ tầng tài liệu, không tính endpoint nghiệp vụ.
-- Có **22 cặp HTTP method/path: 20 endpoint chính + 2 alias** (`GET /api/orders`, `GET /api/tickets`). Phạm vi “khoảng 23” của issue chưa có danh sách 23 endpoint riêng được xác nhận; không tự thêm endpoint để đủ số.
+- Có **30 cặp HTTP method/path: 28 endpoint chính + 2 alias** (`GET /api/orders`, `GET /api/tickets`). Phạm vi “khoảng 23” của issue chưa có danh sách 23 endpoint riêng được xác nhận; không tự thêm endpoint để đủ số.
 - Nguồn thực thi: [routers](../backend/app/routers), [schemas.py](../backend/app/schemas.py), [deps.py](../backend/app/deps.py), [services](../backend/app/services), [error handlers](../backend/app/main.py), [schema.sql](../backend/schema.sql). Danh mục tham khảo phân công hiện có trong [report.tex — API Reference](report.tex) liệt kê 20 dòng, gộp hai alias. Report cũ chưa có `standing` và `buyer`; hợp đồng hiện hành ưu tiên code.
 - JSON UTF-8 cho request/response, riêng login dùng `application/x-www-form-urlencoded`. Thời gian là string ISO 8601 có múi giờ; UUID là string. ID database là integer (khác `c1`, `c2` ở frontend). Giá/tiền là integer đơn vị nguyên, không tự suy ra currency hay chuyển đổi sang VND; API chưa có trường currency.
 - Giữ nguyên snake_case/camelCase theo từng schema; không đổi `ticketId` thành `ticket_id` trong request admin check-in.
@@ -380,6 +380,70 @@ Body bắt buộc `application/json`: `AdminCheckInRequest`.
 - **Lỗi chính:** 400 `wrong_concert` (ticket_concert_id), `ticket_not_valid` (ticket_status); 403 `forbidden`; 404 `not_found`; 409 `ticket_already_used` (checked_in_at). Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
 **Lưu ý hợp đồng:** `ticketId` nhận integer ID, string số (cũng được hiểu là ID) hoặc string mã ticket 1–64 ký tự sau trim. ID số âm/0/quá BIGINT không tìm thấy trả 404, không tràn DB. `concertId` ≥1. Dùng mã QR gốc, không gửi chuỗi có tiền tố hiển thị C01. Khác route /tickets/check-in: route admin kiểm tra concert tại cổng, và vé cancelled/refunded trả 400 thay vì 409.
+
+### 23. `GET /api/concerts`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** Public.
+- **Input:** Không có body/query.
+- **Response:** 200 PublicConcertCatalogOut; items chỉ on_sale/sold_out, managed_ids gồm mọi ID để loại preview cũ.
+- **Lỗi chính:** Không có lỗi nghiệp vụ riêng. Áp dụng lỗi chung mục 2.
+
+### 24. `GET /api/concerts/{concert_id}`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** Public.
+- **Input:** Path concert_id: integer.
+- **Response:** 200 AdminConcertOut.
+- **Lỗi chính:** 404 not_found nếu không tồn tại hoặc không public. Áp dụng lỗi chung mục 2.
+
+### 25. `GET /api/admin/concerts`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** admin.
+- **Input:** Không có body/query.
+- **Response:** 200 array<AdminConcertOut>, mọi trạng thái.
+- **Lỗi chính:** 401/403 theo quyền. Áp dụng lỗi chung mục 2.
+
+### 26. `GET /api/admin/concerts/{concert_id}`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** admin.
+- **Input:** Path concert_id: integer.
+- **Response:** 200 AdminConcertOut.
+- **Lỗi chính:** 404 not_found. Áp dụng lỗi chung mục 2.
+
+### 27. `POST /api/admin/concerts`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** admin.
+- **Input:** JSON AdminConcertInput bắt buộc.
+- **Response:** 201 AdminConcertOut, tạo zone/inventory.
+- **Lỗi chính:** 422 validation_error; không có gateway hay tự seed. Áp dụng lỗi chung mục 2.
+
+### 28. `PUT /api/admin/concerts/{concert_id}`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** admin.
+- **Input:** Path concert_id: integer; JSON AdminConcertInput bắt buộc (thay bộ hạng vé, không phải PATCH).
+- **Response:** 200 AdminConcertOut.
+- **Lỗi chính:** 404 not_found; 409 invalid_ticket_type, ticket_type_has_bookings, capacity_below_occupied, capacity_update_failed, booking_type_has_bookings. Áp dụng lỗi chung mục 2.
+
+### 29. `DELETE /api/admin/concerts/{concert_id}`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** admin.
+- **Input:** Path concert_id: integer.
+- **Response:** 204, không response body.
+- **Lỗi chính:** 404 not_found; 409 concert_has_bookings khi có order/reservation. Áp dụng lỗi chung mục 2.
+
+### 30. `POST /api/admin/concerts/upload-image`
+
+- **Mục đích:** Catalogue/quản lý concert tích hợp từ #81.
+- **Quyền:** admin.
+- **Input:** multipart/form-data với image (binary file) bắt buộc; JPEG/PNG/WebP, tối đa 5 MiB.
+- **Response:** 200 object có url:string, ví dụ /uploads/<filename>.
+- **Lỗi chính:** 413 image_too_large; 415 unsupported_image_type/invalid_image; 422 thiếu file. Áp dụng lỗi chung mục 2.
 
 ## 4. Cấu trúc dữ liệu
 
@@ -773,6 +837,70 @@ Các bảng sau lấy tên trường/kiểu/required/default trực tiếp từ 
 | `token_type` | string | Không | default="bearer" |
 | `user` | `AuthUserOut` | Có | — |
 
+### AdminConcertZoneInput
+
+| Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
+| --- | --- | --- | --- |
+| `booking_type` | string hoặc null | Không | enum=["seated", "standing"] |
+| `id` | integer hoặc null | Không | minimum=1.0 |
+| `name` | string | Có | minLength=1; maxLength=100 |
+| `price` | integer | Có | minimum=0.0; maximum=999999999999.0 |
+| `capacity` | integer | Có | minimum=1.0; maximum=50000.0 |
+| `color` | string hoặc null | Không | maxLength=20 |
+
+### AdminConcertInput
+
+| Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
+| --- | --- | --- | --- |
+| `title` | string | Có | minLength=1; maxLength=255 |
+| `artist` | string | Có | minLength=1; maxLength=255 |
+| `description` | string hoặc null | Không | maxLength=10000 |
+| `venue` | string | Có | minLength=1; maxLength=255 |
+| `city` | string | Có | minLength=1; maxLength=100 |
+| `poster_url` | string hoặc null | Không | maxLength=2048 |
+| `starts_at` | string (date-time) | Có | — |
+| `status` | string | Có | enum=["draft", "on_sale", "sold_out", "cancelled", "completed"] |
+| `zones` | array<`AdminConcertZoneInput`> | Có | minItems=1; maxItems=50 |
+
+### AdminConcertZoneOut
+
+| Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
+| --- | --- | --- | --- |
+| `booking_type` | string | Có | enum=["seated", "standing"] |
+| `id` | integer | Có | — |
+| `name` | string | Có | — |
+| `price` | integer | Có | — |
+| `capacity` | integer | Có | — |
+| `color` | string hoặc null | Không | — |
+
+### AdminConcertOut
+
+| Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
+| --- | --- | --- | --- |
+| `id` | integer | Có | — |
+| `title` | string | Có | — |
+| `artist` | string | Có | — |
+| `description` | string hoặc null | Không | — |
+| `venue` | string | Có | — |
+| `city` | string | Có | — |
+| `poster_url` | string hoặc null | Không | — |
+| `starts_at` | string (date-time) | Có | — |
+| `status` | string | Có | — |
+| `zones` | array<`AdminConcertZoneOut`> | Có | — |
+
+### PublicConcertCatalogOut
+
+| Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
+| --- | --- | --- | --- |
+| `items` | array<`AdminConcertOut`> | Có | — |
+| `managed_ids` | array<integer> | Có | — |
+
+### Body_upload_concert_image_api_admin_concerts_upload_image_post
+
+| Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
+| --- | --- | --- | --- |
+| `image` | string | Có | — |
+
 ## 5. Giá trị trạng thái và ví dụ tích hợp
 
 | Tài nguyên / field | Giá trị trong DB/hợp đồng |
@@ -831,7 +959,7 @@ Luồng: đọc seat map → POST reservations (201) → lưu id/expires_at, đ�
 
 ## 6. Đối chiếu Swagger và phần chưa có
 
-Đã đối chiếu đầy đủ 22 method/path, tham số, request schema và response_model với `/openapi.json` (nguồn của `/docs`) và mã nguồn cùng nhánh. Có các khác biệt thực tế cần TV2/TV3 thống nhất trước khi chốt:
+Đã đối chiếu đầy đủ 30 method/path, tham số, request schema và response_model với `/openapi.json` (nguồn của `/docs`) và mã nguồn cùng nhánh. Có các khác biệt thực tế cần TV2/TV3 thống nhất trước khi chốt:
 
 | Điểm | Swagger hiện tại | Thực thi / cách đọc spec này |
 | --- | --- | --- |
@@ -840,9 +968,9 @@ Luồng: đọc seat map → POST reservations (201) → lưu id/expires_at, đ�
 | Seat map và health | Response schema object rỗng | Shape cụ thể ở mục 4 lấy từ service/main; cần response_model nếu muốn Swagger tự mô tả |
 | Auth optional ở seat map | Có HTTPBearer security metadata | Dependency cho phép anonymous; token sai vẫn 401 |
 | Buyer | Có schema bắt buộc | Validate nhưng không lưu buyer contact vào order; cần thống nhất nếu yêu cầu lưu thông tin người mua |
-| Scope khoảng 23 endpoint | 22 operations / 20 canonical | Chờ danh sách phân công gốc/TV2/TV3 xác nhận số lượng; không tự dựng endpoint thứ 23 |
+| Scope sau tích hợp #81 | 30 operations / 28 canonical | Chờ danh sách phân công gốc/TV2/TV3 xác nhận số lượng; không tự dựng endpoint thứ 23 |
 
-Không có route register/refresh/logout, public concert list/detail hay admin concert CRUD trong OpenAPI/code nhánh này. Một số màn hình tương ứng còn dùng dữ liệu frontend/mock. Đó là phần chưa tích hợp, không phải API đã triển khai. Khi các PR auth/concert khác được tích hợp phải cập nhật spec theo route/schema thực tế, không lấy bản thiết kế dự kiến làm hợp đồng đang chạy.
+Sau tích hợp #81, public concert list/detail và admin concert CRUD/upload đã có API, liệt kê ở mục 3. Chưa có register/refresh/logout. Register vẫn chỉ là demo frontend; catalogue public ưu tiên API qua public-catalog.js, có fallback preview local nếu API lỗi. Đó là phần chưa tích hợp, không phải API đã triển khai. Khi các PR auth/concert khác được tích hợp phải cập nhật spec theo route/schema thực tế, không lấy bản thiết kế dự kiến làm hợp đồng đang chạy.
 
 ## 7. Review TV2/TV3 và quy trình cập nhật
 
@@ -866,10 +994,22 @@ Khi hợp đồng thay đổi:
 
 ### Checklist nghiệm thu
 
-- [x] Bao phủ mọi endpoint thực có: 22 method/path (gồm 2 alias).
+- [x] Bao phủ mọi endpoint thực có: 30 method/path (gồm 2 alias).
 - [x] Method/path, field/type và success schema đối chiếu với code/OpenAPI.
 - [x] Quyền, request/response và các mã lỗi chính cho từng endpoint.
 - [x] Nêu rõ chênh lệch giữa Swagger và handler/service, không giả ghi là đã khớp hoàn toàn.
 - [ ] TV2/TV3 xác nhận phạm vi khoảng 23 và những API chưa tích hợp.
 - [ ] Backend/TV2/TV3 thống nhất các chênh lệch Swagger nêu ở mục 6.
 - [ ] Ghi nhận bản chốt trước tích hợp diện rộng.
+
+
+### Bổ sung review #83 sau tích hợp #81
+
+Loại vé là cột zones.booking_type (seated/standing), không còn phụ thuộc đổi tên
+hay ID concert trong JSON. Admin nhập booking_type; thiếu/null khi sửa giữ giá trị
+cũ, khi tạo mặc định seated. Không cho đổi loại nếu có ticket hoặc inventory
+occupied: 409 booking_type_has_bookings. Migration rõ ràng bắt buộc trước triển
+khai trên DB cũ, không tự chạy ở startup; xem backend/README.md.
+Admin tên/ID zone không hợp lệ theo schema trả 422. starts_at phải có timezone;
+tên zone không trùng không phân biệt hoa thường, không lặp ID, tổng capacity ≤20.000.
+Upload chỉ kiểm tra MIME/chữ ký/giới hạn byte hiện có, không phải quét nội dung ảnh.
