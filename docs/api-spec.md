@@ -1,6 +1,6 @@
 # CONCERTLY — API Specification
 
-Issue: [#53](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/53). Nhánh soạn: `feature/trung-next`, nền code `629b5b4`. Ngày đối chiếu: 13/11/2026.
+Issue gốc: [#53](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/53). Đồng bộ theo [#57](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/57) ngày 13/11/2026 trên nhánh `feature/trung-dashboard-metrics`, nền code `4bbcc45`. OpenAPI tại `http://localhost:8000/openapi.json` trả HTTP 200 và khớp toàn bộ schema sinh từ FastAPI source; không khởi động lại hoặc đổi cấu hình server.
 
 Cập nhật theo yêu cầu task #54: giới hạn hiện hành là **6 vé**, thay cho 8 vé của bản nền; xem [Business Rules, BR-03](business-rules.md). Hold active cũ quá 6 vé bị chặn checkout mới; đơn đã thanh toán giữ tương thích.
 
@@ -26,7 +26,7 @@ Cập nhật theo yêu cầu task #54: giới hạn hiện hành là **6 vé**, 
 | staff/admin | Role staff hoặc admin |
 | admin | Chỉ admin; staff bị từ chối |
 
-Gửi `Authorization: Bearer <access_token>`. Login trả JWT HS256, thời hạn mặc định 60 phút, có thể cấu hình qua `ACCESS_TOKEN_EXPIRE_MINUTES`. Không có API refresh/logout/register trên nhánh này; logout phía frontend xóa session local. `X-User-Id` chỉ được backend chấp nhận khi `ALLOW_DEV_USER_HEADER=1`; không dùng làm hợp đồng production và không xuất hiện trong Swagger.
+Gửi `Authorization: Bearer <access_token>`. Login trả JWT HS256, thời hạn mặc định 60 phút, có thể cấu hình qua `ACCESS_TOKEN_EXPIRE_MINUTES`. Không có API refresh/logout/register/đổi hoặc quên mật khẩu trên nhánh này; logout phía frontend xóa session local. `X-User-Id` chỉ được backend chấp nhận khi `ALLOW_DEV_USER_HEADER=1`; không dùng làm hợp đồng production và không xuất hiện trong Swagger.
 
 Mọi endpoint có L/O/role đều có thể trả **401 `unauthenticated`** (thiếu/sai/hết hạn token, tài khoản không active), kèm `WWW-Authenticate: Bearer`. Public seat map cho phép không có token, nhưng token sai đã gửi vẫn trả 401. Endpoint có path/query/body validation có thể trả **422 `validation_error`**, bổ sung cho các lỗi riêng trong danh mục. Các lỗi kết nối DB/exception chưa xử lý có thể thành 500; không có cam kết error envelope hay retry response riêng cho lỗi ngoài dự kiến.
 
@@ -115,7 +115,7 @@ Body bắt buộc `application/json`: `HoldRequest`.
 - **Response thành công:** HTTP **201**, `application/json`, `ReservationOut`.
 - **Lỗi chính:** 400 `duplicate_seats`, `seat_not_found`, `seat_wrong_concert`, `zone_requires_quantity`, `zone_requires_seats`, `too_many_seats`; 404 `not_found`; 409 `seat_unavailable`, `standing_unavailable`, `concert_not_on_sale`, `sale_not_started`, `sale_ended`. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
-**Lưu ý hợp đồng:** Body mặc định `seat_ids=[]`, `standing=[]`; tổng `len(seat_ids)+sum(quantity)` phải từ 1 đến 6. Trùng zone Standing trả 422 ở validator; trùng seat ID trả 400. Ghế phải thuộc concert. Standing chỉ dùng zone/số lượng; Seated phải dùng seat ID. Tất cả thành công hoặc rollback. HTTP status thành công luôn 201; mỗi request tạo hold mới và hủy hold active trước đó của cùng người/concert, không phải idempotency key. TTL mặc định 300 giây (cấu hình `RESERVATION_TTL_SECONDS`).
+**Lưu ý hợp đồng:** Body mặc định `seat_ids=[]`, `standing=[]`; tổng `len(seat_ids)+sum(quantity)` phải từ 1 đến 6 (vi phạm schema/validator trả 422 trước khi vào service). Trùng zone Standing trả 422 ở validator; trùng seat ID trả 400. Ghế phải thuộc concert. Standing chỉ dùng zone/số lượng; Seated phải dùng seat ID. Tất cả thành công hoặc rollback. HTTP status thành công luôn 201; mỗi request tạo hold mới và hủy hold active trước đó của cùng người/concert, không phải idempotency key. TTL mặc định 300 giây (cấu hình `RESERVATION_TTL_SECONDS`).
 
 ### 06. `GET /api/reservations/{reservation_id}`
 
@@ -173,7 +173,7 @@ Body bắt buộc `application/json`: `CheckoutRequest`.
 
 | Vị trí | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- | --- |
-| query | `status` | string hoặc null | Không | — |
+| query | `status` | string hoặc null | Không | pattern=^(pending\|paid\|cancelled\|failed)$ |
 | query | `limit` | integer | Không | minimum=1; maximum=100; default=50 |
 | query | `offset` | integer | Không | minimum=0; default=0 |
 
@@ -190,7 +190,7 @@ Không có request body.
 
 | Vị trí | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- | --- |
-| query | `status` | string hoặc null | Không | — |
+| query | `status` | string hoặc null | Không | pattern=^(pending\|paid\|cancelled\|failed)$ |
 | query | `limit` | integer | Không | minimum=1; maximum=100; default=50 |
 | query | `offset` | integer | Không | minimum=0; default=0 |
 
@@ -239,7 +239,7 @@ Body tùy chọn `application/json`: `CancelRequest` hoặc null.
 
 | Vị trí | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- | --- |
-| query | `status` | string hoặc null | Không | — |
+| query | `status` | string hoặc null | Không | pattern=^(valid\|used\|cancelled\|refunded)$ |
 
 Không có request body.
 
@@ -254,7 +254,7 @@ Không có request body.
 
 | Vị trí | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- | --- |
-| query | `status` | string hoặc null | Không | — |
+| query | `status` | string hoặc null | Không | pattern=^(valid\|used\|cancelled\|refunded)$ |
 
 Không có request body.
 
@@ -302,7 +302,7 @@ Không có request body.
 - **Response thành công:** HTTP **200**, `application/json`, `AdminStatsOut`.
 - **Lỗi chính:** 403 `forbidden`; áp dụng lỗi chung. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
-**Lưu ý hợp đồng:** totalRevenue = tổng total_amount − refund_amount với payment_status=paid; ticketsSold đếm valid/used; totalOrders đếm mọi order; upcomingConcerts chỉ on_sale/sold_out và starts_at tương lai. checkinsToday dùng nửa đêm theo múi giờ DB.
+**Lưu ý hợp đồng:** totalRevenue = tổng total_amount − refund_amount với payment_status=paid; ticketsSold đếm valid/used; totalOrders đếm mọi order; upcomingConcerts chỉ on_sale/sold_out và starts_at tương lai. totalConcerts đếm toàn bộ catalogue. checkinsToday đếm ticket used với checked_in_at từ nửa đêm theo múi giờ DB (query hiện chỉ có cận dưới, không lọc timestamp tương lai). Xem [công thức và đối chiếu Dashboard](dashboard-metrics.md).
 
 ### 18. `GET /api/admin/stats/concerts`
 
@@ -316,7 +316,7 @@ Không có request body.
 - **Response thành công:** HTTP **200**, `application/json`, array<`AdminConcertStatsOut`>.
 - **Lỗi chính:** 403 `forbidden`; áp dụng lỗi chung. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
-**Lưu ý hợp đồng:** Cùng quy tắc doanh thu/vé bán như thống kê chung. capacity là tổng capacity các zone; upcoming cần cả starts_at tương lai và status on_sale/sold_out.
+**Lưu ý hợp đồng:** Cùng quy tắc doanh thu/vé bán như thống kê chung. capacity là tổng capacity các zone; upcoming cần cả starts_at tương lai và status on_sale/sold_out. checkedIn đếm used toàn thời gian của concert, khác checkinsToday. Response không có available/held/sold inventory; không coi capacity − ticketsSold là số vé mua được ngay (xem issue #87 trong tài liệu Dashboard).
 
 ### 19. `GET /api/admin/orders`
 
@@ -326,9 +326,9 @@ Không có request body.
 
 | Vị trí | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- | --- |
-| query | `status` | string hoặc null | Không | — |
-| query | `concert_id` | integer hoặc null | Không | — |
-| query | `q` | string hoặc null | Không | — |
+| query | `status` | string hoặc null | Không | pattern=^(pending\|paid\|cancelled\|failed\|refunded)$ |
+| query | `concert_id` | integer hoặc null | Không | minimum=1 |
+| query | `q` | string hoặc null | Không | maxLength=100 |
 | query | `page` | integer | Không | minimum=1; default=1 |
 | query | `page_size` | integer | Không | minimum=1; maximum=100; default=20 |
 
@@ -576,7 +576,7 @@ Các bảng sau lấy tên trường/kiểu/required/default trực tiếp từ 
 
 | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- |
-| `grant_type` | string hoặc null | Không | — |
+| `grant_type` | string hoặc null | Không | pattern=^password$ |
 | `username` | string | Có | — |
 | `password` | string (password) | Có | — |
 | `scope` | string | Không | default="" |
@@ -595,7 +595,7 @@ Các bảng sau lấy tên trường/kiểu/required/default trực tiếp từ 
 
 | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- |
-| `reason` | string hoặc null | Không | — |
+| `reason` | string hoặc null | Không | maxLength=500 |
 
 ### CheckInRequest
 
@@ -875,3 +875,45 @@ Khi hợp đồng thay đổi:
 - [ ] TV2/TV3 xác nhận phạm vi khoảng 23 và những API chưa tích hợp.
 - [ ] Backend/TV2/TV3 thống nhất các chênh lệch Swagger nêu ở mục 6.
 - [ ] Ghi nhận bản chốt trước tích hợp diện rộng.
+
+
+## 8. Biên bản đồng bộ Task #57
+
+Đối chiếu trực tiếp OpenAPI đang chạy với `app.openapi()` không mở lifespan,
+không chạy sweeper hay thực hiện request tạo/đổi dữ liệu. Hai schema khớp nhau,
+bao phủ đủ 22 operations. Các bảng model bao phủ tên field, required/nullable và
+kiểu dữ liệu của input/output; điều kiện custom validator/service được ghi bằng
+chữ vì Swagger không tự biểu diễn toàn bộ. Hướng dẫn sử dụng tại [README](README.md).
+
+Các điểm bổ sung so với bản #53/#54:
+
+- Bổ sung pattern của bộ lọc status, minimum của concert_id, maxLength của q,
+  CancelRequest.reason và pattern grant_type vốn chưa hiện đủ trong bảng.
+- Standing tự cấp **đơn vị tồn kho nội bộ** theo Seat.id tăng dần dưới khóa DB;
+  không cấp hàng/số ghế ngồi cho khách. Seated phải gửi seat_ids cụ thể; không có
+  endpoint nhận seated zone + quantity để tự chọn ghế hay đảm bảo liền nhau.
+- API hold hỗ trợ mixed Standing/Seated trong một request, nhưng UI hiện gửi lựa
+  chọn của một hạng/loại mỗi lần Continue Payment; không coi đó là giỏ mixed đã tích hợp.
+- TTL mặc định 300 giây, cấu hình RESERVATION_TTL_SECONDS có thể override.
+  Sweeper mỗi 30 giây khi được bật; expiry lazy bảo đảm không thanh toán hold hết
+  hạn, không cam kết row DB được giải phóng ngay tức khắc ở mốc countdown 0.
+- Giá checkout lấy Zone.price tại thời điểm thanh toán; không nhận tổng tiền từ
+  client. Body buyer được validate ở HTTP boundary, chưa được lưu làm người nhận vé.
+- Register UI chỉ kiểm tra xác nhận mật khẩu và lưu tên local, chưa có register API.
+  Backend checkout mô phỏng nhưng lưu order/ticket thật vào PostgreSQL; checkout
+  demo không reservationId chỉ lưu local, không tạo admission QR. API lỗi không
+  làm Seat Selection tự chuyển sang mua demo.
+
+### Các việc còn cần developer/reviewer xử lý
+
+| Vấn đề | Bằng chứng | Trạng thái |
+| --- | --- | --- |
+| Swagger chưa mô tả error envelope thực và các lỗi nghiệp vụ | main.py exception handlers so với responses trong OpenAPI | Đã ghi nhận, chưa sửa API trong task docs |
+| Seat map/health thiếu response_model đầy đủ | routers/seats.py và main.py, schema response object rỗng | Đã ghi nhận, cần developer bổ sung nếu muốn Swagger đầy đủ |
+| Register báo thành công dù chưa tạo user PostgreSQL | pages/auth/register.html handleRegister, không có route register | Chưa tích hợp; README đã cảnh báo rõ |
+| Lưu buyer contact trên order | routers/orders.py không truyền buyer vào checkout service | Chưa triển khai, cần quyết định nghiệp vụ nếu yêu cầu lưu |
+| Nhãn Dashboard remaining chưa phản ánh inventory available | js/dashboard.js và số liệu QA task #56 | Đã có [issue #87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87) |
+| Concert CRUD/public list-detail và tự cấp ghế Seated | Không có operations tương ứng trong OpenAPI/router | Chưa có API, không mô tả là hoàn tất |
+
+Task #57 không khẳng định đã thực hiện review TV2/TV3, triển khai các chức năng
+thiếu hoặc sửa các lỗi runtime trên. Không thay đổi backend để khớp tài liệu.
