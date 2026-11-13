@@ -26,7 +26,6 @@ from app.config import MAX_SEATS_PER_RESERVATION, RESERVATION_TTL
 from app.errors import DomainError, bad_request, conflict, not_found
 from app.models import Concert, Reservation, Seat, Zone
 from app.services.txn import transactional
-from app.venue_catalog import booking_type
 
 
 @dataclass
@@ -106,13 +105,13 @@ def release_expired(db: Session, seats: list[Seat], now: datetime) -> None:
 
 def seat_views(db: Session, seat_ids) -> list[SeatView]:
     rows = db.execute(
-        select(Seat.id, Zone.id, Zone.name, Seat.row_label, Seat.seat_number, Zone.price, Zone.concert_id)
+        select(Seat.id, Zone.id, Zone.name, Seat.row_label, Seat.seat_number, Zone.price, Zone.booking_type)
         .join(Zone, Zone.id == Seat.zone_id)
         .where(Seat.id.in_(list(seat_ids)))
         .order_by(Zone.id, Seat.row_label, Seat.seat_number)
     ).all()
-    return [SeatView(r[0], r[1], r[2], r[3] if booking_type(r[6], r[2]) == "seated" else None,
-                     r[4] if booking_type(r[6], r[2]) == "seated" else None, r[5], booking_type(r[6], r[2])) for r in rows]
+    return [SeatView(r[0], r[1], r[2], r[3] if r[6] == "seated" else None,
+                     r[4] if r[6] == "seated" else None, r[5], r[6]) for r in rows]
 
 
 @transactional
@@ -132,14 +131,21 @@ def hold_tickets(db: Session, user_id: int, concert_id: int, seat_ids: list[int]
     # or interfering with the global seats -> reservation -> order lock sequence.
     db.execute(select(func.pg_advisory_xact_lock(func.hashtextextended(f"hold:{user_id}:{concert_id}", 0))))
     requested_zones = {z for z, _ in standing}
-    zones = {z.id: z for z in db.execute(select(Zone).where(Zone.id.in_(requested_zones))).scalars()}
+    # Keep admission type stable until this hold commits. Admin edits lock zones
+    # exclusively before inspecting inventory; acquire shared locks before seat locks.
+    explicit_zone_ids = set(db.execute(select(Seat.zone_id).where(Seat.id.in_(seat_ids))).scalars())
+    zones = {z.id: z for z in db.execute(
+        select(Zone).where(Zone.id.in_(requested_zones | explicit_zone_ids))
+        .order_by(Zone.id).with_for_update(read=True)
+        .execution_options(populate_existing=True)
+    ).scalars()}
     for zone_id in requested_zones:
         if zone_id not in zones or zones[zone_id].concert_id != concert_id:
             raise bad_request("seat_wrong_concert", "Standing zone does not belong to this concert.")
         if zones[zone_id].booking_type != "standing":
             raise bad_request("zone_requires_seats", "Select specific seats in this seated zone.")
-    explicit = db.execute(select(Seat.id, Zone.concert_id, Zone.name).join(Zone, Zone.id == Seat.zone_id).where(Seat.id.in_(seat_ids))).all()
-    if any(booking_type(cid, name) == "standing" for _, cid, name in explicit):
+    explicit = db.execute(select(Seat.id, Zone.concert_id, Zone.booking_type).join(Zone, Zone.id == Seat.zone_id).where(Seat.id.in_(seat_ids))).all()
+    if any(mode == "standing" for _, _, mode in explicit):
         raise bad_request("zone_requires_quantity", "Standing zones are booked by quantity, not seat IDs.")
     previous = select(Reservation.id).where(Reservation.user_id == user_id, Reservation.concert_id == concert_id, Reservation.status == "active")
     old_ids = list(db.execute(select(Seat.id).where(Seat.reservation_id.in_(previous))).scalars())
