@@ -78,10 +78,19 @@ def main():
         assert status == 200 and seats['zones'][0]['booking_type'] == 'standing'
         assert seats['zones'][0]['name'] == 'Renamed standing' and seats['zones'][0]['seats'] == []
         buyer = login('minhanh@concertly.dev')['access_token']
-        status, hold = request('/reservations', buyer, {'concert_id':concert['id'],'standing':[{'zone_id':concert['zones'][0]['id'],'quantity':1}]})
-        assert status == 201
-        status, order = request('/checkout', buyer, {'reservation_id':hold['id'],'payment_method':'card','buyer':{'full_name':'QA Buyer','email':'qa@example.com','phone':'0912345678'}})
-        assert status == 201 and order['tickets'][0]['booking_type'] == 'standing'
+        browser.evaluate(f'localStorage.setItem("token",{json.dumps(buyer)});localStorage.setItem("concertlyUser","QA Buyer");localStorage.setItem("userRole","customer")')
+        browser.navigate(f"pages/concerts/tickets.html?id=c{concert['id']}")
+        browser.wait('document.querySelector(".ticket-item p")?.textContent.includes("available")')
+        browser.click('.ticket-item')
+        browser.wait('!document.getElementById("continue-payment").disabled')
+        assert browser.evaluate('document.getElementById("seat-picker").textContent.includes("Standing")')
+        browser.click('#continue-payment')
+        browser.wait('location.pathname.endsWith("/checkout/index.html") && document.getElementById("confirm-payment") && !document.getElementById("confirm-payment").disabled')
+        browser.evaluate('Object.entries({"buyer-name":"QA Buyer","buyer-email":"qa@example.com","buyer-phone":"0912345678","payment-method":"card"}).forEach(([id,value])=>document.getElementById(id).value=value)')
+        browser.click('#confirm-payment')
+        browser.wait('location.pathname.endsWith("/me/order-detail.html")')
+        status, order = request('/orders/' + browser.evaluate('new URLSearchParams(location.search).get("id")'), buyer)
+        assert status == 200 and order['tickets'][0]['booking_type'] == 'standing'
         assert order['tickets'][0]['row'] is None and order['tickets'][0]['qr_data']
         assert not browser.errors, browser.errors
         print('PASS Chrome: create Standing/Seated, persist/rename, 6 responsive widths, Standing checkout and QR')
