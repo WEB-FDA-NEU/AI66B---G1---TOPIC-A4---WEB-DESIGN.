@@ -34,7 +34,7 @@ và [schemas.py](../backend/app/schemas.py).
 | --- | --- |
 | User / `users` | Danh tính, password_hash, role, is_active; liên kết với reservation và order |
 | Concert / `concerts` | Thời gian diễn/mở bán, trạng thái sự kiện |
-| Zone / `zones` | Khu/hạng vé của concert, price và capacity; booking_type được suy ra từ cấu hình venue, không phải cột DB riêng |
+| Zone / `zones` | Khu/hạng vé của concert, price và capacity; booking_type là cột DB seated/standing; JSON chỉ dùng cho seed |
 | Seat / `seats` | Ghế Seated hoặc đơn vị tồn kho Standing; zone_id, row_label, seat_number, status, reservation_id, held_until |
 | Reservation / `reservations` | Chủ hold, concert_id, status và expires_at; liên kết tồn kho qua seats.reservation_id |
 | Order / `orders` | Tổng tiền, chủ đơn, concert, reservation_id; trạng thái đơn, thanh toán và hoàn tiền |
@@ -46,9 +46,9 @@ của order. Đơn chưa thanh toán có thể tồn tại mà chưa có ticket.
 trường refund nằm trên orders. Vì vậy, không được trình bày mô hình Order Items
 hoặc Payment như những bảng đã triển khai.
 
-Catalogue và nội dung giới thiệu concert trên frontend còn lấy từ
-[js/mock-data.js](../js/mock-data.js); hình venue/polygon lấy từ các file SVG
-configuration. Chúng không thay thế giá/tồn kho PostgreSQL khi giữ và thanh toán.
+Sau tích hợp #81, catalogue public được tải qua public-catalog.js từ API, ghép
+với dữ liệu trình bày/mock; khi API lỗi có thể còn preview local. Hình venue/polygon
+lấy từ các file SVG configuration. Chúng không thay thế giá/tồn kho PostgreSQL khi giữ và thanh toán.
 
 ## 2. Quy trình đặt vé và giữ chỗ
 
@@ -337,7 +337,7 @@ hai request API hoặc giữa API với SQL khi có giao dịch đồng thời.
 | Đã triển khai, có bằng chứng QA trước đó | Hold 300 giây, giới hạn 6, Standing/Seated, checkout và QR, hủy/hoàn toàn phần, thống kê | Test QA không đại diện mọi tải và cấu hình; không chạy lại ở Task #58 |
 | Đã triển khai, chưa kiểm chứng đầy đủ | Sweeper khi vận hành lâu dài, cạnh tranh tải lớn, dữ liệu đang thay đổi, đồng bộ timezone giữa trình duyệt và DB | Cần đánh giá vận hành/stress test riêng; không đưa chỉ tiêu hiệu năng chưa đo |
 | Đã triển khai nhưng còn hạn chế | Nhãn remaining; buyer chỉ validate; giá không khóa tại hold; UI chưa có giỏ mixed nhiều hạng | Ghi nhận #87; các phần còn lại cần thống nhất nghiệp vụ trước khi mở rộng |
-| Chưa triển khai | Register backend, tự cấp ghế Seated, public concert list/detail và concert CRUD API, refresh token, lưu buyer riêng/gửi email vé | Không xem giao diện demo hay trường DB dự phòng là workflow hoàn chỉnh |
+| Chưa triển khai | Register backend, tự cấp ghế Seated, refresh token, lưu buyer riêng/gửi email vé | Không xem giao diện demo hay trường DB dự phòng là workflow hoàn chỉnh |
 | Chưa triển khai | Hủy từng vé/hoàn một phần, duyệt refund requested/rejected, tự hoàn tất cả khi concert cancelled | Luồng hiện tại chỉ hủy toàn đơn theo điều kiện và mock refund thành công |
 | Ngoài phạm vi demo hiện tại | Gateway/hoàn tiền thật, webhook và đối soát ngân hàng, phí/thuế/voucher, đa tiền tệ | Cần thiết kế hợp đồng thanh toán và quy tắc tài chính trước khi triển khai |
 
@@ -361,3 +361,15 @@ tự ghi là đã nghiệm thu chung.
 - [Business Rules](business-rules.md).
 - [Công thức và đối chiếu Dashboard](dashboard-metrics.md).
 - [Dữ liệu mẫu](seed-data.md) và [seed_data.json](../backend/scripts/seed_data.json).
+
+
+### Cập nhật review #83 sau #81 — 14/11/2026
+
+Admin/public concert CRUD/catalogue đã tích hợp từ #81; không còn là chức năng
+chưa có như giai đoạn tài liệu đầu tiên. Zone.booking_type là dữ liệu lưu ở DB,
+admin chọn loại rõ ràng và đổi tên không đổi loại. Request sửa bỏ/null field giữ
+loại cũ; tạo mới mặc định seated. Đổi loại khi có ticket hoặc inventory occupied
+trả 409 để bảo toàn vé cũ. Database cũ cần migration tường minh, không tự áp dụng
+trong startup hoặc chạy lại seed. Các số liệu seed/QA ở mục 5 vẫn là snapshot lịch
+sử; không tuyên bố database vận hành đã migrate. Chi tiết triển khai và bằng chứng
+review tại backend/README.md và docs/current-ui-qa.md.
