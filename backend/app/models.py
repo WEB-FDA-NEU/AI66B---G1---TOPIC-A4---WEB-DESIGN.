@@ -95,6 +95,7 @@ class Zone(Base):
     __tablename__ = "zones"
     __table_args__ = (
         CheckConstraint("price >= 0", name="ck_zones_price_nonnegative"),
+        CheckConstraint("booking_type IN ('seated', 'standing')", name="ck_zones_booking_type"),
         CheckConstraint("capacity > 0", name="ck_zones_capacity_positive"),
         UniqueConstraint("concert_id", "name", name="uq_zones_concert_name"),
         Index("ix_zones_concert_id", "concert_id"),
@@ -113,10 +114,7 @@ class Zone(Base):
     concert: Mapped[Concert] = relationship(back_populates="zones")
     seats: Mapped[list[Seat]] = relationship(back_populates="zone", cascade="all, delete-orphan")
 
-    @property
-    def booking_type(self) -> str:
-        from app.venue_catalog import booking_type
-        return booking_type(self.concert_id, self.name)
+    booking_type: Mapped[str] = mapped_column(String(10), nullable=False, default="seated", server_default=text("'seated'"))
 
 
 class Reservation(Base):

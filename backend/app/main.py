@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import EXPIRY_SWEEP_INTERVAL
 from app.database import SessionLocal
@@ -43,6 +44,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Concertly API", lifespan=lifespan)
+admin.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=admin.UPLOAD_DIR), name="uploads")
 
 # The static frontend is served from a different origin in development.
 app.add_middleware(
