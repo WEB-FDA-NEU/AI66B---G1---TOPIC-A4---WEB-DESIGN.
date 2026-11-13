@@ -20,12 +20,13 @@ concert's tier capacities.
 """
 from __future__ import annotations
 
-from sqlalchemy import String, cast, func, or_, select
+from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.errors import not_found
-from app.models import Concert, Order, Ticket, User, Zone
+from app.models import Concert, Order, Seat, Ticket, User, Zone
 from app.services.orders import order_detail, order_summary
+from app.services.reservations import db_now
 
 ORDER_STATUS_FILTERS = ("pending", "paid", "cancelled", "failed", "refunded")
 UPCOMING_STATUSES = ("on_sale", "sold_out")
@@ -83,6 +84,22 @@ def concert_stats(db: Session) -> list[dict]:
         .group_by(Order.concert_id)
         .subquery()
     )
+    # Match seat-map lazy expiry without mutating seats or waiting for the sweeper.
+    # Sample DB wall-clock once so all inventory buckets share the same boundary.
+    now = db_now(db)
+    inventory = (
+        select(
+            Zone.concert_id,
+            func.count().filter(or_(Seat.status == "available", and_(
+                Seat.status == "held", Seat.held_until <= now
+            ))).label("available"),
+            func.count().filter(and_(Seat.status == "held", Seat.held_until > now)).label("held"),
+            func.count().filter(Seat.status == "sold").label("sold"),
+        )
+        .join(Seat, Seat.zone_id == Zone.id)
+        .group_by(Zone.concert_id)
+        .subquery()
+    )
     rows = db.execute(
         select(
             Concert,
@@ -91,7 +108,11 @@ def concert_stats(db: Session) -> list[dict]:
             func.coalesce(checked_in.c.checked_in, 0),
             func.coalesce(revenue.c.revenue, 0),
             Concert.starts_at > func.now(),
+            func.coalesce(inventory.c.available, 0),
+            func.coalesce(inventory.c.held, 0),
+            func.coalesce(inventory.c.sold, 0),
         )
+        .outerjoin(inventory, inventory.c.concert_id == Concert.id)
         .outerjoin(capacity, capacity.c.concert_id == Concert.id)
         .outerjoin(sold, sold.c.concert_id == Concert.id)
         .outerjoin(checked_in, checked_in.c.concert_id == Concert.id)
@@ -113,8 +134,11 @@ def concert_stats(db: Session) -> list[dict]:
             "ticketsSold": int(n_sold),
             "checkedIn": int(n_in),
             "revenue": int(rev),
+            "availableInventory": int(available),
+            "heldInventory": int(held),
+            "soldInventory": int(inventory_sold),
         }
-        for c, cap, n_sold, n_in, rev, future in rows
+        for c, cap, n_sold, n_in, rev, future, available, held, inventory_sold in rows
     ]
 
 

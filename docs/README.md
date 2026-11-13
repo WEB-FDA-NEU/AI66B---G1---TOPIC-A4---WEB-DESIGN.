@@ -155,8 +155,8 @@ concertId, kiểm tra đúng concert và chặn check-in trùng.
 
 **Quản lý concert/khu/giá trên UI chưa có API CRUD tương ứng.** Không xem màn hình
 Concert Management hoặc nút Save là bằng chứng đã lưu PostgreSQL. Catalogue public
-cũng chưa có API list/detail (chỉ có API seats). Dashboard “tickets remaining” còn
-hạn chế tính tồn kho, đã ghi nhận [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
+cũng chưa có API list/detail (chỉ có API seats). Dashboard “tickets remaining” đã được sửa trong bản làm việc để lấy availableInventory,
+loại hold chưa hết hạn và inventory sold; tham chiếu [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
 
 ## 7. Trạng thái nghiệm thu Task #57
 

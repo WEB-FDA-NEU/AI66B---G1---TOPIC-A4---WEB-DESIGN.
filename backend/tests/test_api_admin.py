@@ -322,6 +322,7 @@ def test_concert_stats(client, db, shop, admin):
     titles = {c["title"]: c for c in rows.values()}
     assert titles["Draft Show"]["upcoming"] is False and titles["Sold Out Show"]["upcoming"] is True
     assert titles["Draft Show"]["capacity"] == 0 and titles["Draft Show"]["revenue"] == 0
+    assert all(titles["Draft Show"][key] == 0 for key in ("availableInventory", "heldInventory", "soldInventory"))
     # soonest first
     starts = [c["starts_at"] for c in r.json()]
     assert starts == sorted(starts)
@@ -335,3 +336,50 @@ def test_concert_stats(client, db, shop, admin):
 def test_concert_stats_requires_admin(client, db, users):
     assert client.get("/api/admin/stats/concerts").status_code == 401
     assert client.get("/api/admin/stats/concerts", headers=bearer(db, users["a"])).status_code == 403
+
+
+@pytest.mark.parametrize("expire", [False, True])
+def test_inventory_counts_match_seatmap_without_sweeper(client, db, users, concert, seat_ids, admin, expire):
+    from app.services.reservations import hold_seats
+    from tests.conftest import expire_reservation
+
+    hold = hold_seats(db, users["a"], concert, seat_ids[:2])
+    if expire:
+        expire_reservation(hold.id)
+    # Extra sold inventory deliberately has no issued ticket, as in soldOut seed.
+    seat = db.get(Seat, seat_ids[2])
+    seat.status = "sold"
+    db.commit()
+    response = client.get("/api/admin/stats/concerts", headers=bearer(db, admin))
+    assert response.status_code == 200
+    row = next(c for c in response.json() if c["id"] == concert)
+    assert row["availableInventory"] == (14 if expire else 12)
+    assert row["heldInventory"] == (0 if expire else 2)
+    assert row["soldInventory"] == 1
+    assert row["ticketsSold"] == row["revenue"] == 0
+    assert sum(row[k] for k in ("availableInventory", "heldInventory", "soldInventory")) == 15
+    # Reading dashboard must not release expired holds or mutate reservations.
+    assert scalar("SELECT count(*) FROM seats WHERE status='held'") == 2
+    zones = client.get(f"/api/concerts/{concert}/seats").json()["zones"]
+    for field, status in [("availableInventory", "available"), ("heldInventory", "held"), ("soldInventory", "sold")]:
+        assert row[field] == sum(z[status] for z in zones)
+
+
+def test_inventory_after_checkout_and_refund(client, db, users, concert, seat_ids, admin):
+    from app.services import reservations, checkout, orders
+
+    def inventory():
+        response = client.get("/api/admin/stats/concerts", headers=bearer(db, admin))
+        assert response.status_code == 200
+        return next(c for c in response.json() if c["id"] == concert)
+
+    before = inventory()
+    assert (before["availableInventory"], before["heldInventory"], before["soldInventory"]) == (15, 0, 0)
+    hold = reservations.hold_seats(db, users["a"], concert, seat_ids[:2])
+    order = checkout.checkout(db, users["a"], hold.id, "card")
+    paid = inventory()
+    assert (paid["availableInventory"], paid["heldInventory"], paid["soldInventory"], paid["ticketsSold"]) == (13, 0, 2, 2)
+    orders.cancel_order(db, users["a"], order["id"], None)
+    refunded = inventory()
+    assert (refunded["availableInventory"], refunded["heldInventory"], refunded["soldInventory"]) == (15, 0, 0)
+    assert refunded["ticketsSold"] == refunded["revenue"] == 0

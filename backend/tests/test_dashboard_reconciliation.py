@@ -37,7 +37,9 @@ def test_dashboard_matches_read_only_snapshot(db):
     for row in concerts:
         api = by_id[row['id']]
         for key, column in [('capacity','capacity'), ('ticketsSold','tickets_sold'),
-                            ('revenue','revenue'), ('checkedIn','checked_in'), ('upcoming','upcoming')]:
+                            ('revenue','revenue'), ('checkedIn','checked_in'), ('upcoming','upcoming'),
+                            ('availableInventory','available_inventory'),
+                            ('heldInventory','held_inventory'), ('soldInventory','sold_inventory')]:
             assert api[key] == row[column]
     assert sum(c['revenue'] for c in concerts) == actual['totalRevenue']
     assert sum(c['tickets_sold'] for c in concerts) == actual['ticketsSold']

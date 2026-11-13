@@ -91,6 +91,10 @@ function renderUpcomingConcerts() {
     const capacity = Math.max(c.capacity, 1);
     const sold = Math.min(c.ticketsSold, capacity);
     const soldPercent = Math.round((sold / capacity) * 100);
+    // Never infer availability from issued tickets; older API versions lack this field.
+    const remaining = Number.isInteger(c.availableInventory) && c.availableInventory >= 0
+      ? `${c.availableInventory.toLocaleString("en-US")} tickets remaining`
+      : "Availability unavailable";
     return `
       <div class="mini-list-item">
         ${c.poster_url ? `<img class="mini-thumb" src="${adminEscape(c.poster_url)}" alt="">` : ""}
@@ -105,7 +109,7 @@ function renderUpcomingConcerts() {
             <div class="mini-progress" role="progressbar" aria-valuenow="${soldPercent}" aria-valuemin="0" aria-valuemax="100">
               <span style="width: ${soldPercent}%"></span>
             </div>
-            <div class="mini-sales-remaining">${(c.capacity - sold).toLocaleString("en-US")} tickets remaining</div>
+            <div class="mini-sales-remaining">${remaining}</div>
           </div>
         </div>
         ${adminConcertBadge(c.status)}

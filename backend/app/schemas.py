@@ -174,6 +174,9 @@ class AdminConcertStatsOut(BaseModel):
     ticketsSold: int
     checkedIn: int
     revenue: int
+    availableInventory: int
+    heldInventory: int
+    soldInventory: int
 
 
 class CustomerOut(BaseModel):

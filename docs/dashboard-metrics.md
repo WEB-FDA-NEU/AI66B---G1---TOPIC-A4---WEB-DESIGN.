@@ -10,7 +10,7 @@ API thống kê yêu cầu quyền admin: `GET /api/admin/stats` và
 
 Issue yêu cầu năm chỉ số; giao diện thực tế có năm chỉ số chính và một chỉ số
 bổ sung Check-ins Today. Tài liệu bao phủ cả sáu để không bỏ sót hành vi đang chạy.
-Không thay đổi công thức, UI, schema hay dữ liệu vận hành trong task này.
+Task #56 chỉ đối chiếu. Bản sửa #87 sau đó bổ sung trường inventory API và đổi nguồn số remaining; không thay công thức doanh thu, Tickets Sold hoặc schema PostgreSQL.
 
 ## Năm chỉ số chính
 
@@ -50,6 +50,9 @@ ngày với Check-ins Today nếu trình duyệt và PostgreSQL khác timezone.
 
 `/api/admin/stats/concerts` trả mọi concert, kể cả chưa có đơn hoặc chưa có zone.
 Các tổng revenue/ticketsSold áp dụng cùng quy tắc, thêm điều kiện concert_id.
+Bản sửa #87 bổ sung availableInventory (available hoặc held hết hạn), heldInventory
+(held chưa hết hạn), soldInventory (sold). Thời gian được lấy một lần từ đồng hồ DB
+qua db_now; không mutate tồn kho khi đọc thống kê. Concert không có inventory trả 0.
 `checkedIn` là số vé used toàn thời gian của concert, không phải checkinsToday.
 `capacity` = SUM(zones.capacity), tập rỗng bằng 0. `upcoming` dùng cùng điều kiện
 thời gian và trạng thái như chỉ số toàn hệ thống.
@@ -113,11 +116,12 @@ vì vậy chỉ chạy với database QA mới có tên chứa `test`, tuyệt �
 ## Sai lệch được ghi nhận
 
 [Issue #87 — tickets remaining chưa phản ánh inventory available](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
-Frontend hiện tính capacity - ticketsSold, nên bao gồm hold và inventory khóa bán
-không có ticket. Giữ công thức Tickets Sold như trên; issue đề xuất thống nhất
-nhãn hoặc bổ sung available inventory thực vào API. Đây là lỗi hiển thị tồn kho,
-không phải sai công thức doanh thu. Task #56 ghi nhận và giải thích, không thay đổi
-UI hoặc hợp đồng API ngoài phạm vi.
+Trước bản sửa #87, frontend tính capacity - ticketsSold nên gồm cả hold và inventory
+khóa bán không có ticket. Bản làm việc đã sửa: remaining lấy availableInventory,
+không tính held chưa hết hạn hoặc sold; hold hết hạn được tính lại ngay cả trước
+sweeper. Tickets Sold, doanh thu và progress bán vé giữ nguyên. API cũ thiếu field
+thì hiện Availability unavailable, không tự suy diễn còn vé. Số remaining là snapshot
+tồn kho, không cam kết mọi inventory đều mua được nếu concert ngoài thời gian mở bán.
 
 Chưa kiểm chứng số liệu của database vận hành local hoặc production; không seed
 hay thay đổi chúng để làm báo cáo này. Khi hợp đồng hoặc chính sách thay đổi,

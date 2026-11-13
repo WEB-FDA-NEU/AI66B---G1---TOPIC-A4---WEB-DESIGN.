@@ -16,8 +16,8 @@ SELECT c.id,
  (SELECT count(*) FROM tickets t WHERE t.concert_id=c.id AND t.status IN ('valid','used')) AS tickets_sold,
  (SELECT count(*) FROM tickets t WHERE t.concert_id=c.id AND t.status='used') AS checked_in,
  c.starts_at>now() AND c.status IN ('on_sale','sold_out') AS upcoming,
- (SELECT count(*) FROM seats s JOIN zones z ON z.id=s.zone_id WHERE z.concert_id=c.id AND s.status='available') AS available_inventory,
- (SELECT count(*) FROM seats s JOIN zones z ON z.id=s.zone_id WHERE z.concert_id=c.id AND s.status='held') AS held_inventory,
+ (SELECT count(*) FROM seats s JOIN zones z ON z.id=s.zone_id WHERE z.concert_id=c.id AND (s.status='available' OR (s.status='held' AND s.held_until<=current_timestamp))) AS available_inventory,
+ (SELECT count(*) FROM seats s JOIN zones z ON z.id=s.zone_id WHERE z.concert_id=c.id AND s.status='held' AND s.held_until>current_timestamp) AS held_inventory,
  (SELECT count(*) FROM seats s JOIN zones z ON z.id=s.zone_id WHERE z.concert_id=c.id AND s.status='sold') AS sold_inventory
 FROM concerts c ORDER BY c.starts_at,c.id;
 
