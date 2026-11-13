@@ -16,6 +16,8 @@ uvicorn app.main:app --reload --port 8000
 The static frontend calls `http://localhost:8000/api` (override with `window.CONCERTLY_API_BASE`).
 If the API cannot be reached, booking is disabled and a retry button is shown. New purchases never fall back to local mock orders. The old demo receipt reader remains only for saved legacy checkout sessions, clearly marked as demo and without admission QR codes.
 
+For production deployment, see [the Render deployment guide](../docs/deploy.md).
+
 ## Authentication
 
 Sign in with `POST /api/auth/login` (form fields `username` = e-mail, `password`), which returns
