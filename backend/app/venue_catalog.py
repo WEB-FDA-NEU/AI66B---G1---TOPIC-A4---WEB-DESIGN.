@@ -1,4 +1,4 @@
-"""Explicit demo zone types, shared by read APIs and reservation validation.
+"""Demo zone defaults for seed only; runtime reads zones.booking_type.
 
 No existing rows are rewritten. Unknown legacy zones retain their numbered-seat
 contract; only explicitly configured standing zones use quantity inventory.
