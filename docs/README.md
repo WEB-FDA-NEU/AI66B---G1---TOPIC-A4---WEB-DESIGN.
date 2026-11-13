@@ -1,9 +1,9 @@
-# CONCERTLY — Hướng dẫn hệ thống hiện tại
+# CONCERTLY — Hướng dẫn hệ thống
 
-Đối chiếu Task [#57](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/57)
-ngày 13/11/2026, source tại commit `4bbcc45` và OpenAPI của backend local.
-Đây là dự án demo: có đặt vé lưu PostgreSQL nhưng thanh toán và hoàn tiền đều mô
-phỏng, không giao dịch tiền thật. Các tính năng chưa có backend được nêu riêng.
+Tài liệu này mô tả cách sử dụng, luồng nghiệp vụ và giới hạn của Concertly. Hệ
+thống hỗ trợ đặt vé lưu trong PostgreSQL; thanh toán và hoàn tiền hiện chỉ mô
+phỏng, không giao dịch tiền thật. Các tính năng chưa được hỗ trợ được ghi rõ tại
+từng phần.
 
 ## 1. Tài liệu và nguồn dữ liệu
 
@@ -15,7 +15,7 @@ phỏng, không giao dịch tiền thật. Các tính năng chưa có backend đ
 - [UI và QA hiện hành](current-ui-qa.md): ghi nhận kiểm thử trước đây, không thay thế
   source/OpenAPI hiện tại. Các báo cáo Seat Map khác là lịch sử triển khai.
 
-Sau tích hợp #81, Home/Explore/Detail lấy catalogue public từ API qua
+Home/Explore/Detail lấy catalogue public từ API qua
 [js/public-catalog.js](../js/public-catalog.js), ghép với dữ liệu trình bày trong
 [js/mock-data.js](../js/mock-data.js). API lỗi có thể hiển thị preview local;
 preview không bảo đảm được mua vé. Hình venue/polygon nằm trong
@@ -155,26 +155,28 @@ Admin Dashboard, danh sách/chi tiết đơn và check-in đã gọi API. Các e
 staff/admin nhận ticket_code; `/api/admin/checkin` chỉ admin, nhận ticketId và
 concertId, kiểm tra đúng concert và chặn check-in trùng.
 
-**Quản lý concert/khu/giá đã có API CRUD từ #81**, có upload ảnh,
-public catalogue list/detail và form Admin lưu PostgreSQL. Admin chọn Standing/Seated
+**Quản lý concert/khu/giá** có API CRUD, upload ảnh, public catalogue list/detail
+và form Admin lưu PostgreSQL. Admin chọn Standing/Seated
 tại mỗi hạng vé; đổi tên không đổi loại. Thiếu booking_type trên request sửa giữ
 loại cũ; khu mới mặc định Seated. Đổi loại khi có ticket hoặc inventory occupied
-trả 409 booking_type_has_bookings. Database cũ cần migration tường minh trước khi
-chạy code mới, xem [backend README](../backend/README.md). Dashboard “tickets remaining” đã sửa để lấy availableInventory, loại hold
-chưa hết hạn và sold; tham chiếu [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
+trả 409 `booking_type_has_bookings`. Database cũ cần migration tường minh trước khi
+chạy code mới, xem [backend README](../backend/README.md). Dashboard tính vé còn
+lại từ tồn kho available, không tính hold còn hiệu lực và vé đã bán.
 
-## 7. Trạng thái nghiệm thu Task #57
+## 7. Phạm vi và giới hạn
 
-- Tài liệu nêu rõ Register và tự cấp ghế Seated chưa được triển khai; concert CRUD đã tích hợp;
-  phân biệt backend mock payment với demo chỉ lưu local.
-- Method/path và các bảng model của API spec được đối chiếu với OpenAPI đang chạy
-  và source; các chênh lệch Swagger/error handler được giữ trong API spec để developer xử lý.
-- Các bước sử dụng phân biệt chọn UI/hold, JWT/TTL và ticket/inventory, không yêu cầu
-  mật khẩu thật hoặc sửa database. Task này chỉ cập nhật hai file tài liệu.
-- Review TV2/TV3 của task API spec trước đó vẫn chưa có bằng chứng xác nhận;
-  việc đối chiếu kỹ thuật này không thay thế phê duyệt liên thành viên.
+- Đăng ký tài khoản hiện chỉ là giao diện demo; chưa tạo tài khoản trong PostgreSQL.
+- Ghế Seated được chọn theo số ghế cụ thể; chưa có API tự cấp ghế theo số lượng
+  hoặc bảo đảm các ghế được xếp liền nhau.
+- Giao dịch thanh toán, hoàn tiền, coupon, webhook và đối soát với ngân hàng chưa
+  được tích hợp.
+- Nhánh checkout chỉ lưu trong trình duyệt là dữ liệu demo, không tạo order hoặc
+  vé có QR hợp lệ trong PostgreSQL.
+- Sơ đồ venue là cấu hình hiển thị trên frontend; loại vé và tồn kho có thẩm quyền
+  được lưu ở backend/database.
 
-
-Cập nhật review #83 sau #81: dữ liệu loại vé nằm ở zones.booking_type; JSON chỉ
-khởi tạo seed. Các bằng chứng Task #57 ở trên giữ mốc lịch sử ban đầu, không
-khẳng định backend local đã được migrate hoặc đã triển khai bản code mới.
+Loại vé Standing/Seated được lưu trong `zones.booking_type`. Tệp JSON chỉ dùng để
+khởi tạo dữ liệu seed; việc đổi tên khu không làm thay đổi loại vé. Khi triển khai
+code mới lên database đã tồn tại, cần kiểm tra và áp dụng migration phù hợp trước
+khi chạy ứng dụng. Xem [hướng dẫn backend](../backend/README.md) và
+[hướng dẫn triển khai](deploy.md).

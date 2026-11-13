@@ -95,8 +95,8 @@ real customer data.
 
 For any **existing** database, do not re-run `schema.sql` as a migration. Back up
 the database and review pending migrations before deploying. Migrations are not
-automatically applied at application startup. Follow the notes in
-[backend README](../backend/README.md#pr-83-review-persistent-admission-type).
+automatically applied at application startup. Follow the
+[backend database migration guide](../backend/README.md#database-setup-and-migrations).
 
 ## 4. Deploy the frontend and connect it to the API
 
