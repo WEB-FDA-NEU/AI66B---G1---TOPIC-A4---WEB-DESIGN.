@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await window.concertlyCatalogReady;
   const params = new URLSearchParams(window.location.search);
   const concertId = params.get("id");
   const concert = MOCK_CONCERTS.find((item) => item.id === concertId);
