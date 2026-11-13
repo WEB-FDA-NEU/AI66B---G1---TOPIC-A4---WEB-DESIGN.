@@ -335,3 +335,143 @@ def test_concert_stats(client, db, shop, admin):
 def test_concert_stats_requires_admin(client, db, users):
     assert client.get("/api/admin/stats/concerts").status_code == 401
     assert client.get("/api/admin/stats/concerts", headers=bearer(db, users["a"])).status_code == 403
+
+
+# -------------------------------------------------------------- public catalogue
+
+def test_public_concert_catalog_reflects_admin_data(client, db, shop):
+    new_start = datetime.now(timezone.utc) + timedelta(days=100)
+    db.get(Concert, shop["concert"]).starts_at = new_start
+    db.commit()
+    catalog = client.get("/api/concerts")
+    assert catalog.status_code == 200
+    result = catalog.json()
+    assert shop["concert"] in result["managed_ids"]
+    published = {item["id"]: item for item in result["items"]}
+    assert shop["concert"] in published
+    assert published[shop["concert"]]["title"] == "Test Tour"
+    assert datetime.fromisoformat(published[shop["concert"]]["starts_at"]) == new_start
+    assert published[shop["concert"]]["zones"][0]["name"] == "VIP"
+
+    detail = client.get(f"/api/concerts/{shop['concert']}")
+    assert detail.status_code == 200
+    assert detail.json()["id"] == shop["concert"]
+
+    draft_id = next(
+        concert_id
+        for concert_id in result["managed_ids"]
+        if db.get(Concert, concert_id).status == "draft"
+    )
+    assert draft_id not in published
+    assert client.get(f"/api/concerts/{draft_id}").status_code == 404
+
+
+# ------------------------------------------------------------ concert management
+
+def concert_payload(**changes):
+    payload = {
+        "title": "Admin Created Show",
+        "artist": "New Artist",
+        "description": "A test concert",
+        "venue": "Main Hall",
+        "city": "Hanoi",
+        "poster_url": None,
+        "starts_at": (datetime.now(timezone.utc) + timedelta(days=90)).isoformat(),
+        "status": "on_sale",
+        "zones": [{"name": "Floor", "price": 250, "capacity": 4}],
+    }
+    payload.update(changes)
+    return payload
+
+
+def test_admin_concert_crud_creates_inventory_and_preserves_bookings(client, db, admin, users):
+    headers = bearer(db, admin)
+    created = client.post("/api/admin/concerts", json=concert_payload(), headers=headers)
+    assert created.status_code == 201, created.text
+    concert = created.json()
+    assert concert["title"] == "Admin Created Show"
+    assert concert["zones"][0]["capacity"] == 4
+    zone_id = concert["zones"][0]["id"]
+    assert scalar("SELECT count(*) FROM seats WHERE zone_id = :z", z=zone_id) == 4
+
+    updated_payload = concert_payload(
+        title="Updated Admin Show",
+        zones=[{"id": zone_id, "name": "Floor", "price": 300, "capacity": 6}],
+    )
+    updated = client.put(
+        f"/api/admin/concerts/{concert['id']}",
+        json=updated_payload,
+        headers=headers,
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["title"] == "Updated Admin Show"
+    assert updated.json()["zones"][0]["price"] == 300
+    assert scalar("SELECT count(*) FROM seats WHERE zone_id = :z", z=zone_id) == 6
+
+    listing = client.get("/api/admin/concerts", headers=headers)
+    assert listing.status_code == 200
+    assert any(item["id"] == concert["id"] for item in listing.json())
+    detail = client.get(f"/api/admin/concerts/{concert['id']}", headers=headers)
+    assert detail.status_code == 200 and detail.json()["zones"][0]["id"] == zone_id
+
+    deleted = client.delete(f"/api/admin/concerts/{concert['id']}", headers=headers)
+    assert deleted.status_code == 204
+    assert scalar("SELECT count(*) FROM concerts WHERE id = :i", i=concert["id"]) == 0
+
+
+def test_admin_cannot_reduce_capacity_below_occupied_seats(client, db, admin, users):
+    headers = bearer(db, admin)
+    created = client.post("/api/admin/concerts", json=concert_payload(), headers=headers).json()
+    zone_id = created["zones"][0]["id"]
+    db.execute(text("UPDATE seats SET status = 'sold' WHERE zone_id = :z AND seat_number <= 3"), {"z": zone_id})
+    db.commit()
+    smaller = concert_payload(zones=[{"id": zone_id, "name": "Floor", "price": 250, "capacity": 2}])
+    response = client.put(f"/api/admin/concerts/{created['id']}", json=smaller, headers=headers)
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "capacity_below_occupied"
+    assert scalar("SELECT capacity FROM zones WHERE id = :z", z=zone_id) == 4
+
+
+@pytest.mark.parametrize("method,path", [
+    ("get", "/api/admin/concerts"),
+    ("get", "/api/admin/concerts/1"),
+    ("post", "/api/admin/concerts"),
+    ("post", "/api/admin/concerts/upload-image"),
+    ("put", "/api/admin/concerts/1"),
+    ("delete", "/api/admin/concerts/1"),
+])
+def test_concert_management_requires_admin(client, db, users, method, path):
+    if "upload-image" in path:
+        kwargs = {"files": {"image": ("test.png", b"\x89PNG\r\n\x1a\nimage", "image/png")}}
+    elif method in ("post", "put"):
+        kwargs = {"json": concert_payload()}
+    else:
+        kwargs = {}
+    assert getattr(client, method)(path, **kwargs).status_code == 401
+    response = getattr(client, method)(path, headers=bearer(db, users["a"]), **kwargs)
+    assert response.status_code == 403
+
+
+def test_admin_concert_rejects_duplicate_ticket_type_names(client, db, admin):
+    payload = concert_payload(zones=[
+        {"name": "Floor", "price": 250, "capacity": 4},
+        {"name": " floor ", "price": 300, "capacity": 4},
+    ])
+    response = client.post("/api/admin/concerts", json=payload, headers=bearer(db, admin))
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"
+
+
+def test_admin_concert_image_upload_stores_supported_image(client, db, admin, monkeypatch, tmp_path):
+    from app.routers import admin as admin_router
+
+    monkeypatch.setattr(admin_router, "UPLOAD_DIR", tmp_path)
+    content = b"\x89PNG\r\n\x1a\nvalid image bytes"
+    response = client.post(
+        "/api/admin/concerts/upload-image",
+        headers=bearer(db, admin),
+        files={"image": ("poster.png", content, "image/png")},
+    )
+    assert response.status_code == 200, response.text
+    image_path = tmp_path / response.json()["url"].rsplit("/", 1)[1]
+    assert image_path.read_bytes() == content

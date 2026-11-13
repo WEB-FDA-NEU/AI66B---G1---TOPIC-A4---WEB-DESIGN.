@@ -66,6 +66,22 @@
     grid-row: 1;
   }
 
+  .admin-brand-group {
+    grid-column: 1;
+    grid-row: 1;
+    gap: var(--space-xs);
+  }
+
+  .admin-return-link {
+    gap: 4px;
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+
+  .admin-brand-group .site-logo {
+    font-size: 20px;
+  }
+
   .mobile-header-controls {
     display: flex;
     grid-column: 2;
