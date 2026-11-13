@@ -1,5 +1,7 @@
 # Kiểm thử hồi quy CONCERTLY — feature/trung
 
+> Báo cáo lịch sử của một giai đoạn triển khai. UI và lệnh kiểm thử hiện hành được mô tả tại [current-ui-qa.md](current-ui-qa.md); các selector/nút hoặc kết quả cũ dưới đây không phải trạng thái hiện tại.
+
 Ngày kiểm thử: 13/11/2026. Không chuyển nhánh, không commit/push, không thay đổi schema database.
 
 ## Môi trường

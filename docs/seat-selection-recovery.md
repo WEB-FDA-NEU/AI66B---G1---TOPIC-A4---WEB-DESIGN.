@@ -1,5 +1,7 @@
 # Khôi phục Seat Selection từ lịch sử Codex
 
+> Báo cáo lịch sử của một giai đoạn triển khai. UI và lệnh kiểm thử hiện hành được mô tả tại [current-ui-qa.md](current-ui-qa.md); các selector/nút hoặc kết quả cũ dưới đây không phải trạng thái hiện tại.
+
 ## Phiên bản gốc đã xác định
 
 Dùng nội dung file được Codex đọc ngay trước yêu cầu cải thiện layout/Fit/single-zone ngày 13/11/2026, không lấy Git HEAD vốn có trước các thay đổi Standing/Seated/polygon.

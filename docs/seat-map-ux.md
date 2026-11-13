@@ -1,5 +1,7 @@
 # Seat Map — Fit và chọn từng khu
 
+> Báo cáo lịch sử của một giai đoạn triển khai. UI và lệnh kiểm thử hiện hành được mô tả tại [current-ui-qa.md](current-ui-qa.md); các selector/nút hoặc kết quả cũ dưới đây không phải trạng thái hiện tại.
+
 **Cập nhật:** cách ẩn overview trong báo cáo lịch sử này đã được sửa theo yêu cầu. Venue Overview hiện luôn hiển thị phía trên phần chi tiết, tiếp theo là Ticket Summary; xem `venue-overview-restored.md`. Fit, polygon và lưu lựa chọn vẫn giữ nguyên.
 
 Triển khai trên `feature/trung`. Lần cải thiện này chỉ sửa phần trình bày/chọn khu ở frontend, không đổi backend reservation/checkout, seat ID/hàng/số ghế/trạng thái, QR, schema, cấu hình zone hoặc seed.

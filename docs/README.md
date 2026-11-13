@@ -1,5 +1,7 @@
 # CONCERTLY — Online Concert Ticketing Platform
 
+Tài liệu UI và QA hiện hành: [current-ui-qa.md](current-ui-qa.md). Các báo cáo Seat Map khác được giữ như lịch sử triển khai.
+
 ## 1. Giới thiệu đề tài
 
 Đề tài A4: Trang bán khóa học / vé sự kiện online, được cụ thể hóa thành website bán vé concert các nhóm nhạc.

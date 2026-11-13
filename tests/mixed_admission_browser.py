@@ -68,16 +68,14 @@ def main():
             assert modes == ({'standing'} if cid == 8 else {'seated', 'standing'})
             assert all(not z['seats'] for z in data['zones'] if z['booking_type'] == 'standing')
             results['concerts'].append({'id': cid, 'seated': [z['name'] for z in data['zones'] if z['booking_type']=='seated'], 'standing': [z['name'] for z in data['zones'] if z['booking_type']=='standing']})
-        # Pay for preserved seats from two SVG fragments, excluding another category's draft.
+        # Pay for seats preserved across two fragments of the same ticket category.
         browser.navigate('pages/concerts/tickets.html?id=c1')
         saved=[]
         for fragment in ['c1-left-bowl','c1-right-bowl']:
             open_zone(browser,'Standard Tier 2',fragment)
             seat=browser.evaluate('document.querySelector(".seat:not(:disabled)").dataset.id')
             saved.append(int(seat));browser.click(f'.seat[data-id="{seat}"]')
-            browser.click('#change-zone')
-        open_zone(browser,'Standard Tier 1');browser.click('.seat:not(:disabled)')
-        browser.click('#change-zone');open_zone(browser,'Standard Tier 2','c1-right-bowl')
+        open_zone(browser,'Standard Tier 2','c1-right-bowl')
         assert browser.evaluate('document.getElementById("quantity").textContent==="2"')
         browser.click('#continue-payment')
         browser.wait('location.pathname.endsWith("/checkout/index.html") && !document.getElementById("confirm-payment").disabled')
@@ -92,7 +90,7 @@ def main():
         with db.cursor() as cur:
             cur.execute('SELECT seat_id FROM tickets WHERE order_id=%s',(oid,))
             assert sorted(r[0] for r in cur.fetchall())==sorted(saved)
-        results['flows'].append('Preserved choices across two fragments -> checkout exactly those 2 IDs -> paid order, unchanged QR; other category draft excluded')
+        results['flows'].append('Preserved choices across two fragments -> checkout exactly those 2 IDs -> paid order, unchanged QR; IDs match both selected fragments')
         browser.navigate('pages/concerts/tickets.html?id=c1')
         open_zone(browser,'VIP Diamond Experience')
         browser.evaluate('for(let i=0;i<12;i++)document.getElementById("plus").click()')

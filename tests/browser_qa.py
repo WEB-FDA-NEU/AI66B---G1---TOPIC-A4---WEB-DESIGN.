@@ -165,7 +165,7 @@ def main():
         browser.wait('document.querySelector(".venue-svg") !== null')
         browser.wait('document.querySelector(".ticket-item p")?.textContent.includes("available")')
         browser.click('[data-map-zoom="0.5"]')
-        assert browser.evaluate('document.getElementById("concert-map").classList.contains("is-zoomed")')
+        assert browser.evaluate('document.querySelector(".venue-svg").getBoundingClientRect().width > document.getElementById("concert-map").clientWidth * 1.4')
         browser.click('[data-map-zoom="reset"]')
         browser.evaluate('document.querySelector(".venue-section[data-name=\\"Standard Tier 2\\"]").dispatchEvent(new KeyboardEvent("keydown", {key:"Enter", bubbles:true}))')
         browser.evaluate('for(let i=0;i<9;i++)document.querySelectorAll(".seat:not(:disabled)")[i].click()')

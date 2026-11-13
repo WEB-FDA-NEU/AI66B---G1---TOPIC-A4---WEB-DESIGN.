@@ -1,5 +1,7 @@
 # Sơ đồ Seated theo hình dạng SVG
 
+> Báo cáo lịch sử của một giai đoạn triển khai. UI và lệnh kiểm thử hiện hành được mô tả tại [current-ui-qa.md](current-ui-qa.md); các selector/nút hoặc kết quả cũ dưới đây không phải trạng thái hiện tại.
+
 Báo cáo này mô tả lần sửa geometry trước. UX hiện tại đã thay preview/lưới cuộn mặc định bằng Fit và chỉ một section; xem `seat-map-ux.md`. Thuật toán geometry và định danh ghế ở đây vẫn được tái sử dụng.
 
 Thực hiện trên `feature/trung`, không chuyển nhánh, commit hoặc push. Không thay đổi schema hay dữ liệu database ứng dụng. Backend và hợp đồng reservation/checkout/QR giữ nguyên trong lần sửa này.

@@ -86,7 +86,7 @@ overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
 
 ## Standing and Seated (demo configuration)
 
-`app/venue_zones.json` explicitly classifies the 33 existing ticket tiers. The 11 SVG map files carry matching `bookingType` metadata; no SVG coordinates, shapes or prices were changed. See `../docs/standing-seated.md` for the complete concert/tier matrix.
+`app/venue_zones.json` explicitly classifies the 33 existing ticket tiers. The 11 SVG map files carry matching `bookingType` metadata. The polygon update adjusted only CENTER PREMIUM in c1/c5/c6 so it widens towards the stage; standing shapes and ticket prices are unchanged. See `../docs/standing-seated.md` for the complete concert/tier matrix.
 
 - Seated zones expose PostgreSQL seat IDs, rows, numbers and live availability. Reserve specific IDs via `seat_ids`.
 - Standing zones expose availability counts, never numbered seats. Reserve a zone and quantity via `standing`.
@@ -94,4 +94,6 @@ overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
 - HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 8 applies to the combined request.
 - `booking_type` is added to reservation items and tickets. Public standing `row`/`row_label`/`seat_number` are null. Existing IDs, stored row values, ticket codes and QR payloads are not rewritten.
 - Unknown legacy zones retain their existing numbered-seat contract. Configure new zones explicitly before advertising them as Standing.
-- Multiple SVG sections with the same ticket-tier name share that tier's inventory and demo seat grid. This configuration is not an assertion about the artists' real seating plans.
+- Multiple SVG sections with the same ticket-tier name share that tier's inventory; the existing seats are allocated once across its SVG fragments for display. This configuration is not an assertion about the artists' real seating plans.
+
+For the current UI and executable QA commands, see [Current UI and QA](../docs/current-ui-qa.md). Historical UI reports describe earlier iterations.

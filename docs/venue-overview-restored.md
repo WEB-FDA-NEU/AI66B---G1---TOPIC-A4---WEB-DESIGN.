@@ -1,5 +1,7 @@
 # Khôi phục Venue Overview luôn hiển thị
 
+> Báo cáo lịch sử của một giai đoạn triển khai. UI và lệnh kiểm thử hiện hành được mô tả tại [current-ui-qa.md](current-ui-qa.md); các selector/nút hoặc kết quả cũ dưới đây không phải trạng thái hiện tại.
+
 Bản sửa trên `feature/trung` giữ đồng thời ba phần theo thứ tự:
 
 1. **Venue Overview Map**: luôn hiện toàn bộ sân khấu, VIP, Standing, Seated và mọi khu trong cấu hình SVG hiện có.
