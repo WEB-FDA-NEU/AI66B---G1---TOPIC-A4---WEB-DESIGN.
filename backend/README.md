@@ -35,6 +35,8 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | --- | --- |
 | `GET /concerts/{id}/seats` | Zones and seat availability (lapsed holds show as available) |
 | `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 8 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
+| `GET /concerts` | Public concert catalogue for `on_sale` / `sold_out` shows plus IDs managed by the backend |
+| `GET /concerts/{id}` | Public details and ticket types for an on-sale / sold-out concert |
 | `GET /reservations/{id}` | Hold status and `seconds_left` |
 | `DELETE /reservations/{id}` | Release a hold |
 | `POST /checkout` `{reservation_id, payment_method, buyer: {full_name, email, phone}}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
@@ -45,6 +47,11 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | `POST /tickets/check-in` `{ticket_code}` | Staff scan; a ticket can be admitted once |
 | `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts`, plus `checkinsToday` (tickets checked in since midnight) |
 | `GET /admin/stats/concerts` | Admin: every concert (soonest first) with `capacity`, `ticketsSold`, `checkedIn`, `revenue` and `upcoming`, same rules as `/admin/stats` |
+| `GET /admin/concerts` | Admin: concerts with descriptions, poster URLs, and ticket types/capacities |
+| `GET /admin/concerts/{id}` | Admin: one concert with its ticket types/capacities |
+| `POST /admin/concerts`, `PUT /admin/concerts/{id}` | Admin: create/update concert and ticket types; creates matching seat inventory. Ticket types with bookings cannot be removed and occupied seats cannot be removed by reducing capacity |
+| `DELETE /admin/concerts/{id}` | Admin: delete a concert only if it has no orders or reservations |
+| `POST /admin/concerts/upload-image` (`multipart` field `image`) | Admin: store JPG/PNG/WebP poster images up to 5 MB; returns a URL served from `/uploads/` |
 | `GET /admin/orders?status=&concert_id=&q=&page=&page_size=` | Admin: all orders with customer, newest first. `status`: `pending`, `paid`, `cancelled`, `failed`, `refunded`; `q` matches order number, customer e-mail/name, concert title/artist |
 | `GET /admin/orders/{id}` | Admin: order detail with customer and tickets |
 | `GET /admin/concerts/{id}/attendees` | Admin: holders of `valid`/`used` tickets with customer, seat and check-in time, plus `total` / `checked_in` / `not_checked_in` |
