@@ -48,3 +48,22 @@ Chrome headless chỉ mô phỏng kích thước và thao tác touch; chưa thay
 - `mixed_admission_browser.py` chạy trực tiếp đạt: 77 overview, 287 lượt section tại 7 chiều rộng; 14 trường hợp geometry (12 hạng thật trong demo và 2 hình mẫu), chọn qua nhiều section cùng hạng, zoom/reset/cuộn, touch pan mobile, resize, Standing, thanh toán và QR. Không có JavaScript exception.
 - `browser_qa.py` chạy trực tiếp đạt: 40 lượt responsive và 12 luồng kiểm thử, gồm validation, expiry, thanh toán, order/vé và QR/check-in. Không cần adapter tạm hoặc chỉnh source ứng dụng.
 - Checksum 89 file JS/CSS/HTML/backend được bảo vệ giữ nguyên trước/sau sửa QA. Thay đổi lần này chỉ thuộc test và tài liệu.
+
+
+## Review PR #83 sau tích hợp #81 — 14/11/2026
+
+- Loại vé được lưu trong zones.booking_type; Admin chọn Standing/Seated khi tạo
+  hoặc sửa khu. Đổi tên không đổi loại; client cũ bỏ field giữ loại hiện có.
+- Chặn đổi loại nếu có bất kỳ ticket hoặc tồn kho đang occupied; hold dùng shared
+  zone lock để loại vé không đổi giữa validation và commit.
+- Migration 001_zone_booking_type.sql được kiểm tra trên cấu trúc legacy trong QA:
+  giữ ID, backfill mapping trước đây, chạy lại không ghi đè lựa chọn đã lưu.
+- 177 test backend trên nền main/#81 đạt; sau bổ sung khóa zone, 32 test liên quan
+  admission/concurrency đạt. 17 frontend và 5 checkout contract/10 subtest đạt.
+- Chrome mixed-admission: 11 concert, 4 luồng, 77 overview và 287 section;
+  polygon/zoom/QR không lỗi JavaScript.
+- Chrome Admin: tạo Standing và Seated tên tùy ý, lưu lại, đổi tên, checkout
+  Standing/QR đạt; 6 chiều rộng 320/375/390/768/1024/1440 không tràn ngang trang.
+- Tất cả giao dịch dùng database QA riêng. Không migrate/seed database vận hành.
+  Xem backend/README.md để biết migration bắt buộc trước triển khai code mới.
+- Giới hạn ở PR nền #83 vẫn theo lịch sử 8 vé; PR #85 phía sau đổi xuống 6.

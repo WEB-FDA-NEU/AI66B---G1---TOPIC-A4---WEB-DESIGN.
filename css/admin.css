@@ -808,6 +808,83 @@
 .badge-red { background: rgba(255, 92, 108, .12); color: var(--color-error); }
 .badge-gray { background: var(--color-bg-hover); color: var(--color-text-muted); }
 
+.order-detail-trigger {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-primary-light);
+    font: inherit;
+    cursor: pointer;
+}
+
+.order-detail-trigger:hover {
+    text-decoration: underline;
+}
+
+.admin-order-dialog {
+    width: min(900px, calc(100% - 32px));
+    max-height: min(85vh, 900px);
+    padding: 24px;
+    overflow: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-card);
+    color: var(--color-text);
+}
+
+.admin-order-dialog::backdrop {
+    background: rgba(0, 0, 0, .65);
+}
+
+.admin-order-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.admin-order-dialog-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.admin-order-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0 0 24px;
+}
+
+.admin-order-facts div {
+    min-width: 0;
+}
+
+.admin-order-facts dt {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.admin-order-facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.admin-order-tickets {
+    overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+    .admin-order-dialog {
+        padding: 16px;
+    }
+
+    .admin-order-facts {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* --- Pagination --------------------------------------------------------------- */
 
 .table-pagination {
@@ -935,7 +1012,7 @@ textarea.form-input {
 /* Ticket type repeatable rows */
 .ticket-type-row {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr auto;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr auto;
     gap: var(--space-md);
     align-items: end;
     margin-bottom: var(--space-md);

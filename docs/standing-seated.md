@@ -37,11 +37,11 @@ Các mảnh SVG cùng tên hạng vé cùng trỏ tới một zone trong databas
 
 ## Backend, database và tương thích
 
-Không thay đổi `schema.sql`, không ALTER/DROP database, không chạy seed hoặc sửa dữ liệu trên database thật.
+Bổ sung sau review PR #83: schema mới có zones.booking_type. Database cũ cần migration rõ ràng tại backend/migrations/001_zone_booking_type.sql; không tự chạy trên database thật trong lượt sửa này.
 
-Các bản ghi `seats` có sẵn ở khu Standing được tái sử dụng làm đơn vị tồn kho nội bộ, không phải ghế gán cho khách. Giữ nguyên khóa chính, ràng buộc duy nhất, ticket/order cũ và payload QR. Không cần migration. Dữ liệu hàng/số ghế cũ vẫn còn nguyên trong PostgreSQL; API chỉ không hiển thị chúng cho Standing.
+Các bản ghi `seats` có sẵn ở khu Standing được tái sử dụng làm đơn vị tồn kho nội bộ, không phải ghế gán cho khách. Giữ nguyên khóa chính, ràng buộc duy nhất, ticket/order cũ và payload QR. Migration chỉ thêm/backfill loại zone, không đổi dữ liệu vé/ghế. Dữ liệu hàng/số ghế cũ vẫn còn nguyên trong PostgreSQL; API chỉ không hiển thị chúng cho Standing.
 
-`Zone.booking_type` là thuộc tính đọc từ cấu hình, không phải cột mới. Zone cũ ngoài 11 concert chưa có cấu hình tiếp tục hợp đồng numbered-seat trước đó, tránh tự đổi dữ liệu không rõ nguồn.
+`Zone.booking_type` là cột DB có check seated/standing. JSON chỉ dùng cho seed và mapping đóng băng trong migration ban đầu; runtime không tra loại vé bằng tên. Admin chọn loại khi tạo; đổi tên giữ loại. Đổi loại khi có ticket hoặc inventory held/sold bị chặn. Zone cũ không khớp mapping migration giữ hợp đồng fallback seated trước đó. Xem backend/README.md để biết trình tự triển khai.
 
 `POST /api/reservations` chấp nhận:
 

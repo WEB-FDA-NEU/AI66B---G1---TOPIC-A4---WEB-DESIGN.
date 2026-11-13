@@ -50,6 +50,8 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from app.venue_catalog import booking_type as seed_booking_type
+
 DATA_FILE = Path(__file__).with_name("seed_data.json")
 SEATS_PER_ROW = 20
 # Arbitrary constant key for pg_advisory_xact_lock so two seed runs never interleave.
@@ -244,6 +246,7 @@ def seed(db, data: dict, *, sample_orders: bool = True, env: dict | None = None,
                     name=tier["name"],
                     price=tier["price"],
                     capacity=tier["capacity"],
+                    booking_type=seed_booking_type(spec["id"], tier["name"]),
                     color=tier.get("color"),
                 )
                 .on_conflict_do_nothing(constraint="uq_zones_concert_name")
