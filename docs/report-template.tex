@@ -1,0 +1,494 @@
+% ============================================================================
+%  Web Design and Programming — Final Project Report (template)
+%  Compile with XeLaTeX:  latexmk -xelatex report-template.tex
+%  (Overleaf: Menu → Compiler → XeLaTeX)
+%
+%  HOW TO USE
+%  - Replace every \fillin{...} with your own content.
+%  - Every "Example" box shows the expected level of detail, using a sample
+%    product called ReLoop (a second-hand marketplace). DELETE the example
+%    boxes before you submit:  set \showexamplesfalse below.
+%  - Keep the section headings and numbering: the lecturer grades section by section.
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.1cm,top=2.2cm,bottom=2.2cm]{geometry}
+\usepackage{fontspec}
+% TeX Gyre fonts ship with TeX Live / Overleaf and support Vietnamese names.
+\setmainfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+  ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{texgyrecursor}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+  ItalicFont=*-italic, BoldItalicFont=*-bolditalic, Scale=0.95]
+
+\usepackage{xcolor}
+\usepackage{tabularx,booktabs,array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage{comment}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\DeclareUrlCommand\cpath{\urlstyle{tt}}
+
+% ---------------------------------------------------------------- colours
+\definecolor{accent}{HTML}{0E6E6B}
+\definecolor{accentsoft}{HTML}{E6F1EF}
+\definecolor{ink2}{HTML}{4B5558}
+\definecolor{fill}{HTML}{1F4E9E}
+\definecolor{codebg}{HTML}{F4F6F5}
+\definecolor{rule}{HTML}{C8CEC8}
+
+% ---------------------------------------------------------------- switches
+\newif\ifshowexamples
+\showexamplestrue        % <-- set to \showexamplesfalse before submitting
+
+% ---------------------------------------------------------------- macros
+\newcommand{\fillin}[1]{\leavevmode{\color{fill}[#1]}}
+\newcommand{\hint}[1]{{\small\color{ink2}\itshape #1\par}\medskip}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\newtcolorbox{examplebox}{enhanced, breakable, colback=accentsoft, colframe=accent,
+  boxrule=0pt, leftrule=3pt, arc=0pt, left=8pt, right=8pt, top=3pt, bottom=6pt,
+  title={Example (ReLoop)}, fonttitle=\bfseries\footnotesize, coltitle=accent,
+  colbacktitle=accentsoft, toptitle=4pt, bottomtitle=0pt, titlerule=0pt,
+  fontupper=\small}
+\ifshowexamples
+  \newenvironment{example}{\begin{examplebox}}{\end{examplebox}}
+\else
+  \excludecomment{example}
+\fi
+
+\lstset{basicstyle=\ttfamily\small, backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{rule}, framesep=4pt, xleftmargin=4pt, xrightmargin=4pt,
+  columns=fullflexible, keepspaces=true, breaklines=true, showstringspaces=false,
+  aboveskip=6pt, belowskip=6pt}
+
+\titleformat{\section}{\Large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+\setlist{nosep, leftmargin=1.4em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\color{ink2}Team \fillin{N} · \fillin{Product name}}
+\fancyfoot[R]{\small\color{ink2}\thepage}
+
+% ============================================================================
+\begin{document}
+
+{\color{accent}\small\bfseries WEB DESIGN AND PROGRAMMING · FINAL PROJECT REPORT}\par
+\vspace{2pt}
+{\huge\bfseries \fillin{Product name}}\par
+\vspace{2pt}
+{\large\color{ink2}\fillin{One-line pitch: who it is for and what it does}}\par
+\vspace{10pt}
+
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}l Y@{}}
+\toprule
+Group          & Team \fillin{N} \\
+Repository     & \fillin{GitHub URL} \\
+Live URL       & \fillin{URL, or ``Not deployed --- runs locally''} \\
+Demo accounts  & \fillin{user@example.com / password} \quad \fillin{admin@example.com / password} \\
+Submitted      & \fillin{YYYY-MM-DD} \\
+\bottomrule
+\end{tabularx}
+
+\begin{example}
+Team 0 · \textbf{ReLoop} --- a second-hand marketplace for students. Repository
+\cpath{github.com/team0/reloop} · Not deployed --- runs locally · Demo:
+\code{an@reloop.vn / reloop123} (buyer), \code{admin@reloop.vn / admin123} (admin).
+\end{example}
+
+% ============================================================================
+\section{Project Overview}
+\hint{3--5 sentences: who the users are, what problem the product solves, and which flow is
+the core of the product. Then say what changed since Milestone 2.}
+
+\fillin{Overview}
+
+\textbf{What changed since Milestone 2:} \fillin{real backend, database, login, \ldots;
+screens dropped or merged and why}
+
+\begin{example}
+ReLoop lets students sell used items to other students on the same campus. A seller posts a
+listing with photos and a price; a buyer searches by category and price, and must log in to see
+the seller's phone number. The core flow is \emph{search $\to$ listing detail $\to$ reveal phone}.
+
+\textbf{Since M2:} all pages now read from our FastAPI backend instead of \cpath{mock/*.json};
+login and register work with real accounts; the ``Saved items'' screen was dropped (P1).
+\end{example}
+
+% ============================================================================
+\section{Features}
+\hint{One row per P0 feature. Status: Completed / Partially Completed / Not Implemented.
+``Completed'' means it works through the real API and the data stays after a server restart.}
+
+{\small
+\begin{tabularx}{\linewidth}{@{}r >{\hsize=1.05\hsize}Y >{\hsize=.8\hsize}Y >{\hsize=1.15\hsize}Y >{\raggedright\arraybackslash}p{2.1cm} l@{}}
+\toprule
+\# & Feature & Screens & API endpoints & Status & Owner \\
+\midrule
+1 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+2 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Core flow:} \fillin{Screen A $\to$ Screen B $\to$ Screen C}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}r >{\hsize=1.05\hsize}Y >{\hsize=.8\hsize}Y >{\hsize=1.15\hsize}Y >{\raggedright\arraybackslash}p{2.1cm} l@{}}
+\toprule
+\# & Feature & Screens & API endpoints & Status & Owner \\
+\midrule
+1 & Search by category and price & \cpath{search.html} & \code{GET} \cpath{/api/listings} & Completed & Bình \\
+2 & Reveal seller phone (login required) & \cpath{listing-detail.html} & \code{GET} \cpath{/api/listings/{id}/phone} & Completed & Chi \\
+3 & Post a listing with photos & \cpath{listing-new.html} & \code{POST} \cpath{/api/listings}, \code{POST} \cpath{/api/uploads} & Partially: max 1 photo & Em \\
+4 & Mark as sold & \cpath{my-listings.html} & \code{POST} \cpath{/api/listings/{id}/status} & Not Implemented & Em \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Core flow:} Home $\to$ Search $\to$ Listing detail $\to$ Login $\to$ back to the same listing $\to$ phone shown.
+\end{example}
+
+% ============================================================================
+\section{Technology Stack}
+\hint{Name the version you really installed (\code{pip freeze}) and say in a few words why or how you use it.}
+
+{\small
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}p{3.3cm} l Y@{}}
+\toprule
+Layer & Technology & Version & How we use it \\
+\midrule
+Frontend         & HTML, CSS, JavaScript (\cpath{fetch})     & ---          & \fillin{ } \\
+Backend          & FastAPI + Uvicorn                        & \fillin{ }   & \fillin{ } \\
+ORM / database   & SQLModel + \fillin{SQLite / PostgreSQL}  & \fillin{ }   & \fillin{ } \\
+Passwords        & bcrypt                                   & \fillin{ }   & \fillin{ } \\
+Login            & \fillin{JWT (python-jose) / session}     & \fillin{ }   & \fillin{ } \\
+Testing          & pytest + \cpath{TestClient}               & \fillin{ }   & \fillin{ } \\
+Other            & \fillin{ }                               & \fillin{ }   & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}p{3.3cm} l Y@{}}
+\toprule
+Layer & Technology & Version & How we use it \\
+\midrule
+Frontend & HTML, CSS, JS modules & --- & One \cpath{api.js} wraps every \cpath{fetch}, adds the token, turns 422 errors into text \\
+Backend  & FastAPI + Uvicorn & 0.115 / 0.32 & One \cpath{APIRouter} per resource: \cpath{auth}, \cpath{listings}, \cpath{uploads} \\
+ORM / DB & SQLModel + SQLite & 0.0.22 & File \cpath{app.db}; URL read from \cpath{DATABASE_URL} in \cpath{.env} \\
+Passwords & bcrypt & 4.2 & \cpath{hashpw} on register, \cpath{checkpw} on login \\
+Login & python-jose (JWT) & 3.3 & HS256 token, 60 minutes, stored in \cpath{localStorage} \\
+Testing & pytest + TestClient & 8.3 & 9 tests on a separate in-memory database \\
+\bottomrule
+\end{tabularx}
+\end{example}
+
+% ============================================================================
+\section{System Architecture}
+\hint{Show how a request travels, and say how the frontend is served: by FastAPI
+\cpath{StaticFiles} (same origin, no CORS) or by Live Server on another port (CORS needed).}
+
+\begin{lstlisting}
+[Your diagram here]
+\end{lstlisting}
+
+\fillin{2--3 sentences}
+
+\begin{example}
+\begin{lstlisting}
+Browser: frontend/*.html + js/pages/*.js
+   |  api.js: fetch('/api/listings?category=books', { Authorization: 'Bearer <token>' })
+   v
+FastAPI: main.py -> routers/listings.py -> Depends(get_session), Depends(get_current_user)
+   |  SQLModel: select(Listing).where(Listing.category_id == 3)
+   v
+SQLite: app.db  (tables user, category, listing)
+\end{lstlisting}
+FastAPI serves the frontend with \code{app.mount("/", StaticFiles(directory="frontend", html=True))},
+placed after all routers, so the browser and the API share one origin and no CORS is needed.
+\end{example}
+
+% ============================================================================
+\section{API Reference}
+\hint{All endpoints, as in \cpath{/docs}. Auth: --- public, \textbf{L} needs login, \textbf{O} owner or role only.}
+
+{\small
+\begin{tabularx}{\linewidth}{@{}l >{\hsize=1.25\hsize}Y c >{\hsize=.75\hsize}Y l l l@{}}
+\toprule
+Method & Path & Auth & Request & Success & Errors & Owner \\
+\midrule
+\fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+\fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Changes from the M2 mock data / API contract:} \fillin{renamed fields or paths and why, or ``None''}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}l >{\hsize=1.25\hsize}Y c >{\hsize=.75\hsize}Y l l l@{}}
+\toprule
+Method & Path & Auth & Request & Success & Errors & Owner \\
+\midrule
+GET  & \cpath{/api/listings}             & --- & \code{?category=\&}\allowbreak\code{max\_price=\&}\allowbreak\cpath{limit=} & 200 list & 422 & Bình \\
+GET  & \cpath{/api/listings/{id}/phone} & L  & ---                                   & 200 \code{\{phone\}} & 401, 404 & Chi \\
+POST & \cpath{/api/listings}             & L   & \code{\{title, price, category\_id\}}  & 201 & 401, 422 & Em \\
+POST & \cpath{/api/auth/register}        & --- & \code{\{email, password, full\_name\}} & 201 & 409, 422 & Dũng \\
+POST & \cpath{/api/auth/login}           & --- & \code{\{email, password\}}             & 200 token & 401 & Dũng \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Changes:} \cpath{price_vnd} in the mock became \cpath{price}; the frontend was updated in
+\cpath{render.js} in the same commit.
+\end{example}
+
+% ============================================================================
+\section{Database Design}
+\hint{An entity-relationship diagram (text or image), then the constraints that protect your data:
+foreign keys, \cpath{UNIQUE}, and what \cpath{seed.py} creates.}
+
+\begin{lstlisting}
+[ERD here]
+\end{lstlisting}
+\textbf{Key constraints:} \fillin{ } \\
+\textbf{Seed data:} \fillin{what \code{python seed.py} creates}
+
+\begin{example}
+\begin{lstlisting}
+user 1 ----< listing >---- 1 category
+  id, email (UNIQUE),        id, title, price,        id, name (UNIQUE)
+  password_hash, phone       status, seller_id (FK),
+                             category_id (FK)
+\end{lstlisting}
+\textbf{Key constraints:} \cpath{user.email} UNIQUE (a second register returns 409);
+\code{listing.seller\_id $\to$ user.id}; \code{listing.category\_id $\to$ category.id}; index on \cpath{listing.status}.\\
+\textbf{Seed data:} 3 users, 5 categories, 24 listings (one user with no listings, for the empty state).
+\end{example}
+
+% ============================================================================
+\section{Authentication and Authorization}
+{\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.4cm} Y@{}}
+\toprule
+How is a password stored? & \fillin{ } \\
+What does login return; where does the frontend keep it? & \fillin{ } \\
+How long is it valid? & \fillin{ } \\
+Which routes need login? & \fillin{ } \\
+Which routes check owner / role, and what error is returned? & \fillin{ } \\
+How does the frontend protect pages? & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+Proof that the backend blocks requests without a token:
+\begin{lstlisting}
+$ curl -i [protected route]
+[paste the real output]
+\end{lstlisting}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.4cm} Y@{}}
+\toprule
+Password & bcrypt hash in \cpath{user.password_hash} (\code{\$2b\$12\$\ldots}); never logged \\
+Login returns & JWT \code{\{access\_token, token\_type\}}; kept in \cpath{localStorage}, sent as \code{Authorization: Bearer} \\
+Valid for & 60 minutes; after that the API returns 401 and \cpath{api.js} sends the user to Login \\
+Login required & \code{GET} \cpath{/listings/{id}/phone}, \code{POST} \cpath{/listings}, \code{GET} \cpath{/me} \\
+Owner only & \code{POST} \cpath{/listings/{id}/status} $\to$ 403 ``You can only edit your own listing'' \\
+Frontend & \cpath{requireLogin()} saves the current URL, then returns there after login \\
+\bottomrule
+\end{tabularx}
+\begin{lstlisting}
+$ curl -i http://localhost:8000/api/listings/1/phone
+HTTP/1.1 401 Unauthorized
+{"detail":"Not authenticated"}
+\end{lstlisting}
+\end{example}
+
+% ============================================================================
+\section{Business Rules}
+\hint{At least two rules from Milestone 1, enforced in backend code (not only by hiding a button).}
+
+{\small
+\begin{tabularx}{\linewidth}{@{}l Y Y Y >{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+ID & Rule & Enforced in (file : function) & When violated & Test \\
+\midrule
+\fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+\fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}l Y Y Y >{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+ID & Rule & Enforced in & When violated & Test \\
+\midrule
+BR-7 & Only logged-in users see a seller's phone & \code{routers/listings.py : reveal\_phone} via \cpath{Depends(get_current_user)} & 401 & \cpath{test_phone_needs_login} \\
+BR-11 & A sold listing cannot go back to ``active'' & \code{routers/listings.py : change\_status} & 409 ``Listing already sold'' & \cpath{test_sold_is_final} \\
+\bottomrule
+\end{tabularx}
+\end{example}
+
+% ============================================================================
+\section{Testing}
+\begin{lstlisting}
+$ pytest -q
+[paste the real output]
+\end{lstlisting}
+{\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.4cm} Y l@{}}
+\toprule
+Test & What it proves & Owner \\
+\midrule
+\fillin{ } & \fillin{ } & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\begin{example}
+\begin{lstlisting}
+$ pytest -q
+.........                                                  [100%]
+9 passed in 1.84s
+\end{lstlisting}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.4cm} Y l@{}}
+\toprule
+Test & What it proves & Owner \\
+\midrule
+\cpath{test_register_duplicate_email} & a second register with the same email returns 409 & Dũng \\
+\cpath{test_phone_needs_login} & no token $\to$ 401; with token $\to$ 200 and the phone & Chi \\
+\cpath{test_filter_by_price} & \cpath{?max_price=100000} returns only cheaper listings & Bình \\
+\bottomrule
+\end{tabularx}
+\end{example}
+
+% ============================================================================
+\section{Team Members and Individual Contributions}
+\hint{The most important section. During Q\&A the lecturer picks a member, opens the files listed
+under their name and asks them to walk through the code and make a small change. List only what
+that person really did and can explain alone. The table must match \code{git log}; the
+\emph{Share} column must add up to 100.}
+
+{\small
+\begin{tabularx}{\linewidth}{@{}r l >{\raggedright\arraybackslash}p{1.7cm} Y Y r r l@{}}
+\toprule
+No. & Student ID & Full name & Frontend (screens / JS) & Backend (endpoints / files / tests) & Comm. & Share & Status \\
+\midrule
+1 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ }\% & \fillin{ } \\
+2 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ }\% & \fillin{ } \\
+3 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ }\% & \fillin{ } \\
+4 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ }\% & \fillin{ } \\
+5 & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } & \fillin{ }\% & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\begin{lstlisting}
+$ git shortlog -sn --all
+[paste the real output]
+\end{lstlisting}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}r l >{\raggedright\arraybackslash}p{1.7cm} Y Y r r l@{}}
+\toprule
+No. & ID & Name & Frontend & Backend & Comm. & Share & Status \\
+\midrule
+1 & 1124\ldots01 & Nguyễn An   & \cpath{site-header.js}, \cpath{api.js}, 404 page & \cpath{main.py}, \cpath{database.py}, \cpath{seed.py} & 34 & 22\% & Completed \\
+2 & 1124\ldots02 & Trần Bình   & \cpath{index.html}, \cpath{search.js} & \code{GET} \cpath{/api/listings}, \code{GET} \cpath{/api/categories}; \cpath{test_filter_by_price} & 21 & 19\% & Completed \\
+3 & 1124\ldots03 & Lê Chi      & \cpath{listing-detail.js} & \code{GET} \cpath{/listings/{id}}, \cpath{/phone} (BR-7); \cpath{test_phone_needs_login} & 19 & 19\% & Completed \\
+4 & 1124\ldots04 & Phạm Dũng   & \cpath{login.html}, \cpath{register.html}, \cpath{auth.js} & \cpath{routers/auth.py}, \cpath{security.py}, \cpath{deps.py} & 23 & 21\% & Completed \\
+5 & 1124\ldots05 & Hoàng Em    & \cpath{listing-new.html}, \cpath{my-listings.js} & \code{POST} \cpath{/listings}, \cpath{/status} (BR-11), \cpath{/uploads} & 17 & 19\% & Partially \\
+\bottomrule
+\end{tabularx}
+\begin{lstlisting}
+$ git shortlog -sn --all
+    34  Nguyen An
+    23  Pham Dung
+    21  Tran Binh
+    19  Le Chi
+    17  Hoang Em
+\end{lstlisting}
+\end{example}
+
+% ============================================================================
+\section{How to Run}
+\begin{lstlisting}
+git clone [repo URL]
+cd [repo]/backend
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env             # then edit SECRET_KEY / DATABASE_URL
+python seed.py
+uvicorn main:app --reload
+\end{lstlisting}
+Open \cpath{http://localhost:8000} (app) and \cpath{http://localhost:8000/docs} (API).\\
+\textbf{Environment variables:} \fillin{name --- meaning --- example}\\
+\textbf{Known setup problems:} \fillin{ }
+
+\begin{example}
+\textbf{Environment variables:} \cpath{DATABASE_URL=sqlite:///./app.db};
+\cpath{SECRET_KEY=change-me} (signs the JWT).\\
+\textbf{Known setup problems:} on Windows, if \cpath{Activate.ps1} is blocked, run
+\code{Set-ExecutionPolicy -Scope CurrentUser RemoteSigned} once.
+\end{example}
+
+% ============================================================================
+\section{Known Issues and Future Work}
+{\small
+\begin{tabularx}{\linewidth}{@{}Y Y Y@{}}
+\toprule
+Issue / missing feature & Why not done & How we would do it \\
+\midrule
+\fillin{ } & \fillin{ } & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}Y Y Y@{}}
+\toprule
+Issue & Why not done & How we would do it \\
+\midrule
+Only one photo per listing & Ran out of time on the uploader & A \cpath{photo} table with \cpath{listing_id} FK and \cpath{position} \\
+``Mark as sold'' missing & BR-11 done in the API, no button yet & Add the button in \cpath{my-listings.js}, call the existing endpoint \\
+\bottomrule
+\end{tabularx}
+\end{example}
+
+% ============================================================================
+\section{Use of AI Tools and External Sources}
+\hint{Using a tool is allowed, but each member must still be able to explain the code under their name.
+Write ``None'' if you did not use any.}
+
+{\small
+\begin{tabularx}{\linewidth}{@{}l Y l l@{}}
+\toprule
+Tool / source & Used for & Files & Who \\
+\midrule
+\fillin{ } & \fillin{ } & \fillin{ } & \fillin{ } \\
+\bottomrule
+\end{tabularx}}
+
+\begin{example}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}l Y l l@{}}
+\toprule
+Tool / source & Used for & Files & Who \\
+\midrule
+ChatGPT & Explaining a \cpath{422} error; generating 24 fake listings & \cpath{seed.py} & An \\
+FastAPI docs & JWT example adapted for our \cpath{User} model & \cpath{security.py} & Dũng \\
+\bottomrule
+\end{tabularx}
+\end{example}
+
+\end{document}
