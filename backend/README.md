@@ -132,3 +132,8 @@ This migration is **not auto-applied at application startup**, and the review wo
 only executes it on a throwaway QA database. The running local database has not
 been migrated. Fresh databases get the column from schema.sql. New zones in seed
 get defaults from JSON; existing zones are not overwritten by a seed rerun.
+
+Presentation limit: the 11 existing SVG maps are unchanged. A newly created concert
+without a configured SVG can sell Standing from the category list, as verified in
+Chrome. Its Seated API inventory is valid, but detailed polygon selection still
+requires a venue map; this review does not invent a floor plan for new concerts.
