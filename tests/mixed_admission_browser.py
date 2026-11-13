@@ -94,7 +94,7 @@ def main():
         browser.navigate('pages/concerts/tickets.html?id=c1')
         open_zone(browser,'VIP Diamond Experience')
         browser.evaluate('for(let i=0;i<12;i++)document.getElementById("plus").click()')
-        assert browser.evaluate('document.getElementById("quantity").textContent==="8"')
+        assert browser.evaluate('document.getElementById("quantity").textContent==="6"')
         # Real Standing order from the browser.
         browser.click('#continue-payment')
         browser.wait('location.pathname.endsWith("/checkout/index.html") && !document.getElementById("confirm-payment").disabled')
@@ -104,12 +104,12 @@ def main():
         browser.wait('location.pathname.endsWith("/order-detail.html") && document.querySelector(".line-ticket")!==null')
         oid = browser.evaluate('new URLSearchParams(location.search).get("id")')
         _, order = request(f'/orders/{oid}', token)
-        assert len(order['tickets'])==8 and all(t['booking_type']=='standing' and t['row'] is None and t['seat_number'] is None for t in order['tickets'])
+        assert len(order['tickets'])==6 and all(t['booking_type']=='standing' and t['row'] is None and t['seat_number'] is None for t in order['tickets'])
         standing_ticket = order['tickets'][0]
         browser.navigate(f'pages/me/ticket-detail.html?id={standing_ticket["id"]}')
         browser.wait('document.querySelector(".digital-ticket-qr img")?.naturalWidth>0')
         assert browser.evaluate('document.querySelector(".digital-ticket-facts").textContent.includes("Standing (no assigned seat)")')
-        results['flows'].append('Standing: quantity -> real hold -> checkout -> 8 issued tickets -> QR, no assigned rows or seats')
+        results['flows'].append('Standing: quantity -> real hold -> checkout -> 6 issued tickets -> QR, no assigned rows or seats')
         # API-created hold by another customer renders Held and cannot be selected.
         _, data = request('/concerts/1/seats', token)
         zone = next(z for z in data['zones'] if z['name']=='Standard Tier 2')

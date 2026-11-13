@@ -7,22 +7,24 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, StrictInt, StrictStr, field_validator, model_validator
 
+from app.config import MAX_SEATS_PER_RESERVATION
+
 
 class StandingSelection(BaseModel):
     zone_id: int = Field(ge=1)
-    quantity: StrictInt = Field(ge=1, le=8)
+    quantity: StrictInt = Field(ge=1, le=MAX_SEATS_PER_RESERVATION)
 
 
 class HoldRequest(BaseModel):
     concert_id: int
-    seat_ids: list[int] = Field(default_factory=list, max_length=8)
-    standing: list[StandingSelection] = Field(default_factory=list, max_length=8)
+    seat_ids: list[int] = Field(default_factory=list, max_length=MAX_SEATS_PER_RESERVATION)
+    standing: list[StandingSelection] = Field(default_factory=list, max_length=MAX_SEATS_PER_RESERVATION)
 
     @model_validator(mode="after")
     def total_tickets(self):
         count = len(self.seat_ids) + sum(s.quantity for s in self.standing)
-        if not 1 <= count <= 8:
-            raise ValueError("Select 1–8 tickets in total.")
+        if not 1 <= count <= MAX_SEATS_PER_RESERVATION:
+            raise ValueError(f"Select 1–{MAX_SEATS_PER_RESERVATION} tickets in total.")
         if len({s.zone_id for s in self.standing}) != len(self.standing):
             raise ValueError("Standing zones must not be repeated.")
         return self
@@ -172,6 +174,9 @@ class AdminConcertStatsOut(BaseModel):
     ticketsSold: int
     checkedIn: int
     revenue: int
+    availableInventory: int
+    heldInventory: int
+    soldInventory: int
 
 
 class AdminConcertZoneInput(BaseModel):

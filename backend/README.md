@@ -34,7 +34,7 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | Method & path | Purpose |
 | --- | --- |
 | `GET /concerts/{id}/seats` | Zones and seat availability (lapsed holds show as available) |
-| `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 8 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
+| `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 6 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
 | `GET /concerts` | Public concert catalogue for `on_sale` / `sold_out` shows plus IDs managed by the backend |
 | `GET /concerts/{id}` | Public details and ticket types for an on-sale / sold-out concert |
 | `GET /reservations/{id}` | Hold status and `seconds_left` |
@@ -42,7 +42,7 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | `POST /checkout` `{reservation_id, payment_method, buyer: {full_name, email, phone}}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
 | `POST /auth/login`, `GET /auth/me` | Sign in (OAuth2 password form) / current user |
 | `GET /orders/me` (alias `/orders`), `GET /orders/{id}` | The caller's orders (someone else's order → 404) |
-| `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
+| `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Owner only; pending/paid, no used tickets; more than 24 h before the show, except cancelled concerts waive the cutoff |
 | `GET /tickets/me` (alias `/tickets`), `GET /tickets/{id}` | The caller's tickets. `qr_data` (the ticket code) is set only while the ticket is `valid`; the detail also returns `qr_image`, an SVG data URI rendered by the server |
 | `POST /tickets/check-in` `{ticket_code}` | Staff scan; a ticket can be admitted once |
 | `GET /admin/stats` | Admin: `totalConcerts`, `ticketsSold`, `totalOrders`, `totalRevenue`, `upcomingConcerts`, plus `checkinsToday` (tickets checked in since midnight) |
@@ -98,12 +98,16 @@ overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
 - Seated zones expose PostgreSQL seat IDs, rows, numbers and live availability. Reserve specific IDs via `seat_ids`.
 - Standing zones expose availability counts, never numbered seats. Reserve a zone and quantity via `standing`.
 - Both modes reuse the existing `seats` inventory rows, row locks, five-minute expiry, checkout, refund and QR lifecycle. Standing rows act as inventory units internally, not assigned seats. The zone booking_type column is persistent; existing installations require the explicit migration described below. Existing bookings/seat IDs are not rewritten.
-- HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 8 applies to the combined request.
+- HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 6 applies to the combined request.
 - `booking_type` is added to reservation items and tickets. Public standing `row`/`row_label`/`seat_number` are null. Existing IDs, stored row values, ticket codes and QR payloads are not rewritten.
 - New admin zones choose Standing/Seated explicitly. Renaming a zone never changes admission type. Clients omitting booking_type on edit preserve the stored type; new zones default to seated. Changing type is rejected with 409 booking_type_has_bookings when any ticket or occupied inventory exists.
 - Multiple SVG sections with the same ticket-tier name share that tier's inventory; the existing seats are allocated once across its SVG fragments for display. This configuration is not an assertion about the artists' real seating plans.
 
 For the current UI and executable QA commands, see [Current UI and QA](../docs/current-ui-qa.md). Historical UI reports describe earlier iterations.
+
+## Sample data (task #55)
+
+11 concerts, 33 tiers, 7,200 inventory units and 14 sample orders. See [seed-data.md](../docs/seed-data.md) for the full price/capacity matrix, dashboard expectations, safe seed commands and TV1 review checklist. Run `python -B scripts/seed.py --check` before an authorized seed. Never use the application database as a pytest fixture.
 
 
 ## PR #83 review: persistent admission type

@@ -1,443 +1,180 @@
-# CONCERTLY — Online Concert Ticketing Platform
-
-Tài liệu UI và QA hiện hành: [current-ui-qa.md](current-ui-qa.md). Các báo cáo Seat Map khác được giữ như lịch sử triển khai.
-
-## 1. Giới thiệu đề tài
-
-Đề tài A4: Trang bán khóa học / vé sự kiện online, được cụ thể hóa thành website bán vé concert các nhóm nhạc.
-
-**CONCERTLY** là website bán vé concert trực tuyến, tập trung vào trải nghiệm tìm kiếm sự kiện, lựa chọn ghế, mua vé và quản lý vé sau khi đăng nhập.
-
-Website được xây dựng dưới dạng student project, mô phỏng quy trình mua vé concert thực tế nhưng sử dụng mock payment, không thực hiện giao dịch tiền thật.
-
----
-
-## 2. Bài toán
-
-Vé concert là sản phẩm số có số lượng giới hạn (theo hạng ghế/khu vực), nhiều người có thể cùng đặt một vé tại một thời điểm. Hệ thống cần đảm bảo:
-
-- Giúp người dùng dễ dàng tìm kiếm và khám phá các concert.
-- Cung cấp đầy đủ thông tin về concert, venue, nghệ sĩ và giá vé.
-- Cho phép người dùng lựa chọn ghế trực tiếp trên sơ đồ chỗ ngồi.
-- Tạm giữ ghế trong thời gian ngắn trong quá trình checkout.
-- Mô phỏng quy trình đặt vé và thanh toán.
-- Tạo vé điện tử có QR Code sau khi đặt vé thành công.
-- Cho phép người dùng xem lại vé và lịch sử đơn hàng.
-- Cung cấp giao diện quản trị để quản lý concert và đơn hàng.
-
----
-
-## 3. Các tính năng chính
-
-### 3.1. Concert Discovery
-
-Người dùng có thể khám phá các concert trên website.
-
-- Danh sách concert sắp diễn ra và đang mở bán.
-- Tìm kiếm concert theo tên concert hoặc nghệ sĩ.
-  -Lọc theo ngày và khoảng giá.
-- Hiển thị concert nổi bật.
-- Hiển thị trạng thái mở bán / sắp mở bán.
-- Countdown đến thời điểm concert hoặc mở bán.
-
-Mục tiêu: Tạo trải nghiệm khám phá concert trực quan và dễ sử dụng.
-
-### 3.2. Concert Detail
-
-Trang chi tiết cung cấp thông tin cần thiết trước khi người dùng quyết định mua vé.
-
-- Tên concert.
-- Poster / hình ảnh concert.
-- Nghệ sĩ / line-up.
-- Ngày và thời gian.
-- Địa điểm / venue.
-- Mô tả concert.
-- Các khu vực vé.
-- Giá vé theo từng khu vực.
-- Số lượng vé còn lại.
-- Điều khoản cơ bản.
-
-### 3.3. Interactive Seat Selection
-
-Người dùng chọn ghế trực tiếp trên **sơ đồ chỗ ngồi**.
-
-- Hiển thị sơ đồ sân khấu và các khu vực ghế.
-- Phân biệt các khu vực như VIP / A / B / C.
-- Phân biệt trạng thái:
-  - Available
-  - Selected
-  - Held
-  - Sold
-- Không cho phép chọn ghế đã Sold.
-- Click vào ghế để chọn / bỏ chọn.
-- Hiển thị giá của ghế hoặc khu vực.
-- Tự động cập nhật số lượng ghế và tổng tiền.
-
-Hệ thống hỗ trợ đồng thời Standing (chọn khu và số lượng) và Seated (chọn từng ghế đánh số). Phân loại demo, API và kết quả kiểm thử được ghi tại [Standing/Seated](standing-seated.md).
-
-### 3.4. Temporary Seat Reservation
-
-Sau khi người dùng chọn ghế:
-
-- Ghế được chuyển sang trạng thái Held.
-- Hiển thị countdown 5 phút trong phiên checkout.
-- Người dùng có thời gian hoàn tất đơn hàng.
-- Nếu thanh toán thành công → ghế chuyển thành Sold.
-- Nếu hết thời gian → ghế được trả về Available.
-- Khi checkout, hệ thống kiểm tra lại trạng thái ghế trước khi xác nhận đơn hàng.
-
-### 3.5. Mock Checkout & Payment
-
-Website mô phỏng quy trình đặt vé:
-
-Seat Selection → Order Summary → Payment → Success
-
-Người dùng có thể:
-
-- Kiểm tra concert đã chọn.
-- Kiểm tra ghế đã chọn.
-- Xem số lượng vé.
-- Xem tổng tiền.
-- Chọn phương thức thanh toán giả lập:
-  - Credit/Debit Card
-  - E-wallet
-  - Bank Transfer
-- Xác nhận thanh toán.
-
-Sau khi thanh toán thành công:
-
-- Order được cập nhật thành Paid.
-- Ghế được xác nhận là Sold.
-- Hệ thống tạo digital ticket.
-
-Hệ thống chỉ mô phỏng thanh toán và không thực hiện giao dịch tiền thật.
-
-### 3.6. Digital Ticket & QR Code
-
-Sau khi đặt vé thành công:
-
-- Tạo digital ticket.
-- Hiển thị:
-  - Concert
-  - Ngày / giờ
-  - Venue
-  - Khu vực
-  - Số ghế
-  - Ticket ID
-- Sinh QR Code cho mỗi vé.
-- Ticket có trạng thái:
-  - Valid
-  - Used
-- Người dùng có thể mở vé từ My Tickets.
-
-Admin có thể sử dụng QR Code để kiểm tra và xác thực vé tại sự kiện.
-
-### 3.7. My Tickets & Orders
-
-Sau khi đăng nhập, người dùng có thể:
-
-- Xem các concert sắp tham dự.
-- Xem danh sách vé đã mua.
-- Mở digital ticket.
-- Xem QR Code.
-- Xem Ticket ID.
-- Xem lịch sử đơn hàng.
-- Xem trạng thái đơn hàng:
-  - Pending
-  - Paid
-  - Cancelled
-- Người dùng có thể hủy đơn theo chính sách của concert.
-- Đơn đủ điều kiện được ghi nhận yêu cầu hoàn tiền qua mock payment và cập nhật
-  trạng thái hoàn tiền.
-
-### 3.8. Admin Dashboard
-
-Admin có thể:
-
-**Concert Management**
-Xem danh sách concert.
-Thêm concert mới.
-Chỉnh sửa thông tin concert.
-Xóa concert.
-
-**Ticket & Seat Management**
-
-- Xem các khu vực ghế.
-- Cập nhật giá vé.
-- Xem số lượng vé còn lại.
-
-**Order Management**
-
-- Xem danh sách đơn hàng.
-- Xem thông tin khách hàng.
-- Xem trạng thái thanh toán.
-- Xem chi tiết đơn hàng.
-
-**Basic Dashboard**
-
-Hiển thị một số chỉ số cơ bản:
-
-- Total Concerts.
-- Tickets Sold.
-- Total Orders.
-- Total Revenue.
-- Upcoming Concerts.
-
-### 3.9. Cancellation & Refund
-
-- Người dùng gửi yêu cầu hủy từ Order Detail khi đơn còn đủ điều kiện.
-- Hệ thống hiển thị chính sách và yêu cầu xác nhận trước khi hủy.
-- Đơn chuyển sang Cancelled; nếu đã thanh toán, mock payment mô phỏng hoàn tiền.
-- Không thực hiện giao dịch tiền thật.
-
----
-
-## 4. Các màn hình dự kiến
-
-### User
-
-1. **Register**
-   Mục đích: Tạo tài khoản khách hàng mới.
-
-- Họ tên
-- Email
-- Mật khẩu
-
-2. **Login**
-   Mục đích: Đăng nhập tài khoản khách hàng để xem vé và đơn hàng.
-
-- Email
-- Mật khẩu
-
-3. **Home**
-   Mục đích: Giúp người dùng khám phá nhanh các concert nổi bật.
-   - Concert nổi bật
-   - Trending
-   - Upcoming concerts
-
-4. **Explore Concerts**
-   Mục đích: Tìm kiếm và lọc concert.
-   - Search
-   - Filter
-   - Danh sách concert
-
-5. **Concert Detail**
-   Mục đích: Cung cấp thông tin chi tiết trước khi mua vé.
-   - Thông tin concert
-   - Line-up
-   - Venue
-   - Giá vé
-   - Seat map
-
-6. **Seat Selection**
-   Mục đích: Cho phép người dùng chọn ghế trực tiếp.
-   - Interactive seat map
-   - Chọn ghế
-   - Countdown giữ vé
-   - Tổng tiền
-
-7. **Checkout**
-   Mục đích: Xác nhận thông tin đơn hàng và mô phỏng thanh toán.
-   - Thông tin vé
-   - Ghế đã chọn
-   - Tổng tiền
-   - Phương thức thanh toán
-
-- Nút xác nhận thanh toán
-
-8. **Session Expired**
-   Mục đích: Thông báo phiên giữ ghế đã hết hạn.
-
-- Thông báo ghế đã được trả lại
-- Nút quay lại Seat Selection
-
-9. **Order Confirmation**
-   Mục đích: Xác nhận đặt vé thành công sau khi thanh toán.
-
-- Payment Success
-- Mã đơn hàng
-- Link tới vé
-
-10. **My Tickets**
-    Mục đích: Quản lý các vé đã mua.
-
-- Danh sách vé
-- QR Code
-- Thông tin concert
-- Mã vé
-
-11. **Profile & Orders**
-    Mục đích: Quản lý tài khoản và lịch sử mua vé.
-
-- Thông tin cá nhân
-- Lịch sử đơn hàng
-- Trạng thái thanh toán
-
-12. **Order Detail**
-    Mục đích: Xem chi tiết một đơn hàng và thao tác hủy nếu đủ điều kiện.
-
-- Thông tin concert, vé và tổng tiền
-- Trạng thái thanh toán / đơn hàng
-- Chính sách hủy và hoàn tiền
-- Nút hủy đơn
-
-### Authentication & Admin
-
-13. **Admin Login**
-    Mục đích: Xác thực quản trị viên trước khi vào khu vực quản trị.
-
-- Tài khoản quản trị
-- Mật khẩu
-
-14. **Admin Dashboard**
-    Mục đích: Tổng quan và quản lý hệ thống.
-
-- Tổng quan doanh thu
-- Vé đã bán
-- Concert đang hoạt động
-- Quản lý concert
-- Quản lý khu vực / ghế
-- Quản lý đơn hàng
-- Check-in và xác thực QR Code
-
----
-
-## 5. User Flow chính
-
-**5.1. Customer — Discover & Purchase Ticket**
-
-```text
-Home
-  ↓
-Explore Concerts
-  ↓
-Concert Detail
-  ↓
-Select Seats
-  ↓
-Temporary Reservation (5 minutes)
-  ↓
-Checkout
-  ↓
-Mock Payment
-  ↓
-Order Confirmation
-  ↓
-My Tickets
-  ↓
-Digital Ticket + QR Code
-```
-
-**5.2. Customer — View Existing Ticket**
-
-```text
-Login
-  ↓
-My Tickets
-  ↓
-Select Ticket
-  ↓
-Digital Ticket
-  ↓
-View QR Code
-```
-
-**5.2a. Customer — Register & Login**
-
-```text
-Register
-  ↓
-Login
-  ↓
-Home
-```
-
-**5.3. Customer — View Order History**
-
-```text
-Profile
-  ↓
-Orders
-  ↓
-Order Detail
-  ↓
-Payment Status
-  ↓
-View Ticket
-```
-
-**5.4. Admin — Manage Concert**
-
-```text
-Admin Login
-  ↓
-Admin Dashboard
-  ↓
-Concert Management
-  ↓
-Create / Edit Concert
-  ↓
-Update Ticket Information
-  ↓
-Save
-```
-
-**5.5. Admin — Manage Orders**
-
-```text
-Admin Dashboard
-  ↓
-Order Management
-  ↓
-Order List
-  ↓
-Order Detail
-  ↓
-View Payment / Ticket Status
-```
-
-**5.6. Optional — QR Check-in**
-
-```text
-Admin Dashboard
-  ↓
-Check-in
-  ↓
-Enter / Scan QR Code
-  ↓
-Validate Ticket
-  ↓
-Valid → Mark as Used
-```
-
-**5.7. Customer — Reservation Timeout**
-
-```text
-Checkout
-  ↓ (hết 5 phút giữ chỗ)
-Session Expired
-  ↓
-Seat Selection
-```
-
-Khi phiên hết hạn, hệ thống trả ghế về Available và người dùng phải chọn lại
-ghế trước khi tiếp tục checkout.
-
-**5.8. Customer — Cancel Order & Refund**
-
-```text
-Login
-  ↓
-Profile & Orders
-  ↓
-Order Detail
-  ↓
-Cancel Order
-  ↓
-Refund Processing (Mock)
-  ↓
-Cancelled
-```
-
-Nếu đơn chưa thanh toán, bước hoàn tiền được bỏ qua. Nếu đơn đã thanh toán,
-mock payment cập nhật kết quả hoàn tiền theo chính sách của concert.
+# CONCERTLY — Hướng dẫn hệ thống hiện tại
+
+Đối chiếu Task [#57](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/57)
+ngày 13/11/2026, source tại commit `4bbcc45` và OpenAPI của backend local.
+Đây là dự án demo: có đặt vé lưu PostgreSQL nhưng thanh toán và hoàn tiền đều mô
+phỏng, không giao dịch tiền thật. Các tính năng chưa có backend được nêu riêng.
+
+## 1. Tài liệu và nguồn dữ liệu
+
+- [API Specification](api-spec.md): 30 cặp method/path, quyền, input, response và lỗi.
+- [Business Rules](business-rules.md): giới hạn 6 vé, giữ chỗ và hủy/hoàn tiền.
+- [Dashboard Metrics](dashboard-metrics.md): công thức và kết quả đối chiếu số liệu QA.
+- [Seed Data](seed-data.md): dữ liệu demo; không tự seed lại database đang sử dụng.
+- [Standing/Seated](standing-seated.md): phân loại demo, không khẳng định sơ đồ concert thực.
+- [UI và QA hiện hành](current-ui-qa.md): ghi nhận kiểm thử trước đây, không thay thế
+  source/OpenAPI hiện tại. Các báo cáo Seat Map khác là lịch sử triển khai.
+
+Sau tích hợp #81, Home/Explore/Detail lấy catalogue public từ API qua
+[js/public-catalog.js](../js/public-catalog.js), ghép với dữ liệu trình bày trong
+[js/mock-data.js](../js/mock-data.js). API lỗi có thể hiển thị preview local;
+preview không bảo đảm được mua vé. Hình venue/polygon nằm trong
+[js/venues](../js/venues). Tồn kho, reservation, order, ticket và quyền truy cập
+trong luồng API lấy từ PostgreSQL. Giá và trạng thái để đặt vé phải dựa trên API,
+không xem nội dung catalogue tĩnh là tồn kho trực tiếp.
+
+Backend mặc định được frontend gọi tại `http://localhost:8000/api`; script
+[js/api.js](../js/api.js) cho phép override bằng `window.CONCERTLY_API_BASE`.
+Swagger tại `http://localhost:8000/docs`, schema tại `/openapi.json`.
+Tài liệu này không yêu cầu thay cấu hình hoặc khởi động lại backend đang chạy.
+
+## 2. Đăng ký, đăng nhập và phiên người dùng
+
+### Đăng ký: hiện chỉ là giao diện demo
+
+Trang [Register](../pages/auth/register.html) nhận họ tên, email, mật khẩu và xác
+nhận mật khẩu. Handler kiểm tra hai mật khẩu trùng nhau, lưu tên vào localStorage
+`concertlyUser` rồi chuyển sang Login. **Không gửi API, không lưu tài khoản hay mật
+khẩu vào PostgreSQL.** Thông báo “Account registered successfully!” hiện không
+chứng minh đã tạo tài khoản có thể đăng nhập. Chưa có API register; đây là phần
+cần developer tích hợp, không hướng dẫn người dùng đăng ký như chức năng hoàn tất.
+
+### Đăng nhập: đã tích hợp API
+
+1. Dùng tài khoản đã tồn tại trong PostgreSQL và đang active, do người quản lý
+   môi trường cung cấp. Không dùng tên vừa lưu ở Register như một tài khoản thật.
+2. Mở [Login](../pages/auth/login.html), nhập email và mật khẩu của mình.
+3. Frontend gửi `POST /api/auth/login`, Content-Type
+   `application/x-www-form-urlencoded`, trường `username` là email, cùng `password`.
+4. Backend trim/lowercase email, kiểm tra hash bcrypt. Sai thông tin trả
+   401 `invalid_credentials`; đúng mật khẩu nhưng tài khoản inactive trả
+   403 `account_disabled`.
+5. Thành công trả JWT và thông tin user. Frontend lưu token trong localStorage,
+   gửi `Authorization: Bearer ...` ở các request sau. Admin được chuyển tới Dashboard;
+   người dùng khác về Home hoặc đường dẫn redirect cùng origin.
+
+JWT HS256 có hạn mặc định 60 phút, cấu hình được. `GET /api/auth/me` lấy thông tin
+người dùng hiện tại. Endpoint yêu cầu đăng nhập trả 401 khi token hết hạn/không hợp
+lệ hoặc tài khoản không active. Khi thấy “Your session has expired”, đăng nhập lại
+trên cùng origin frontend rồi thử tải availability; phiên đăng nhập và thời hạn giữ
+vé là hai cơ chế riêng. Không có refresh token, API logout, đổi/quên mật khẩu hay
+xác minh email. Logout ở frontend xóa phiên local, không thu hồi JWT đã phát hành.
+Không đưa mật khẩu hoặc token thật vào tài liệu hay ảnh báo lỗi.
+
+## 3. Chọn hạng vé và ghế
+
+Luồng hiện tại: Home/Explore → Concert → [Seat Selection](../pages/concerts/tickets.html)
+(với query `id` của concert, ví dụ `?id=c1`) → chọn hạng/khu → Continue Payment.
+Trang cần catalogue demo tương ứng và dữ liệu concert/zone trong backend.
+
+- **Standing:** chọn khu và số lượng, không chọn số ghế. Khi bấm Continue Payment,
+  frontend gửi `standing: [{zone_id, quantity}]` đến `POST /api/reservations`.
+  Backend khóa tồn kho và tự chọn đủ đơn vị inventory khả dụng theo ID tăng dần.
+  Đây là **cấp tồn kho tự động cho vé đứng**, không phải cấp ghế ngồi đánh số.
+  Hàng/số nội bộ không hiển thị trên vé Standing (API trả null).
+- **Seated:** chọn hạng/khu, click ghế cụ thể để chọn/bỏ chọn. Available có thể chọn;
+  Selected chỉ là trạng thái UI; Held và Sold không phải ghế trống. Frontend gửi các
+  `seat_ids` đã chọn, backend giữ đúng các ID nếu còn khả dụng. **Chưa có API chọn
+  hạng + số lượng để tự cấp ghế Seated, cũng chưa có cam kết ghế liền nhau.**
+- Tổng tối đa **6 vé/lần giữ và mua**. API nhận cả Seated + Standing trong cùng
+  một request, tổng vẫn tối đa 6. UI hiện gửi một loại/hạng đang chọn mỗi lần;
+  không suy ra rằng UI đã có giỏ hàng mixed nhiều hạng.
+- Venue SVG/polygon là cách trình bày frontend; không tạo seat ID hoặc thay thế
+  availability trong PostgreSQL. Các khu chưa xác định rõ giữ phân loại đã cấu hình.
+- Chỉ click chọn ở UI chưa giữ chỗ. Hold được tạo khi Continue Payment thành công
+  (HTTP 201). Hai người tranh cùng một ghế không thể cùng giữ thành công; người
+  thua phải cập nhật và chọn lại.
+- Nếu API tải tồn kho thất bại, trang báo lỗi và có Retry availability; không cho
+  đặt thật và không tự chuyển sang mock để giả thành công.
+
+## 4. Giữ chỗ 5 phút
+
+Backend mặc định TTL 300 giây (`RESERVATION_TTL_SECONDS` có thể override). Mốc
+`expires_at` được tạo theo đồng hồ PostgreSQL sau khi lấy khóa; checkout đọc
+reservation và đồng bộ `seconds_left`. Reload không khởi tạo lại 5 phút.
+Mỗi user/concert có tối đa một hold active: tạo hold mới thành công thay hold cũ.
+
+Hết hạn: backend từ chối checkout với 410 `reservation_expired`; hold không còn
+quyền mua. Seat map coi hold hết hạn là Available ngay cả khi chưa cập nhật row DB.
+Việc cập nhật DB được thực hiện khi truy cập các luồng xử lý expiry hoặc bởi sweeper
+mỗi 30 giây (nếu không bị tắt), theo batch và khóa DB; không cam kết row chuyển
+trạng thái đúng từng mili giây tại phút thứ 5.
+
+Frontend vô hiệu hóa thanh toán, xóa checkoutData, chuyển tới
+[Session Expired](../pages/checkout/session-expired.html) và cố gắng gọi release;
+release có thể thất bại do mất mạng, backend vẫn kiểm tra hạn độc lập. Người dùng
+phải chọn lại vé. Không coi hết JWT là đồng nghĩa hết hold, hoặc đăng nhập lại là
+gia hạn hold. `DELETE /api/reservations/{id}` hủy hold của chính mình; hold đã
+converted không được release qua API này.
+
+## 5. Checkout và thanh toán mô phỏng
+
+### Luồng API có lưu PostgreSQL
+
+1. Sau khi giữ chỗ, mở [Checkout](../pages/checkout/index.html). Trang tải lại
+   reservation, số vé, khu/hàng/số ghế (Seated) hoặc khu/số lượng (Standing), giá và tổng tiền.
+2. Nhập họ tên, email, điện thoại. Backend trim các trường; tên 2–150 ký tự,
+   email đúng regex của dự án và tối đa 255 ký tự, điện thoại 8–15 chữ số với
+   ký tự định dạng cho phép. Thông tin thiếu/sai bị từ chối, xem schema trong API spec.
+3. Chọn `card`, `ewallet` hoặc `bank_transfer`, rồi xác nhận trước khi hết hạn.
+   Đây chỉ là nhãn phương thức: không thu thập thông tin thẻ, gọi ngân hàng hay ví thật.
+4. `POST /api/checkout` kiểm tra chủ reservation, hạn và tồn kho dưới khóa DB,
+   tạo order paid, ticket valid, chuyển inventory sold và reservation converted.
+   Tổng tiền lấy giá zone tại thời điểm checkout, không tin tổng frontend gửi lên.
+5. Thành công chuyển tới Order Detail; xem vé trong My Tickets. Gọi lại checkout
+   cho cùng reservation đã converted trả cùng order, không tạo đơn/vé trùng.
+
+Buyer bắt buộc để validate nhưng **chưa lưu contact vào order/ticket**, không cập
+nhật account; tên chủ vé vẫn lấy từ account. Phí/giảm giá hiện bằng 0; chưa có coupon,
+cổng thanh toán, webhook, đối soát ngân hàng hay hoàn tiền thật.
+
+### Nhánh demo local còn trong checkout.js
+
+Nếu checkoutData không có reservationId, checkout xử lý một phiên demo local:
+validate thông tin, tối đa 6 vé, countdown 5 phút lưu qua reload, lưu kết quả demo
+trong trình duyệt. **Không tạo order PostgreSQL, không giữ ghế thật, không phát
+hành QR vào cửa.** Luồng chọn vé hiện tại bắt buộc API, không fallback vào nhánh
+này khi backend lỗi. Không dùng archive local làm bằng chứng thanh toán/nhận vé thật.
+
+## 6. Vé, đơn hàng, hủy và check-in
+
+My Tickets và Orders đọc `/api/tickets/me`, `/api/orders/me`; chi tiết đọc bằng ID
+backend. Seated hiển thị khu/hàng/số ghế, Standing không có số ghế được gán.
+QR của vé valid chứa ticket_code gốc; khi used/cancelled/refunded, API không cung
+cấp QR vào cửa. Mã hiển thị có concert không thay payload QR hoặc ID database.
+
+Chủ đơn có thể hủy đơn pending/paid chưa có vé used, thông thường phải còn **hơn
+24 giờ** đến concert. Concert cancelled bỏ qua cửa sổ 24 giờ, vẫn phải đáp ứng các
+điều kiện còn lại. UI đọc can_cancel, API xác minh lại. Đơn paid đủ điều kiện được
+hoàn toàn phần bằng mock, chuyển order cancelled, payment/refund refunded,
+ticket refunded và trả inventory. Chưa có quy trình duyệt hoàn tiền thủ công/hoàn
+một phần. Chi tiết tại [Business Rules](business-rules.md).
+
+Admin Dashboard, danh sách/chi tiết đơn và check-in đã gọi API. Các endpoint
+`/api/admin/*` chỉ cho admin, staff trả 403. Route `/api/tickets/check-in` cho
+staff/admin nhận ticket_code; `/api/admin/checkin` chỉ admin, nhận ticketId và
+concertId, kiểm tra đúng concert và chặn check-in trùng.
+
+**Quản lý concert/khu/giá đã có API CRUD từ #81**, có upload ảnh,
+public catalogue list/detail và form Admin lưu PostgreSQL. Admin chọn Standing/Seated
+tại mỗi hạng vé; đổi tên không đổi loại. Thiếu booking_type trên request sửa giữ
+loại cũ; khu mới mặc định Seated. Đổi loại khi có ticket hoặc inventory occupied
+trả 409 booking_type_has_bookings. Database cũ cần migration tường minh trước khi
+chạy code mới, xem [backend README](../backend/README.md). Dashboard “tickets remaining” đã sửa để lấy availableInventory, loại hold
+chưa hết hạn và sold; tham chiếu [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
+
+## 7. Trạng thái nghiệm thu Task #57
+
+- Tài liệu nêu rõ Register và tự cấp ghế Seated chưa được triển khai; concert CRUD đã tích hợp;
+  phân biệt backend mock payment với demo chỉ lưu local.
+- Method/path và các bảng model của API spec được đối chiếu với OpenAPI đang chạy
+  và source; các chênh lệch Swagger/error handler được giữ trong API spec để developer xử lý.
+- Các bước sử dụng phân biệt chọn UI/hold, JWT/TTL và ticket/inventory, không yêu cầu
+  mật khẩu thật hoặc sửa database. Task này chỉ cập nhật hai file tài liệu.
+- Review TV2/TV3 của task API spec trước đó vẫn chưa có bằng chứng xác nhận;
+  việc đối chiếu kỹ thuật này không thay thế phê duyệt liên thành viên.
+
+
+Cập nhật review #83 sau #81: dữ liệu loại vé nằm ở zones.booking_type; JSON chỉ
+khởi tạo seed. Các bằng chứng Task #57 ở trên giữ mốc lịch sử ban đầu, không
+khẳng định backend local đã được migrate hoặc đã triển khai bản code mới.

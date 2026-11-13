@@ -118,3 +118,41 @@ def test_api_rejects_mode_confusion_and_enforces_combined_limit(db, concert, use
         hold = client.post('/api/reservations', json={'concert_id': concert, 'seat_ids': ids[:1], 'standing': [{'zone_id': standing, 'quantity': 2}]}, headers=headers)
         assert hold.status_code == 201
         assert sorted(s['booking_type'] for s in hold.json()['seats']) == ['seated', 'standing', 'standing']
+
+@pytest.mark.parametrize('body', [
+    {'seat_ids': list(range(1, 7))},
+    {'standing': [{'zone_id': 1, 'quantity': 6}]},
+    {'seat_ids': [1, 2, 3], 'standing': [{'zone_id': 2, 'quantity': 3}]},
+])
+def test_six_ticket_schema_boundary(body):
+    from app.schemas import HoldRequest
+    from pydantic import ValidationError
+    request = HoldRequest(concert_id=1, **body)
+    assert len(request.seat_ids) + sum(s.quantity for s in request.standing) == 6
+    for extra in [1, 2]:
+        invalid = {'concert_id': 1, 'seat_ids': request.seat_ids + list(range(100, 100 + extra)),
+                   'standing': [s.model_dump() for s in request.standing]}
+        with pytest.raises(ValidationError):
+            HoldRequest(**invalid)
+
+@pytest.mark.parametrize('mode', ['seated', 'standing', 'mixed'])
+def test_api_accepts_six_and_rejects_seven_eight_without_losing_hold(db, concert, users, seat_ids, mixed, mode):
+    standing = mixed[1]
+    zone = db.get(Zone, standing)
+    zone.capacity = 8
+    db.add_all(Seat(zone_id=standing, row_label='A', seat_number=n) for n in range(4, 9))
+    db.commit()
+    def body(count):
+        if mode == 'seated':return {'seat_ids':seat_ids[:count]}
+        if mode == 'standing':return {'standing':[{'zone_id':standing,'quantity':count}]}
+        return {'seat_ids':mixed[2][:3], 'standing':[{'zone_id':standing,'quantity':count-3}]}
+    with TestClient(app) as client:
+        headers={'X-User-Id':str(users['a'])}
+        accepted=client.post('/api/reservations',json={'concert_id':concert,**body(6)},headers=headers)
+        assert accepted.status_code == 201
+        assert len(accepted.json()['seats']) == 6
+        for count in [7,8]:
+            denied=client.post('/api/reservations',json={'concert_id':concert,**body(count)},headers=headers)
+            assert denied.status_code == 422
+        current=client.get('/api/reservations/'+accepted.json()['id'],headers=headers)
+        assert current.json()['status']=='active' and len(current.json()['seats'])==6

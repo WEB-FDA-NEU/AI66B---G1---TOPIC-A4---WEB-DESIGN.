@@ -1,7 +1,7 @@
 /* Run with Node, or via check_project.py using macOS JavaScriptCore. No packages needed. */
 (async () => {
   const sources = typeof require === "function"
-    ? Object.fromEntries(["components", "checkout", "purchases", "tickets", "venue-engine"].map(name => [name, require("fs").readFileSync(`${__dirname}/../js/${name}.js`, "utf8")]))
+    ? Object.fromEntries(["components", "checkout", "purchases", "tickets", "venue-engine", "dashboard"].map(name => [name, require("fs").readFileSync(`${__dirname}/../js/${name}.js`, "utf8")]))
     : globalThis.__sources;
   const results = [];
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -63,17 +63,17 @@
     const env = environment(sample()); env.buyer(); env.document.getElementById("payment-method").value = "forged";
     await env.submit(); assert(!env.store.has("concertlyPurchases"), "bad method accepted");
   });
-  await test("Mock rejects zero, fractional and more than eight tickets", () => {
-    for (const quantity of [0, -1, 1.5, 9, "2"]) {
+  await test("Mock rejects zero, fractional and more than six tickets", () => {
+    for (const quantity of [0, -1, 1.5, 7, 8, "2"]) {
       const env = environment({ ...sample(), quantity });
       assert(env.context.location.href === "session-expired.html", `accepted ${quantity}`);
     }
   });
-  await test("Mock supports eight tickets, one receipt, no fake admission QR", async () => {
-    const env = environment({ ...sample(), quantity: 8 }); env.buyer();
+  await test("Mock supports six tickets, one receipt, no fake admission QR", async () => {
+    const env = environment({ ...sample(), quantity: 6 }); env.buyer();
     await env.submit(); await env.submit();
     const archive = JSON.parse(env.store.get("concertlyPurchases"));
-    assert(archive.orders.length === 1 && archive.tickets.length === 8, "wrong purchase count");
+    assert(archive.orders.length === 1 && archive.tickets.length === 6, "wrong purchase count");
     assert(archive.tickets.every(t => t.status === "demo" && !t.qr_data), "demo created valid tickets");
     assert(!env.document.getElementById("checkout-result").hidden, "receipt missing");
   });
@@ -194,7 +194,7 @@
       seatMap: async () => ({concert_id: 1, status: "on_sale", zones: [{id: 12, name: "VIP", price: 100, available: 20, booking_type: "standing", seats: []}]}),
       holdTickets: async (concert, seatIds, standing) => {
         body = {concert, seatIds, standing};
-        return {id: "standing-hold", total_amount: 800, expires_at: new Date(Date.now()+300000).toISOString(), seats: Array.from({length: 8}, (_, i) => ({id:i+1,zone_name:"VIP",booking_type:"standing",row_label:null,seat_number:null,price:100}))};
+        return {id: "standing-hold", total_amount: 600, expires_at: new Date(Date.now()+300000).toISOString(), seats: Array.from({length: 6}, (_, i) => ({id:i+1,zone_name:"VIP",booking_type:"standing",row_label:null,seat_number:null,price:100}))};
       },
     };
     const env = ticketEnvironment(api); await flush();
@@ -202,9 +202,9 @@
     assert(!env.document.getElementById("quantity-control").hidden, "standing has no quantity control");
     assert(env.document.getElementById("seat-picker").textContent.includes("No assigned"), "standing rendered seat numbers");
     for(let i=0;i<10;i++)env.document.getElementById("plus").listeners.click();
-    assert(env.document.getElementById("quantity").textContent === "8", "standing quantity exceeded limit");
+    assert(env.document.getElementById("quantity").textContent === "6", "standing quantity exceeded limit");
     await env.document.getElementById("continue-payment").listeners.click();
-    assert(body.seatIds.length===0 && body.standing[0].quantity===8 && body.standing[0].zone_id===12, "standing sent numbered seats");
+    assert(body.seatIds.length===0 && body.standing[0].quantity===6 && body.standing[0].zone_id===12, "standing sent numbered seats");
     assert(JSON.parse(env.store.get("checkoutData")).seats.every(s=>s.label==="Standing"), "standing receipt contains numbers");
   });
   await test("Changing SVG sections within a category keeps the original selected seat IDs", async () => {
@@ -253,6 +253,25 @@
     const after=geometry.zone(map,"Seated",changed).flatMap(v=>v.positions);
     assert(after.every((p,i)=>p.seat.status==="sold" && p.x===before[i].x && p.y===before[i].y),"cache changed positions or returned stale status");
     assert(seats.every(s=>s.status==="available"),"inventory objects mutated");
+  });
+  await test("Dashboard remaining uses real available inventory, not issued ticket totals", () => {
+    const elements = {};
+    const context = {
+      document: { addEventListener() {}, getElementById(id) { return elements[id] ||= {}; } },
+      adminEscape: String, adminDate: String, adminConcertBadge: () => "",
+      rows: [
+        { title: "Held", upcoming: true, capacity: 100, ticketsSold: 2, availableInventory: 7 },
+        { title: "Blocked soldOut", upcoming: true, capacity: 100, ticketsSold: 0, availableInventory: 0 },
+        { title: "Expired hold", upcoming: true, capacity: 100, ticketsSold: 2, availableInventory: 98 },
+      ],
+    };
+    run(sources.dashboard + "\nconcertStats = context.rows; renderUpcomingConcerts();", context);
+    const html = elements["upcoming-concerts-list"].innerHTML;
+    assert(html.includes("7 tickets remaining") && html.includes("0 tickets remaining") && html.includes("98 tickets remaining"), "inventory count ignored");
+    assert(html.includes("2 / 100 sold"), "ticketsSold progress changed");
+    context.rows = [{ title: "Old backend", upcoming: true, capacity: 100, ticketsSold: 0 }];
+    run(sources.dashboard + "\nconcertStats = context.rows; renderUpcomingConcerts();", context);
+    assert(elements["upcoming-concerts-list"].innerHTML.includes("Availability unavailable"), "old API invented availability");
   });
   globalThis.__testResults = results;
   if (typeof process !== "undefined") {

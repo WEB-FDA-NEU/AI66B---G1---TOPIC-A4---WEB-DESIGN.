@@ -124,7 +124,7 @@ def hold_tickets(db: Session, user_id: int, concert_id: int, seat_ids: list[int]
     """
     count = len(seat_ids) + sum(quantity for _, quantity in standing)
     if not 1 <= count <= MAX_SEATS_PER_RESERVATION or any(not 1 <= q <= MAX_SEATS_PER_RESERVATION for _, q in standing):
-        raise bad_request("too_many_seats", "Select 1–8 tickets in total.")
+        raise bad_request("too_many_seats", f"Select 1–{MAX_SEATS_PER_RESERVATION} tickets in total.")
     if len(set(seat_ids)) != len(seat_ids) or len({z for z, _ in standing}) != len(standing):
         raise bad_request("duplicate_seats", "Duplicate seats or standing zones.")
     # Serialize replacement requests for the same user/concert without locking users
