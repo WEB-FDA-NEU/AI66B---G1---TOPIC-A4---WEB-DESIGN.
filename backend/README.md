@@ -97,3 +97,7 @@ overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
 - Multiple SVG sections with the same ticket-tier name share that tier's inventory; the existing seats are allocated once across its SVG fragments for display. This configuration is not an assertion about the artists' real seating plans.
 
 For the current UI and executable QA commands, see [Current UI and QA](../docs/current-ui-qa.md). Historical UI reports describe earlier iterations.
+
+## Sample data (task #55)
+
+11 concerts, 33 tiers, 7,200 inventory units and 14 sample orders. See [seed-data.md](../docs/seed-data.md) for the full price/capacity matrix, dashboard expectations, safe seed commands and TV1 review checklist. Run `python -B scripts/seed.py --check` before an authorized seed. Never use the application database as a pytest fixture.

@@ -235,3 +235,77 @@ def test_invalid_data_writes_nothing(db, data):
 def test_cli_check_does_not_touch_database(capsys):
     assert seed_module.main(["--check"]) == 0
     assert "is valid" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize('change', [
+    lambda d:d.update(concerts=None),
+    lambda d:d['concerts'][0]['tiers'][0].update(capacity=True),
+    lambda d:d['concerts'][0]['tiers'][0].update(price='80'),
+    lambda d:d['orders'][0].pop('createdAt'),
+    lambda d:d['orders'][0].update(createdAt='not-a-date'),
+    lambda d:d['orders'][0].update(paymentMethod='unsupported'),
+    lambda d:d['orders'][0]['seats'].append(copy.deepcopy(d['orders'][0]['seats'][0])),
+    lambda d:d['orders'][0].update(seats=[{'tier':d['concerts'][0]['tiers'][0]['name'],'row':'A','seat':i} for i in range(1,8)]),
+    lambda d:d['concerts'][0]['tiers'][0].update(name='Wrong venue zone'),
+    lambda d:d['concerts'][0]['tiers'][0].update(price=81),
+    lambda d:d['demoExpectations'].update(totalRevenue=-1),
+])
+def test_validate_rejects_malformed_or_inconsistent_demo(data, change):
+    bad=copy.deepcopy(data);change(bad)
+    with pytest.raises(SeedDataError):validate(bad)
+
+
+def test_mock_capacity_and_every_svg_section_price_match(data):
+    mock=(REPO/'js/mock-data.js').read_text()
+    blocks=re.split(r'\n\s*id:\s*"',mock)[1:]
+    capacities={b.split('"',1)[0]:int(re.search(r'ticketCapacity:\s*(\d+)',b).group(1)) for b in blocks}
+    for concert in data['concerts']:
+        assert capacities[concert['slug']]==concert['ticketCapacity']
+        source=(REPO/'js/venues'/f"{concert['slug']}-map.js").read_text()
+        sections=re.findall(r'\bname\s*:\s*"([^"\n]+)".*?\bprice\s*:\s*"\$(\d+)"',source,re.S)
+        prices={t['name']:t['price'] for t in concert['tiers']}
+        assert sections and all(prices[name]==int(price) for name,price in sections)
+
+
+def test_demo_dashboard_expected_totals(db, data):
+    from app.services.admin import stats, concert_stats
+    run_seed(db,data)
+    expected=data['demoExpectations']
+    report=stats(db)
+    assert {k:report[k] for k in ['totalConcerts','totalOrders','ticketsSold','totalRevenue']} == {k:expected[k] for k in ['totalConcerts','totalOrders','ticketsSold','totalRevenue']}
+    from fastapi.testclient import TestClient
+    from app.main import app
+    admin_id=scalar("SELECT id FROM users WHERE role='admin' ORDER BY id LIMIT 1")
+    with TestClient(app) as client:
+        headers={'X-User-Id':str(admin_id)}
+        response=client.get('/api/admin/stats',headers=headers)
+        assert response.status_code==200
+        assert all(response.json()[k]==expected[k] for k in ['totalConcerts','totalOrders','ticketsSold','totalRevenue'])
+        page=client.get('/api/admin/orders',headers=headers)
+        assert page.status_code==200 and page.json()['total']==14
+        assert len(page.json()['items'])==14
+        summary=client.get('/api/admin/stats/concerts',headers=headers)
+        assert summary.status_code==200 and len(summary.json())==11
+    assert sum(c['capacity'] for c in concert_stats(db))==expected['totalCapacity']
+    assert table_counts()['zones']==expected['totalZones']
+
+
+def test_seed_does_not_update_unrelated_concert_status(db, data):
+    from app.models import Concert,Zone,Seat
+    from datetime import datetime,timedelta,timezone
+    other=Concert(id=999,title='User event',artist='User',venue='Venue',city='City',starts_at=datetime.now(timezone.utc)+timedelta(days=30),status='on_sale')
+    db.add(other);db.flush()
+    zone=Zone(concert_id=999,name='User tier',price=50,capacity=1);db.add(zone);db.flush()
+    db.add(Seat(zone_id=zone.id,row_label='A',seat_number=1,status='sold'));db.commit()
+    run_seed(db,data)
+    assert scalar('SELECT status FROM concerts WHERE id=999')=='on_sale'
+    assert run_seed(db,data)=={}
+
+
+def test_rerun_preserves_password_ticket_code_and_checkin(db, data):
+    run_seed(db,data)
+    before=db.execute(text('SELECT id,password_hash FROM users ORDER BY id')).all()
+    tickets=db.execute(text('SELECT id,ticket_code,status,checked_in_at FROM tickets ORDER BY id')).all()
+    assert run_seed(db,data)=={}
+    assert db.execute(text('SELECT id,password_hash FROM users ORDER BY id')).all()==before
+    assert db.execute(text('SELECT id,ticket_code,status,checked_in_at FROM tickets ORDER BY id')).all()==tickets

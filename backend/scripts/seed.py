@@ -3,7 +3,7 @@
     cd backend
     python scripts/seed.py                      # seed (safe to run any number of times)
     python scripts/seed.py --check              # validate seed_data.json only, no DB access
-    python scripts/seed.py --no-sample-orders   # catalogue + admin only (e.g. production)
+    python scripts/seed.py --no-sample-orders   # catalogue + admin only (still demo data)
 
 Data comes from ``scripts/seed_data.json`` (converted from ``js/mock-data.js``):
 
@@ -39,6 +39,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import secrets
 import sys
 import uuid
@@ -98,8 +99,40 @@ def load_data(path: Path = DATA_FILE) -> dict:
 
 # ------------------------------------------------------------------------ validation
 
+def _validate_structure(data) -> None:
+    """Check types before relational validation, so malformed JSON cannot crash with KeyError."""
+    errors = []
+    def record(value, fields, location):
+        if not isinstance(value, dict):
+            errors.append(f"{location}: expected object."); return False
+        for key, kind in fields.items():
+            field = value.get(key)
+            if type(field) is not kind or (kind is str and not field.strip()):
+                errors.append(f"{location}.{key}: expected nonempty {kind.__name__}.")
+        return True
+    if not isinstance(data, dict): raise SeedDataError("Seed root must be an object.")
+    for collection in ('users', 'concerts', 'orders'):
+        if not isinstance(data.get(collection), list): errors.append(f"{collection}: expected array.")
+    if errors: raise SeedDataError("Invalid seed structure: " + " ".join(errors))
+    for i, user in enumerate(data['users']):
+        record(user, {'email':str,'fullName':str,'role':str}, f'users[{i}]')
+    for i, concert in enumerate(data['concerts']):
+        if record(concert, {'id':int,'slug':str,'title':str,'artist':str,'venue':str,'city':str,'startsAt':str,'ticketCapacity':int,'tiers':list}, f'concerts[{i}]'):
+            if isinstance(concert.get('tiers'), list):
+                for j, tier in enumerate(concert['tiers']):
+                    if record(tier, {'name':str,'capacity':int,'price':int}, f'concerts[{i}].tiers[{j}]'):
+                        if 'soldOut' in tier and type(tier['soldOut']) is not bool: errors.append('soldOut must be boolean.')
+    for i, order in enumerate(data['orders']):
+        if record(order, {'orderNumber':int,'user':str,'concertId':int,'status':str,'createdAt':str,'seats':list}, f'orders[{i}]'):
+            if isinstance(order.get('seats'), list):
+                for j, seat in enumerate(order['seats']): record(seat, {'tier':str,'row':str,'seat':int},f'orders[{i}].seats[{j}]')
+    if errors: raise SeedDataError("Invalid seed structure: " + " ".join(errors))
+
+
 def validate(data: dict) -> None:
     """Raise SeedDataError describing every problem found in the seed data."""
+    _validate_structure(data)
+    from app.config import MAX_SEATS_PER_RESERVATION, PAYMENT_METHODS
     problems: list[str] = []
     users = {u["email"].lower(): u for u in data.get("users", [])}
     if len(users) != len(data.get("users", [])):
@@ -122,6 +155,13 @@ def validate(data: dict) -> None:
             parse_ts(concert["startsAt"])
         except (SeedDataError, ValueError) as exc:
             problems.append(f"Concert {cid}: {exc}")
+        if cid <= 0 or concert['ticketCapacity'] <= 0 or not concert['tiers']:
+            problems.append(f"Concert {cid}: positive id/capacity and at least one tier required.")
+        for field in ['saleStartAt']:
+            if concert.get(field):
+                try:
+                    if parse_ts(concert[field]) >= parse_ts(concert['startsAt']): problems.append(f"Concert {cid}: {field} must precede startsAt.")
+                except (SeedDataError, ValueError, TypeError) as exc: problems.append(f"Concert {cid}: {exc}")
         names = [t["name"] for t in concert["tiers"]]
         if len(set(names)) != len(names):
             problems.append(f"Concert {cid}: duplicate tier names.")
@@ -133,6 +173,15 @@ def validate(data: dict) -> None:
         for tier in concert["tiers"]:
             if tier["capacity"] <= 0 or tier["price"] < 0:
                 problems.append(f"Concert {cid} tier {tier['name']!r}: invalid capacity/price.")
+
+    venue_dir = BACKEND_DIR.parent / 'js' / 'venues'
+    for concert in concerts.values():
+        venue_file = venue_dir / (concert['slug'] + '-map.js')
+        if venue_file.exists():
+            sections = re.findall(r'\bname\s*:\s*"([^"\n]+)".*?\bprice\s*:\s*"\$(\d+)"', venue_file.read_text(), re.S)
+            expected = {t['name']:t['price'] for t in concert['tiers']}
+            if {name for name, _ in sections} != set(expected) or any(expected.get(name) != int(price) for name, price in sections):
+                problems.append(f"Concert {concert['id']}: tier names/prices differ from venue map.")
 
     numbers = Counter(o["orderNumber"] for o in data.get("orders", []))
     problems += [f"Duplicate order number {n}." for n, c in numbers.items() if c > 1]
@@ -151,6 +200,18 @@ def validate(data: dict) -> None:
         if concert is None:
             problems.append(f"Order {num}: unknown concert {order['concertId']}.")
             continue
+        if len(order['seats']) > MAX_SEATS_PER_RESERVATION:
+            problems.append(f"Order {num}: at most {MAX_SEATS_PER_RESERVATION} tickets.")
+        if order.get('paymentMethod') not in PAYMENT_METHODS:
+            problems.append(f"Order {num}: unsupported paymentMethod.")
+        try:
+            created_at = parse_ts(order['createdAt'])
+            for field in ['checkedInAt','refundedAt']:
+                if order.get(field) and parse_ts(order[field]) < created_at + timedelta(minutes=2):
+                    problems.append(f"Order {num}: {field} precedes payment.")
+        except (SeedDataError, ValueError, TypeError) as exc: problems.append(f"Order {num}: {exc}")
+        labels=[(s['tier'],s['row'],s['seat']) for s in order['seats']]
+        if len(labels) != len(set(labels)): problems.append(f"Order {num}: duplicate inventory units.")
         if not order.get("seats"):
             problems.append(f"Order {num}: needs at least one seat.")
         tiers = {t["name"]: t for t in concert["tiers"]}
@@ -168,6 +229,16 @@ def validate(data: dict) -> None:
                 if key in taken:
                     problems.append(f"Order {num}: seat {key} already sold in order {taken[key]}.")
                 taken[key] = num
+    if 'demoExpectations' in data:
+        expected = data['demoExpectations']
+        prices = {(c['id'],t['name']):t['price'] for c in concerts.values() for t in c['tiers']}
+        actual = {'totalConcerts':len(concerts), 'totalZones':sum(len(c['tiers']) for c in concerts.values()),
+                  'totalCapacity':sum(c['ticketCapacity'] for c in concerts.values()), 'totalOrders':len(data['orders']),
+                  'ticketsSold':sum(len(o['seats']) for o in data['orders'] if o['status']=='paid'),
+                  'totalRevenue':sum(prices.get((o['concertId'],s['tier']),0) for o in data['orders'] if o['status']=='paid' for s in o['seats']),
+                  'orderScenarios':dict(Counter(o['status'] for o in data['orders']))}
+        if not isinstance(expected,dict) or any(expected.get(k)!=v for k,v in actual.items()):
+            problems.append('demoExpectations differs from catalogue/order data.')
     if problems:
         raise SeedDataError("Invalid seed data:\n  - " + "\n  - ".join(problems))
 
@@ -216,6 +287,7 @@ def seed(db, data: dict, *, sample_orders: bool = True, env: dict | None = None,
 
     # Concerts, tiers and seats -------------------------------------------------------
     zone_ids: dict[tuple[int, str], int] = {}
+    affected_concerts: set[int] = set()
     for spec in data["concerts"]:
         starts_at = parse_ts(spec["startsAt"])
         result = db.execute(
@@ -235,6 +307,7 @@ def seed(db, data: dict, *, sample_orders: bool = True, env: dict | None = None,
             .on_conflict_do_nothing(index_elements=["id"])
         )
         created["concerts"] += result.rowcount
+        if result.rowcount: affected_concerts.add(spec["id"])
 
         for tier in spec["tiers"]:
             result = db.execute(
@@ -274,14 +347,16 @@ def seed(db, data: dict, *, sample_orders: bool = True, env: dict | None = None,
             if db.execute(select(Order.id).where(Order.order_number == spec["orderNumber"])).first():
                 continue  # already seeded (or the number is taken): never touch it again
             _create_order(db, spec, user_ids, zone_ids, admin_id, created)
+            if spec["status"] == "paid": affected_concerts.add(spec["concertId"])
         # Concerts whose last seat was sold by the samples become sold out, like checkout does.
         db.execute(
             text(
                 "UPDATE concerts c SET status = 'sold_out', updated_at = now() "
-                "WHERE c.status = 'on_sale' AND NOT EXISTS ("
+                "WHERE c.id = ANY(:affected) AND c.status = 'on_sale' AND NOT EXISTS ("
                 "  SELECT 1 FROM seats s JOIN zones z ON z.id = s.zone_id "
                 "  WHERE z.concert_id = c.id AND s.status <> 'sold')"
-            )
+            ),
+            {"affected": sorted(affected_concerts)},
         )
     db.flush()
     return {name: n for name, n in created.items() if n}

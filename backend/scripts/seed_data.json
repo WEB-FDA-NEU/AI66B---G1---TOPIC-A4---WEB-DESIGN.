@@ -452,7 +452,8 @@
           "row": "A",
           "seat": 2
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10002,
@@ -473,7 +474,8 @@
           "seat": 8
         }
       ],
-      "checkedInAt": "2026-10-18T19:42:00+02:00"
+      "checkedInAt": "2026-10-18T19:42:00+02:00",
+      "scenario": "Paid and checked in; used tickets"
     },
     {
       "orderNumber": 10003,
@@ -490,7 +492,8 @@
           "row": "B",
           "seat": 4
         }
-      ]
+      ],
+      "scenario": "Full mock refund; tickets refunded and inventory free"
     },
     {
       "orderNumber": 10004,
@@ -510,7 +513,8 @@
           "row": "D",
           "seat": 12
         }
-      ]
+      ],
+      "scenario": "Awaiting payment; no tickets issued"
     },
     {
       "orderNumber": 10005,
@@ -535,7 +539,8 @@
           "row": "A",
           "seat": 7
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10006,
@@ -550,7 +555,8 @@
           "row": "E",
           "seat": 1
         }
-      ]
+      ],
+      "scenario": "Failed payment; no tickets issued"
     },
     {
       "orderNumber": 10007,
@@ -565,7 +571,8 @@
           "row": "A",
           "seat": 1
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10008,
@@ -580,7 +587,8 @@
           "row": "A",
           "seat": 10
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10009,
@@ -600,7 +608,8 @@
           "row": "F",
           "seat": 4
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10010,
@@ -615,7 +624,8 @@
           "row": "B",
           "seat": 9
         }
-      ]
+      ],
+      "scenario": "Cancelled before payment; no refund/tickets"
     },
     {
       "orderNumber": 10011,
@@ -635,7 +645,8 @@
           "row": "C",
           "seat": 2
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10012,
@@ -655,7 +666,8 @@
           "row": "B",
           "seat": 16
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10013,
@@ -670,7 +682,8 @@
           "row": "A",
           "seat": 3
         }
-      ]
+      ],
+      "scenario": "Paid order with valid tickets"
     },
     {
       "orderNumber": 10014,
@@ -692,7 +705,24 @@
           "row": "G",
           "seat": 2
         }
-      ]
+      ],
+      "scenario": "Full mock refund; tickets refunded and inventory free"
     }
-  ]
+  ],
+  "demoExpectations": {
+    "totalConcerts": 11,
+    "totalZones": 33,
+    "totalCapacity": 7200,
+    "totalOrders": 14,
+    "ticketsSold": 16,
+    "totalRevenue": 2510,
+    "orderScenarios": {
+      "paid": 9,
+      "refunded": 2,
+      "pending": 1,
+      "failed": 1,
+      "cancelled": 1
+    },
+    "note": "Expected on a fresh database only. upcomingConcerts/checkinsToday depend on database time; refunded is payment/refund state, while order.status is cancelled."
+  }
 }
