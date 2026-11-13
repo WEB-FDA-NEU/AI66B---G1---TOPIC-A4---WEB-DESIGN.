@@ -113,7 +113,7 @@
           class="btn btn-primary"
           onclick="openNewConcertForm()"
         >
-          <i class="fa-solid fa-plus"></i> Add/Edit New Concert
+          <i class="fa-solid fa-plus"></i>           Add Concert
         </button>
       </div>
 
@@ -132,12 +132,11 @@
           <div class="table-filters">
             <select class="form-input" id="concert-status-filter">
               <option value="all">All statuses</option>
-              <option value="Draft">Draft</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="On Sale">On Sale</option>
-              <option value="Sold Out">Sold Out</option>
-              <option value="Ended">Ended</option>
-              <option value="Cancelled">Cancelled</option>
+              <option value="draft">Draft</option>
+              <option value="on_sale">On Sale</option>
+              <option value="sold_out">Sold Out</option>
+              <option value="completed">Ended</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
         </div>
@@ -153,13 +152,11 @@
             </tr>
           </thead>
           <tbody id="concert-table-body">
-            <!-- rendered from MOCK_CONCERTS by js/admin/concerts.js -->
+            <tr><td colspan="6" class="text-muted">Loading concerts…</td></tr>
           </tbody>
         </table>
         <div class="table-pagination">
-          <span class="pagination-info" id="concert-count-caption"
-            >Showing 1–6 of 19 concerts</span
-          >
+          <span class="pagination-info" id="concert-count-caption"></span>
           <div class="pagination-controls" id="concert-pagination">
             <button
               class="page-btn"
@@ -168,7 +165,6 @@
             >
               <i class="fa-solid fa-angle-left"></i>
             </button>
-            <button class="page-btn active" data-page="1">1</button>
             <button
               class="page-btn"
               data-page-action="next"
@@ -192,12 +188,11 @@
             Add New Concert
           </div>
           <p class="form-card-subtitle">
-            This same form is used to edit an existing concert — clicking
-            <i class="fa-solid fa-pen" style="font-size: 11px"></i> on a row
-            loads its details here.
+            Changes are saved to the Concertly backend.
           </p>
         </div>
 
+        <p id="concert-form-feedback" class="checkin-feedback" role="alert" hidden></p>
         <form>
           <div class="form-grid">
             <div class="form-group">
@@ -233,23 +228,26 @@
             <div class="form-group">
               <label class="form-label" for="concert-status">Status</label>
               <select class="form-input" id="concert-status">
-                <option value="Draft">Draft</option>
-                <option value="Upcoming">Upcoming</option>
-                <option value="On Sale" selected>On Sale</option>
-                <option value="Sold Out">Sold Out</option>
-                <option value="Ended">Ended</option>
-                <option value="Cancelled">Cancelled</option>
+                <option value="draft">Draft</option>
+                <option value="on_sale" selected>On Sale</option>
+                <option value="sold_out">Sold Out</option>
+                <option value="completed">Ended</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
 
-            <div class="form-group form-span-2">
+            <div class="form-group">
               <label class="form-label" for="venue">Venue / Location</label>
               <input
                 class="form-input"
                 type="text"
                 id="venue"
-                placeholder="e.g. My Dinh National Stadium, Hanoi"
+                placeholder="e.g. My Dinh National Stadium"
               />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="concert-city">City</label>
+              <input class="form-input" type="text" id="concert-city" placeholder="e.g. Hanoi" />
             </div>
 
             <div class="form-group form-span-2">
@@ -259,10 +257,11 @@
                   <i class="fa-solid fa-image"></i>
                 </div>
                 <div class="cover-upload-info">
-                  <button type="button" class="btn btn-secondary">
+                  <button type="button" class="btn btn-secondary" id="concert-image-upload">
                     <i class="fa-solid fa-upload"></i> Upload image
                   </button>
-                  <p>Recommended size 1200×800px, JPG or PNG, up to 5MB.</p>
+                  <input type="file" id="concert-image-file" accept="image/jpeg,image/png,image/webp" hidden />
+                  <p>Recommended size 1200×800px. JPG, PNG or WebP, up to 5 MB.</p>
                 </div>
               </div>
             </div>
@@ -279,53 +278,7 @@
 
           <div class="form-section-title">Ticket types</div>
 
-          <div id="ticket-type-list">
-            <div class="ticket-type-row">
-              <div class="form-group">
-                <label class="form-label">Type name</label>
-                <input class="form-input" type="text" value="VIP" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Price (USD)</label>
-                <input class="form-input" type="number" value="350" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Quantity</label>
-                <input class="form-input" type="number" value="200" />
-              </div>
-              <button
-                type="button"
-                class="ticket-type-remove"
-                aria-label="Remove ticket type"
-                onclick="this.closest('.ticket-type-row').remove()"
-              >
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-
-            <div class="ticket-type-row">
-              <div class="form-group">
-                <label class="form-label">Type name</label>
-                <input class="form-input" type="text" value="Standard" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Price (USD)</label>
-                <input class="form-input" type="number" value="120" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Quantity</label>
-                <input class="form-input" type="number" value="1500" />
-              </div>
-              <button
-                type="button"
-                class="ticket-type-remove"
-                aria-label="Remove ticket type"
-                onclick="this.closest('.ticket-type-row').remove()"
-              >
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          </div>
+          <div id="ticket-type-list"></div>
 
           <button
             type="button"
@@ -339,7 +292,7 @@
             <button
               type="button"
               class="btn btn-secondary"
-              onclick="resetConcertForm()"
+              id="cancel-concert-form"
             >
               Cancel
             </button>
@@ -353,8 +306,8 @@
       <span>&copy; 2026 Concertly Admin &middot; v1.0</span>
     </footer>
 
-    <script src="../../js/mock-data.js"></script>
-    <script src="../../js/utils.js"></script>
+    <script src="../../js/api.js?v=admin-concert-crud-1"></script>
+    <script src="../../js/admin-common.js"></script>
     <script src="../../js/noti.js"></script>
     <script src="../../js/admin-account.js"></script>
     <script src="../../js/concerts.js"></script>

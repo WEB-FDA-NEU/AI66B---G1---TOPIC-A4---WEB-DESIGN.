@@ -1,5 +1,4 @@
-// 4 Featured artists displayed on Home page: Ariana (c1), Cortis (c11), Lisa (c5), Bruno Mars (c7)
-const HOME_ARTIST_IDS = ["c1", "c11", "c5", "c7"];
+const HOME_CONCERT_LIMIT = 4;
 
 // 1. Hero Carousel Controller with Sliding & Touch/Mouse Drag
 function initHeroCarousel() {
@@ -252,12 +251,14 @@ function createConcertCardHTML(show, isHome = false) {
   `;
 }
 
-// 3. Render Home page (4 featured artists)
+// 3. Render the next concerts on Home from the same API-backed catalogue as Explore.
 function renderHomePage() {
   const homeContainer = document.getElementById("concert-list") || document.getElementById("trending-grid");
   if (!homeContainer || typeof MOCK_CONCERTS === "undefined") return;
 
-  const homeConcerts = MOCK_CONCERTS.filter(c => HOME_ARTIST_IDS.includes(c.id));
+  const homeConcerts = [...MOCK_CONCERTS]
+    .sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`))
+    .slice(0, HOME_CONCERT_LIMIT);
   homeContainer.innerHTML = homeConcerts.map(show => createConcertCardHTML(show, true)).join("");
   initClickableConcertCards(homeContainer);
 }
@@ -293,7 +294,9 @@ function initClickableConcertCards(container) {
 
 // Global execution
 document.addEventListener("DOMContentLoaded", () => {
-  initHeroCarousel();
-  renderHomePage();
-  renderExplorePage();
+  window.concertlyCatalogReady.then(() => {
+    initHeroCarousel();
+    renderHomePage();
+    renderExplorePage();
+  });
 });

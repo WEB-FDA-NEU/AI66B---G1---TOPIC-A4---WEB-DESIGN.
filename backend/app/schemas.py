@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, StrictInt, StrictStr, field_validator
@@ -126,6 +126,88 @@ class AdminConcertStatsOut(BaseModel):
     ticketsSold: int
     checkedIn: int
     revenue: int
+
+
+class AdminConcertZoneInput(BaseModel):
+    id: Optional[int] = Field(default=None, ge=1)
+    name: str = Field(min_length=1, max_length=100)
+    price: int = Field(ge=0, le=999_999_999_999)
+    capacity: int = Field(ge=1, le=50_000)
+    color: Optional[str] = Field(default=None, max_length=20)
+
+    @field_validator("name")
+    @classmethod
+    def _trim_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Zone name cannot be blank.")
+        return value
+
+
+class AdminConcertInput(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    artist: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=10_000)
+    venue: str = Field(min_length=1, max_length=255)
+    city: str = Field(min_length=1, max_length=100)
+    poster_url: Optional[str] = Field(default=None, max_length=2048)
+    starts_at: datetime
+    status: Literal["draft", "on_sale", "sold_out", "cancelled", "completed"]
+    zones: list[AdminConcertZoneInput] = Field(min_length=1, max_length=50)
+
+    @field_validator("title", "artist", "venue", "city")
+    @classmethod
+    def _trim_required_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("This field cannot be blank.")
+        return value
+
+    @field_validator("starts_at")
+    @classmethod
+    def _require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("Concert start time must include a timezone.")
+        return value
+
+    @field_validator("zones")
+    @classmethod
+    def _unique_zone_names(cls, value: list[AdminConcertZoneInput]) -> list[AdminConcertZoneInput]:
+        names = [zone.name.casefold() for zone in value]
+        if len(names) != len(set(names)):
+            raise ValueError("Ticket type names must be unique.")
+        ids = [zone.id for zone in value if zone.id is not None]
+        if len(ids) != len(set(ids)):
+            raise ValueError("A ticket type can only be included once.")
+        if sum(zone.capacity for zone in value) > 20_000:
+            raise ValueError("Total concert capacity cannot exceed 20,000 seats.")
+        return value
+
+
+class AdminConcertZoneOut(BaseModel):
+    id: int
+    name: str
+    price: int
+    capacity: int
+    color: Optional[str] = None
+
+
+class AdminConcertOut(BaseModel):
+    id: int
+    title: str
+    artist: str
+    description: Optional[str] = None
+    venue: str
+    city: str
+    poster_url: Optional[str] = None
+    starts_at: datetime
+    status: str
+    zones: list[AdminConcertZoneOut]
+
+
+class PublicConcertCatalogOut(BaseModel):
+    items: list[AdminConcertOut]
+    managed_ids: list[int]
 
 
 class CustomerOut(BaseModel):
