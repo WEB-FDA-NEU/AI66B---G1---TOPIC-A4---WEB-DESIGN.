@@ -116,3 +116,50 @@ def test_database_invariant_sold_seat_always_has_exactly_one_active_ticket(db, u
         "(SELECT 1 FROM tickets t WHERE t.seat_id=s.id AND t.status IN ('valid','used'))"
     )
     assert bad == 0
+
+
+@pytest.mark.parametrize('concert_status,hours,seconds,allowed', [
+    ('on_sale',24,1,True), ('on_sale',24,0,False), ('on_sale',23,59,False),
+    ('cancelled',24,1,True), ('cancelled',24,0,True),
+    ('cancelled',1,0,True), ('cancelled',-1,0,True),
+])
+def test_cancel_hint_matches_api_cutoff_and_cancelled_concert(db, users, concert, seat_ids, monkeypatch, concert_status, hours, seconds, allowed):
+    from datetime import datetime, timedelta, timezone
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.models import Concert
+    order=paid_order(db, users, concert, seat_ids, 'a', (0,))
+    now=datetime.now(timezone.utc)
+    event=db.get(Concert,concert)
+    event.status=concert_status
+    event.starts_at=now+timedelta(hours=hours,seconds=seconds)
+    db.commit()
+    monkeypatch.setattr(orders_svc,'db_now',lambda session:now)
+    with TestClient(app) as client:
+        headers={'X-User-Id':str(users['a'])}
+        read=client.get(f'/api/orders/{order["id"]}',headers=headers)
+        assert read.status_code==200 and read.json()['can_cancel'] is allowed
+        # An administrative exception to the cutoff never grants another buyer access.
+        assert client.post(f'/api/orders/{order["id"]}/cancel',headers={'X-User-Id':str(users['b'])}).status_code==404
+        result=client.post(f'/api/orders/{order["id"]}/cancel',headers=headers)
+        if allowed:
+            assert result.status_code==200
+            assert result.json()['refund_status']=='refunded' and result.json()['can_cancel'] is False
+            assert result.json()['refund_amount']==order['total_amount']
+            assert seat_status(seat_ids[0])=='available'
+        else:
+            assert result.status_code==409 and result.json()['error']['code']=='cancel_window_closed'
+
+
+def test_cancelled_concert_still_blocks_used_ticket_and_closed_orders(db, users, concert, seat_ids):
+    from app.models import Concert
+    order=paid_order(db, users, concert, seat_ids, 'a', (0,))
+    orders_svc.check_in_ticket(db,users['staff'],order['tickets'][0]['ticket_code'])
+    event=db.get(Concert,concert);event.status='cancelled';db.commit()
+    assert orders_svc.get_order(db,users['a'],order['id'])['can_cancel'] is False
+    with pytest.raises(DomainError) as error:
+        orders_svc.cancel_order(db,users['a'],order['id'])
+    assert error.value.code=='ticket_used'
+    for status in ['cancelled','failed']:
+        from types import SimpleNamespace
+        assert orders_svc.can_cancel(SimpleNamespace(status=status),event,[],None) is False

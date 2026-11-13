@@ -7,7 +7,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.config import PAYMENT_METHODS
+from app.config import PAYMENT_METHODS, MAX_SEATS_PER_RESERVATION
 from app.errors import bad_request, conflict
 from app.models import Concert, Order, Seat, Ticket, Zone
 from app.services import orders as order_service
@@ -57,6 +57,10 @@ def checkout(db: Session, user_id: int, reservation_id: UUID, payment_method: st
             reservation.updated_at = func.now()
             db.commit()
         raise
+
+    # Old paid orders remain idempotent above; active holds must obey the current cap.
+    if len(seats) > MAX_SEATS_PER_RESERVATION:
+        raise bad_request("too_many_seats", f"You can buy at most {MAX_SEATS_PER_RESERVATION} tickets at once.")
 
     seats_ok = (
         seats

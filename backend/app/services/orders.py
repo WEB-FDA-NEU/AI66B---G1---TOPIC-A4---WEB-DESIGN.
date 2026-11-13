@@ -93,12 +93,17 @@ def order_detail(db: Session, order: Order) -> dict:
     return data
 
 
+def cancellation_window_open(concert: Concert, now) -> bool:
+    """Cancelled concerts waive the cutoff; other concerts need more than 24 hours."""
+    return concert.status == "cancelled" or concert.starts_at - now > CANCEL_CUTOFF
+
+
 def can_cancel(order: Order, concert: Concert, tickets: list[dict], now) -> bool:
     if order.status not in ("pending", "paid"):
         return False
     if any(t["status"] == "used" for t in tickets):
         return False
-    return concert.starts_at - now > CANCEL_CUTOFF
+    return cancellation_window_open(concert, now)
 
 
 # ---------------------------------------------------------------------- queries
@@ -176,8 +181,9 @@ def qr_data_uri(payload: str) -> str:
 def cancel_order(db: Session, user_id: int, order_id: int, reason: str | None = None) -> dict:
     """Cancel an order and (if paid) run a mock full refund, freeing its seats.
 
-    Rules: the owner only; not already cancelled; no ticket checked in; and at least
-    ``CANCEL_CUTOFF`` before the concert starts. Lock order is seats -> order -> tickets
+    Rules: the owner only; not already cancelled; no ticket checked in; and
+    more than ``CANCEL_CUTOFF`` before the concert starts, unless it is cancelled.
+    Lock order is seats -> order -> tickets
     -> concert, the same as every other mutation.
     """
     owned = db.execute(select(Order.user_id).where(Order.id == order_id)).scalar_one_or_none()
@@ -213,8 +219,8 @@ def cancel_order(db: Session, user_id: int, order_id: int, reason: str | None = 
         .execution_options(populate_existing=True)
     ).scalar_one()
     now = db_now(db)
-    # A cancelled concert is always refundable; otherwise the cut-off applies.
-    if concert.status != "cancelled" and concert.starts_at - now <= CANCEL_CUTOFF:
+    # Cancelled concerts waive only the cutoff; ownership/status/usage were checked above.
+    if not cancellation_window_open(concert, now):
         raise conflict(
             "cancel_window_closed",
             "Orders can no longer be cancelled less than 24 hours before the concert.",

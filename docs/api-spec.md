@@ -2,6 +2,8 @@
 
 Issue: [#53](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/53). Nhánh soạn: `feature/trung-next`, nền code `629b5b4`. Ngày đối chiếu: 13/11/2026.
 
+Cập nhật theo yêu cầu task #54: giới hạn hiện hành là **6 vé**, thay cho 8 vé của bản nền; xem [Business Rules, BR-03](business-rules.md). Hold active cũ quá 6 vé bị chặn checkout mới; đơn đã thanh toán giữ tương thích.
+
 **Trạng thái: bản đối chiếu kỹ thuật với code/OpenAPI, CHỜ TV2/TV3 xác nhận trước khi chốt.** Không coi yêu cầu review liên thành viên là đã hoàn thành. Tài liệu này không triển khai thêm endpoint hoặc thay đổi backend.
 
 ## 1. Phạm vi, nguồn và quy ước
@@ -113,7 +115,7 @@ Body bắt buộc `application/json`: `HoldRequest`.
 - **Response thành công:** HTTP **201**, `application/json`, `ReservationOut`.
 - **Lỗi chính:** 400 `duplicate_seats`, `seat_not_found`, `seat_wrong_concert`, `zone_requires_quantity`, `zone_requires_seats`, `too_many_seats`; 404 `not_found`; 409 `seat_unavailable`, `standing_unavailable`, `concert_not_on_sale`, `sale_not_started`, `sale_ended`. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
-**Lưu ý hợp đồng:** Body mặc định `seat_ids=[]`, `standing=[]`; tổng `len(seat_ids)+sum(quantity)` phải từ 1 đến 8. Trùng zone Standing trả 422 ở validator; trùng seat ID trả 400. Ghế phải thuộc concert. Standing chỉ dùng zone/số lượng; Seated phải dùng seat ID. Tất cả thành công hoặc rollback. HTTP status thành công luôn 201; mỗi request tạo hold mới và hủy hold active trước đó của cùng người/concert, không phải idempotency key. TTL mặc định 300 giây (cấu hình `RESERVATION_TTL_SECONDS`).
+**Lưu ý hợp đồng:** Body mặc định `seat_ids=[]`, `standing=[]`; tổng `len(seat_ids)+sum(quantity)` phải từ 1 đến 6. Trùng zone Standing trả 422 ở validator; trùng seat ID trả 400. Ghế phải thuộc concert. Standing chỉ dùng zone/số lượng; Seated phải dùng seat ID. Tất cả thành công hoặc rollback. HTTP status thành công luôn 201; mỗi request tạo hold mới và hủy hold active trước đó của cùng người/concert, không phải idempotency key. TTL mặc định 300 giây (cấu hình `RESERVATION_TTL_SECONDS`).
 
 ### 06. `GET /api/reservations/{reservation_id}`
 
@@ -159,7 +161,7 @@ Không có request body.
 Body bắt buộc `application/json`: `CheckoutRequest`.
 
 - **Response thành công:** HTTP **201**, `application/json`, `OrderDetailOut`.
-- **Lỗi chính:** 400 `invalid_payment_method`; 404 `not_found`; 409 `seat_unavailable`, `reservation_converted`; 410 `reservation_expired`. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
+- **Lỗi chính:** 400 `invalid_payment_method`; 404 `not_found`; 409 `seat_unavailable`, `reservation_converted`; 410 `reservation_expired`; 400 `too_many_seats` nếu hold active cũ vượt giới hạn 6. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
 **Lưu ý hợp đồng:** `buyer` bắt buộc, trim ba trường. Name 2–150 ký tự; email ≤255 ký tự theo regex không có whitespace và có dấu chấm sau @; phone ≤30 ký tự, chỉ + ở đầu/chữ số/khoảng trắng/ngoặc/dấu -, gồm 8–15 chữ số. `payment_method`: card, ewallet, bank_transfer (schema khai báo string, giá trị khác trả 400 ở service). Buyer được validate nhưng hiện KHÔNG lưu vào order/ticket và không cập nhật account; holder_name vẫn là tên account. Thanh toán mock, không gọi ngân hàng. Gọi lại hold đã converted và có order trả cùng order, vẫn HTTP 201; request lặp vẫn phải qua auth/body validation.
 
@@ -227,7 +229,7 @@ Body tùy chọn `application/json`: `CancelRequest` hoặc null.
 - **Response thành công:** HTTP **200**, `application/json`, `OrderDetailOut`.
 - **Lỗi chính:** 404 `not_found`; 409 `already_cancelled`, `order_not_cancellable`, `ticket_used`, `cancel_window_closed`. Áp dụng thêm lỗi chung ở mục 2 khi phù hợp.
 
-**Lưu ý hợp đồng:** Body có thể bỏ hoặc null; reason tùy chọn/null, tối đa 500 ký tự. Chỉ pending/paid, chưa có vé used. Thông thường phải còn HƠN 24 giờ tới concert (bằng 24 giờ cũng bị chặn). Concert cancelled được bỏ qua cut-off nhưng vẫn áp dụng các điều kiện khác. Đơn paid chuyển payment_status/refund_status sang refunded, order.status=cancelled, ticket.status=refunded; đơn chưa paid thì vé cancelled. `can_cancel` là gợi ý từ phép tính đọc hiện tại, chưa xét ngoại lệ concert cancelled; endpoint cancel mới là quyết định cuối.
+**Lưu ý hợp đồng:** Body có thể bỏ hoặc null; reason tùy chọn/null, tối đa 500 ký tự. Chỉ pending/paid, chưa có vé used. Thông thường phải còn HƠN 24 giờ tới concert (bằng 24 giờ cũng bị chặn). Concert cancelled được bỏ qua cut-off nhưng vẫn áp dụng các điều kiện khác. Đơn paid chuyển payment_status/refund_status sang refunded, order.status=cancelled, ticket.status=refunded; đơn chưa paid thì vé cancelled. `can_cancel` dùng cùng quy tắc cửa sổ hủy với cancel API, có xét ngoại lệ concert cancelled và vẫn chặn đơn không pending/paid hoặc có vé used. Đây là gợi ý nghiệp vụ, không cấp quyền hủy hộ; endpoint cancel kiểm tra chủ đơn và xác minh lại dưới khóa.
 
 ### 13. `GET /api/tickets`
 
@@ -695,8 +697,8 @@ Các bảng sau lấy tên trường/kiểu/required/default trực tiếp từ 
 | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- |
 | `concert_id` | integer | Có | — |
-| `seat_ids` | array<integer> | Không | maxItems=8 |
-| `standing` | array<`StandingSelection`> | Không | maxItems=8 |
+| `seat_ids` | array<integer> | Không | maxItems=6 |
+| `standing` | array<`StandingSelection`> | Không | maxItems=6 |
 
 ### OrderDetailOut
 
@@ -777,7 +779,7 @@ Các bảng sau lấy tên trường/kiểu/required/default trực tiếp từ 
 | Trường | Kiểu | Bắt buộc | Giới hạn / mặc định |
 | --- | --- | --- | --- |
 | `zone_id` | integer | Có | minimum=1.0 |
-| `quantity` | integer | Có | minimum=1.0; maximum=8.0 |
+| `quantity` | integer | Có | minimum=1.0; maximum=6.0 |
 
 ### TicketDetailOut
 
@@ -976,7 +978,7 @@ Sau tích hợp #81, public concert list/detail và admin concert CRUD/upload đ
 
 | Hạng mục đối chiếu | Người/nhóm cần xác nhận | Trạng thái |
 | --- | --- | --- |
-| Seat map, reservation, TTL/8 vé, checkout/buyer, order/ticket và check-in | TV2 (theo phân công hiện có; xác nhận lại đầu mối) | Chờ xác nhận |
+| Seat map, reservation, TTL/6 vé, checkout/buyer, order/ticket và check-in | TV2 (theo phân công hiện có; xác nhận lại đầu mối) | Chờ xác nhận |
 | Auth, endpoint concert/chưa tích hợp và scope khoảng 23 endpoint | TV3 (theo phân công hiện có; xác nhận lại đầu mối) | Chờ xác nhận |
 | Hai hợp đồng check-in khác nhau và quyền admin/staff | TV2/TV3 và bên tích hợp Admin | Chờ thống nhất |
 | Bổ sung schema lỗi thực tế/seat map vào Swagger | Chủ backend TV2/TV3 | Chờ quyết định; task docs không tự sửa backend |
