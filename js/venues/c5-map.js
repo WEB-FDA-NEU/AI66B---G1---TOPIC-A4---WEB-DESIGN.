@@ -82,6 +82,7 @@ sections:[
 id:"c5-vip",
 
 name:"LLOUD Ultimate VIP Meet & Greet",
+bookingType:"standing",
 
 labelText:"VIP MEET & GREET",
 
@@ -123,6 +124,7 @@ y:285
 id:"c5-center",
 
 name:"Tier 1 Center Seated",
+bookingType:"seated",
 
 labelText:"CENTER PREMIUM",
 
@@ -136,7 +138,7 @@ shape:"polygon",
 
 points:
 
-"320,400 880,400 930,620 270,620",
+"300,400 900,400 850,620 350,620",
 
 
 label:{
@@ -164,6 +166,7 @@ y:520
 id:"c5-left",
 
 name:"Rockstar Standing Zone",
+bookingType:"standing",
 
 labelText:"LEFT STANDING",
 
@@ -205,6 +208,7 @@ y:520
 id:"c5-right",
 
 name:"Rockstar Standing Zone",
+bookingType:"standing",
 
 labelText:"RIGHT STANDING",
 
@@ -246,6 +250,7 @@ y:520
 id:"c5-back",
 
 name:"Rockstar Standing Zone",
+bookingType:"standing",
 
 labelText:"BACK STANDING",
 

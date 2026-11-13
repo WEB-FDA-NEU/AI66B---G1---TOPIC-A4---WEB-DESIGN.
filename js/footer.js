@@ -24,11 +24,11 @@ function renderSiteFooter() {
     accountLinks = `
       <a href="${root}pages/me/tickets.html">My Tickets</a>
       <a href="${root}pages/me/orders.html">My Orders</a>
-      <a href="#" onclick="localStorage.removeItem('concertlyUser'); localStorage.removeItem('userRole'); window.location.reload(); event.preventDefault();">Log out</a>
+      <a href="#" onclick="localStorage.removeItem('concertlyUser'); localStorage.removeItem('userRole'); localStorage.removeItem('token'); localStorage.removeItem('concertlyUserId'); window.location.reload(); event.preventDefault();">Log out</a>
     `;
   } else if (activeUser) {
     accountLinks = `
-      <a href="#" onclick="localStorage.removeItem('concertlyUser'); localStorage.removeItem('userRole'); window.location.reload(); event.preventDefault();">Log out</a>
+      <a href="#" onclick="localStorage.removeItem('concertlyUser'); localStorage.removeItem('userRole'); localStorage.removeItem('token'); localStorage.removeItem('concertlyUserId'); window.location.reload(); event.preventDefault();">Log out</a>
     `;
   } else {
     accountLinks = `

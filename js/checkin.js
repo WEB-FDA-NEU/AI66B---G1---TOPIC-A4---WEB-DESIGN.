@@ -99,14 +99,14 @@ function renderAttendees() {
 
   tbody.innerHTML = filtered.slice(start, start + ATTENDEES_PER_PAGE).map(a => `
     <tr>
-      <td class="ticket-code" title="${adminEscape(a.ticket_code)}">${adminEscape(shortCode(a.ticket_code))}</td>
+      <td class="ticket-code" title="${adminEscape(a.ticket_code)}">${adminEscape(`${ConcertlyCodes.concert(selectedConcertId)} · ${shortCode(a.ticket_code)}`)}</td>
       <td>
         <div class="attendee-name">${adminEscape(a.customer.full_name)}</div>
         <div class="attendee-email">${adminEscape(a.customer.email)}</div>
       </td>
       <td>
         <div>${adminEscape(a.zone)}</div>
-        <div class="attendee-email">Row ${adminEscape(a.row)} · Seat ${a.seat_number}</div>
+        <div class="attendee-email">${a.booking_type === "standing" ? "Standing · no assigned seat" : `Row ${adminEscape(a.row)} · Seat ${a.seat_number}`}</div>
       </td>
       <td><span class="badge ${a.checked_in ? "badge-green" : "badge-gray"}">${a.checked_in ? "Checked in" : "Not checked in"}</span></td>
       <td>
@@ -176,7 +176,7 @@ async function checkIn(ticketRef, button) {
   try {
     const result = await ConcertlyAPI.adminCheckIn(ticketRef, concert.id);
     showCheckinFeedback(
-      `${result.customer.full_name} checked in — ${result.zone}, Row ${result.row}, Seat ${result.seat_number}.`,
+      `${result.customer.full_name} checked in — ${result.zone}${result.booking_type === "standing" ? " (Standing)" : `, Row ${result.row}, Seat ${result.seat_number}`}.`,
       "success",
     );
     await loadAttendees();
@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("ticket-entry-form").addEventListener("submit", async event => {
     event.preventDefault();
     const input = document.getElementById("ticket-code-input");
-    const code = input.value.trim();
+    const code = input.value.trim().replace(/^C\d+\s*·\s*/, "");
     if (!code) return;
     const submit = event.target.querySelector("button[type=submit]");
     submit.disabled = true;

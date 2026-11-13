@@ -77,6 +77,7 @@ sections:[
 id:"vip",
 
 name:"ARMY Ultimate VIP Pass",
+bookingType:"standing",
 
 labelText:"ARMY VIP",
 
@@ -110,6 +111,7 @@ y:290
 id:"soundcheck",
 
 name:"Soundcheck Standing",
+bookingType:"standing",
 
 labelText:"SOUNDCHECK",
 
@@ -143,6 +145,7 @@ y:540
 id:"cat3-left",
 
 name:"CAT 3 Seating",
+bookingType:"seated",
 
 labelText:"CAT 3 LEFT",
 
@@ -176,6 +179,7 @@ y:540
 id:"cat3-right",
 
 name:"CAT 3 Seating",
+bookingType:"seated",
 
 labelText:"CAT 3 RIGHT",
 
@@ -209,6 +213,7 @@ y:540
 id:"upper-left",
 
 name:"CAT 3 Seating",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -242,6 +247,7 @@ y:830
 id:"upper-right",
 
 name:"CAT 3 Seating",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -275,6 +281,7 @@ y:830
 id:"back",
 
 name:"CAT 3 Seating",
+bookingType:"seated",
 
 labelText:"BACK STADIUM",
 

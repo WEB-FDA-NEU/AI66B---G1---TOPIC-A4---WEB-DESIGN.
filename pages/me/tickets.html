@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../../css/me.css" />
     <script src="../../js/api.js"></script>
     <script src="../../js/me.js"></script>
+    <script src="../../js/components.js"></script>
   </head>
   <body>
     <div class="shell">
@@ -160,7 +161,7 @@
         grid.innerHTML = list
           .map((t) => {
             const orderUrl = `order-detail.html?id=${encodeURIComponent(t.order_id)}`;
-            const order = `#CT-${t.order_number}`;
+            const order = `${ConcertlyCodes.order(t)}`;
             return `
     <article class="ticket-card">
       ${t.poster_url ? `<img class="ticket-card__poster" src="${escapeHtml(t.poster_url)}" alt="${escapeHtml(t.concert_title)}" loading="lazy">` : ""}
@@ -174,15 +175,15 @@
           <div>${icoCalendar} ${formatDateTime(t.starts_at)}</div>
           <div>${icoPin} ${escapeHtml(concertLocation(t))}</div>
           <div>${icoSeat} ${escapeHtml(seatLabel(t))}</div>
-          <div class="muted">Ticket ID: <span class="mono">${escapeHtml(t.ticket_code)}</span> · Order <a href="${orderUrl}" class="mono">${order}</a></div>
+          <div class="muted">Ticket ID: <span class="mono">${escapeHtml(ConcertlyCodes.ticket(t))}</span> · Order <a href="${orderUrl}" class="mono">${order}</a></div>
         </div>
       </div>
       <div class="ticket-card__stub">
         <div>
           <div class="ticket-card__type">${escapeHtml(t.zone)}</div>
-          <div class="ticket-card__seat"><span>Seat</span>${escapeHtml(seatCode(t))}</div>
+          <div class="ticket-card__seat"><span>${t.booking_type === "standing" ? "Admission" : "Seat"}</span>${escapeHtml(seatCode(t))}</div>
         </div>
-        <div class="ticket-card__id mono">${escapeHtml(t.ticket_code)}</div>
+        <div class="ticket-card__id mono">${escapeHtml(ConcertlyCodes.ticket(t))}</div>
         <div class="ticket-card__actions">
           <a class="text-link" href="ticket-detail.html?id=${encodeURIComponent(t.id)}">${t.qr_data ? "Open QR ticket" : "View ticket"}</a>
           <a class="text-link" href="${orderUrl}">View order</a>

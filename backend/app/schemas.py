@@ -1,20 +1,64 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, Field, StrictInt, StrictStr, field_validator, model_validator
+
+
+class StandingSelection(BaseModel):
+    zone_id: int = Field(ge=1)
+    quantity: StrictInt = Field(ge=1, le=8)
 
 
 class HoldRequest(BaseModel):
     concert_id: int
-    seat_ids: list[int] = Field(min_length=1, max_length=8)
+    seat_ids: list[int] = Field(default_factory=list, max_length=8)
+    standing: list[StandingSelection] = Field(default_factory=list, max_length=8)
+
+    @model_validator(mode="after")
+    def total_tickets(self):
+        count = len(self.seat_ids) + sum(s.quantity for s in self.standing)
+        if not 1 <= count <= 8:
+            raise ValueError("Select 1–8 tickets in total.")
+        if len({s.zone_id for s in self.standing}) != len(self.standing):
+            raise ValueError("Standing zones must not be repeated.")
+        return self
+
+
+class BuyerInformation(BaseModel):
+    """Validate checkout contact input without changing stored account/order data."""
+    full_name: str = Field(min_length=2, max_length=150)
+    email: str = Field(max_length=255)
+    phone: str = Field(max_length=30)
+
+    @field_validator("full_name", "email", "phone", mode="before")
+    @classmethod
+    def strip_contact(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value):
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+            raise ValueError("Enter a valid email address.")
+        return value
+
+    @field_validator("phone")
+    @classmethod
+    def valid_phone(cls, value):
+        if not re.fullmatch(r"\+?[0-9 ()-]+", value) or not 8 <= len(re.sub(r"\D", "", value)) <= 15:
+            raise ValueError("Phone numbers must contain 8–15 digits.")
+        return value
 
 
 class CheckoutRequest(BaseModel):
     reservation_id: UUID
     payment_method: str
+    # Required at the HTTP boundary; this does not change stored account/order data.
+    buyer: BuyerInformation
 
 
 class CancelRequest(BaseModel):
@@ -30,9 +74,10 @@ class SeatOut(BaseModel):
     id: int
     zone_id: int
     zone_name: str
-    row_label: str
-    seat_number: int
+    row_label: Optional[str]
+    seat_number: Optional[int]
     price: int
+    booking_type: str = "seated"
 
 
 class ReservationOut(BaseModel):
@@ -58,8 +103,9 @@ class TicketOut(BaseModel):
     starts_at: datetime
     poster_url: Optional[str] = None
     zone: str
-    row: str
-    seat_number: int
+    row: Optional[str]
+    seat_number: Optional[int]
+    booking_type: str = "seated"
     price: int
     status: str
     checked_in_at: Optional[datetime] = None
@@ -129,6 +175,8 @@ class AdminConcertStatsOut(BaseModel):
 
 
 class AdminConcertZoneInput(BaseModel):
+    # Omitted/null preserves existing type on edit; new zones default to seated.
+    booking_type: Optional[Literal["seated", "standing"]] = None
     id: Optional[int] = Field(default=None, ge=1)
     name: str = Field(min_length=1, max_length=100)
     price: int = Field(ge=0, le=999_999_999_999)
@@ -185,6 +233,7 @@ class AdminConcertInput(BaseModel):
 
 
 class AdminConcertZoneOut(BaseModel):
+    booking_type: Literal["seated", "standing"]
     id: int
     name: str
     price: int
@@ -260,8 +309,9 @@ class AttendeeOut(BaseModel):
     checked_in: bool
     checked_in_at: Optional[datetime] = None
     zone: str
-    row: str
-    seat_number: int
+    row: Optional[str]
+    seat_number: Optional[int]
+    booking_type: str = "seated"
     price: int
     order_id: int
     order_number: int

@@ -200,14 +200,14 @@ async function renderRecentOrders() {
   tbody.innerHTML = page.items.map(order => {
     const [label, cls] = ORDER_STATUS_BADGE[orderStatusKey(order)] || [order.status, "badge-gray"];
     return `
-    <tr>
-      <td><button type="button" class="order-detail-trigger" data-order-id="${order.id}">#CT-${adminEscape(order.order_number)}</button></td>
-      <td>${adminEscape(order.customer.full_name)}<div class="text-muted">${adminEscape(order.customer.email)}</div></td>
-      <td>${adminEscape(order.concert_title)}</td>
-      <td>${adminMoney(order.total_amount, 2)}</td>
-      <td class="text-muted">${adminDate(order.created_at)}</td>
-      <td><span class="badge ${cls}">${adminEscape(label)}</span></td>
-    </tr>`;
+   <tr>
+    <td><button type="button" class="order-detail-trigger" data-order-id="${order.id}">${adminEscape(ConcertlyCodes.order(order))}</button></td>
+    <td>${adminEscape(order.customer.full_name)}<div class="text-muted">${adminEscape(order.customer.email)}</div></td>
+    <td>${adminEscape(order.concert_title)}</td>
+    <td>${adminMoney(order.total_amount, 2)}</td>
+    <td class="text-muted">${adminDate(order.created_at)}</td>
+    <td><span class="badge ${cls}">${adminEscape(label)}</span></td>
+  </tr>`;
   }).join("") || errorRow("No orders yet.", 6);
 
   const first = page.total ? (page.page - 1) * page.page_size + 1 : 0;

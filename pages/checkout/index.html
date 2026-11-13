@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <script src="../../js/theme-init.js"></script>
     <title>Checkout | Concertly</title>
 
     <link rel="stylesheet" href="../../css/reset.css" />
@@ -13,6 +14,9 @@
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/checkout.css" />
     <link rel="stylesheet" href="../../css/seats.css" />
+    <script src="../../js/components.js"></script>
+    <link rel="stylesheet" href="../../css/responsive.css" />
+    <link rel="stylesheet" href="../../css/theme.css" />
   </head>
 
   <body>
@@ -22,6 +26,7 @@
       <div class="container checkout-container">
         <h1>Checkout</h1>
 
+        <form id="checkout-form" class="checkout-form">
         <div class="checkout-layout">
           <!-- LEFT -->
 
@@ -34,11 +39,15 @@
           <section class="checkout-card">
             <h2>Buyer Information</h2>
 
-            <input type="text" placeholder="Full Name" />
+            <label for="buyer-name">Full name</label>
+            <input id="buyer-name" name="full_name" type="text" autocomplete="name" minlength="2" maxlength="150" required />
 
-            <input type="email" placeholder="Email" />
+            <label for="buyer-email">Email</label>
+            <input id="buyer-email" name="email" type="email" autocomplete="email" maxlength="255" required />
 
-            <input type="tel" placeholder="Phone Number" />
+            <label for="buyer-phone">Phone number</label>
+            <input id="buyer-phone" name="phone" type="tel" autocomplete="tel" maxlength="30" required aria-describedby="phone-hint" />
+            <p id="phone-hint">8–15 digits; spaces, brackets and a leading + are allowed.</p>
           </section>
         </div>
 
@@ -47,9 +56,15 @@
         <section class="checkout-card payment-card">
           <h2>Payment</h2>
 
+          <p id="mock-checkout-notice" class="checkout-notice" hidden>Demo checkout only. No real seats or admission tickets will be issued.</p>
+          <p id="checkout-timer" class="checkout-timer" role="timer">Checking reservation…</p>
+          <p id="checkout-feedback" role="alert" hidden></p>
+          <button id="retry-reservation" type="button" class="btn btn-secondary" hidden>Retry reservation</button>
           <div id="payment-summary"></div>
 
-          <select>
+          <label for="payment-method">Payment method (simulated)</label>
+          <select id="payment-method" name="payment_method" required>
+            <option value="">Select a payment method</option>
             <option value="card">Credit Card</option>
 
             <option value="ewallet">PayPal</option>
@@ -57,10 +72,12 @@
             <option value="bank_transfer">Bank Transfer</option>
           </select>
 
-          <button id="confirm-payment" class="btn btn-primary">
+          <button id="confirm-payment" type="submit" class="btn btn-primary" disabled>
             Confirm Payment
           </button>
         </section>
+        </form>
+        <section id="checkout-result" class="checkout-card" tabindex="-1" hidden></section>
       </div>
     </main>
 
@@ -73,5 +90,6 @@
     <script src="../../js/purchases.js"></script>
     <script src="../../js/api.js"></script>
     <script src="../../js/checkout.js"></script>
+  <script src="../../js/theme.js"></script>
   </body>
 </html>

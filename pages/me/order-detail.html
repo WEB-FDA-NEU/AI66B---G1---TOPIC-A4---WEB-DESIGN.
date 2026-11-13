@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../../css/me.css" />
     <script src="../../js/api.js"></script>
     <script src="../../js/me.js"></script>
+    <script src="../../js/components.js"></script>
   </head>
   <body>
     <div class="shell">
@@ -152,7 +153,7 @@
               <div class="line-ticket__icon">${icoTicket}</div>
               <div>
                 <div class="line-ticket__seat">${escapeHtml(seatLabel(t))}</div>
-                <div class="line-ticket__type">${escapeHtml(t.zone)} · <span class="mono">${escapeHtml(t.ticket_code)}</span> · ${statusBadge(TICKET_STATUS_MAP, t.status)}</div>
+                <div class="line-ticket__type">${escapeHtml(t.zone)} · <span class="mono">${escapeHtml(ConcertlyCodes.ticket(t))}</span> · ${statusBadge(TICKET_STATUS_MAP, t.status)}</div>
               </div>
             </div>
             <div class="line-ticket__price">${formatCurrency(t.price)}</div>

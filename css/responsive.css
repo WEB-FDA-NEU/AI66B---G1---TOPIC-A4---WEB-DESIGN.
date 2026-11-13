@@ -1,4 +1,38 @@
 /* Responsive enhancements for Concert Screens */
+/* HTML hidden must win over component display:flex/grid declarations. */
+[hidden] { display: none !important; }
+
+#site-navbar, #site-footer { width: 100%; }
+#site-navbar { position: sticky; top: 0; z-index: 100; }
+.map-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+.map-controls button { min-height: 44px; }
+#concert-map { display: block; min-height: 0; overflow: auto; max-height: 70vh; }
+#concert-map .venue-svg { width: calc(100% * var(--map-zoom, 1)); max-width: none; display: block; }
+.venue-section:focus-visible .seat-zone { stroke: var(--color-primary); stroke-width: 6px; }
+.ticket-layout { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+.ticket-left, .ticket-right, .ticket-card { min-width: 0; }
+.ticket-item { gap: 12px; overflow-wrap: anywhere; }
+.ticket-item > div { min-width: 0; }
+.ticket-item > strong { flex-shrink: 0; }
+.ticket-card { background: var(--color-bg-card); }
+.expired-page { min-height: 65vh; }
+.expired-card { max-width: 100%; background: var(--color-bg-card); }
+.auth-page { flex-direction: column; justify-content: flex-start; gap: 24px; }
+.auth-page .box { flex: 0 0 auto; width: min(400px, calc(100% - 32px)); margin: 24px auto; }
+.auth-page #site-footer { margin-top: auto; }
+.auth-page .input-group input { box-sizing: border-box; }
+@media (max-width: 900px) { .ticket-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .container { width: calc(100% - 32px); }
+  .ticket-card { padding: 18px; border-radius: 14px; }
+  .ticket-card h2 { font-size: 22px; }
+  .ticket-hero-content h1 { font-size: clamp(26px, 7vw, 36px); overflow-wrap: anywhere; }
+  .ticket-hero-content h2 { font-size: 22px; }
+  .expired-page { padding: 24px 16px; }
+  .expired-card { padding: 28px 18px; }
+  .expired-card h1 { font-size: 30px; }
+  .auth-page .box { padding: 24px; }
+}
 .mobile-nav-icon {
   display: none;
 }

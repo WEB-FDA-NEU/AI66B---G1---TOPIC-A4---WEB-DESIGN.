@@ -118,6 +118,13 @@ function ticketRowHTML(zone = null) {
         <label class="form-label">Quantity</label>
         <input class="form-input" type="number" min="1" max="20000" step="1" value="${zone ? zone.capacity : ""}" required>
       </div>
+      <div class="form-group">
+        <label class="form-label">Admission type</label>
+        <select class="form-input" aria-label="Admission type">
+          <option value="seated" ${zone?.booking_type !== "standing" ? "selected" : ""}>Seated</option>
+          <option value="standing" ${zone?.booking_type === "standing" ? "selected" : ""}>Standing</option>
+        </select>
+      </div>
       <button type="button" class="ticket-type-remove" aria-label="Remove ticket type"><i class="fa-solid fa-xmark"></i></button>
     </div>
   `;
@@ -191,6 +198,7 @@ function concertPayload() {
       price,
       capacity,
       color: row.dataset.zoneColor || null,
+      booking_type: row.querySelector("select").value,
     };
   });
   if (!zones.length) throw new Error("Add at least one ticket type.");

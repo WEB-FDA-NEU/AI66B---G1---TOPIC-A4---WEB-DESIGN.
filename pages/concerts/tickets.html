@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <script src="../../js/theme-init.js"></script>
     <title>Ticket Selection | Concertly</title>
 
     <link rel="stylesheet" href="../../css/reset.css" />
@@ -12,6 +13,9 @@
     <link rel="stylesheet" href="../../css/components.css" />
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/seats.css" />
+    <script src="../../js/components.js"></script>
+    <link rel="stylesheet" href="../../css/responsive.css" />
+    <link rel="stylesheet" href="../../css/theme.css" />
   </head>
 
   <body>
@@ -60,22 +64,36 @@
 
               <p>Select your preferred seating area</p>
 
-              <div id="concert-map">
+              <div class="map-controls" role="group" aria-label="Venue map zoom">
+                <button type="button" class="btn btn-secondary" data-map-zoom="0.5" aria-label="Zoom in">+</button>
+                <button type="button" class="btn btn-secondary" data-map-zoom="-0.5" aria-label="Zoom out">−</button>
+                <button type="button" class="btn btn-secondary" data-map-zoom="reset">Reset zoom</button>
+              </div>
+              <div id="concert-map" tabindex="0" role="region" aria-label="Venue map; scroll to pan when zoomed">
                 <!-- MAP SVG RENDER HERE -->
               </div>
+              <button type="button" id="retry-venue-map" class="btn btn-secondary" hidden>Retry venue map</button>
             </section>
 
             <!-- Seat picker: shown only when the booking API is reachable (js/tickets.js) -->
             <section class="ticket-card" id="seat-card" hidden>
-              <h2>Choose Your Seats</h2>
+              <h2 id="seat-picker-title">Ticket availability</h2>
+              <div id="seat-picker-tools" class="map-controls" role="group" aria-label="Seat map zoom" hidden>
+                <button type="button" class="btn btn-secondary" data-seat-zoom="0.25" aria-label="Enlarge seats">+</button>
+                <button type="button" class="btn btn-secondary" data-seat-zoom="-0.25" aria-label="Reduce seats">−</button>
+                <button type="button" class="btn btn-secondary" data-seat-zoom="reset">Reset seats</button>
+              </div>
 
               <div id="seat-picker"></div>
 
-              <div class="seat-legend">
-                <span>◻ Available</span><span>◼ Selected</span><span>▨ Taken</span>
+              <div class="seat-legend" id="seat-legend">
+                <span class="legend-available">○ Available</span><span class="legend-selected">✓ Selected</span><span class="legend-held">◷ Held</span><span class="legend-sold">× Sold</span>
               </div>
 
               <p class="seat-message" id="seat-message" role="status"></p>
+              <div class="map-controls">
+                <button type="button" id="retry-seats" class="btn btn-secondary" hidden>Retry availability</button>
+              </div>
             </section>
 
             <!-- =====================
@@ -150,6 +168,8 @@
 
     <script src="../../js/tickets.js?v=public-catalog-1"></script>
     <script src="../../js/footer.js"></script>
+  <script src="../../js/navbar.js"></script>
+  <script src="../../js/theme.js"></script>
     <script src="../../js/admin-return.js?v=dashboard-return-1"></script>
   </body>
 </html>

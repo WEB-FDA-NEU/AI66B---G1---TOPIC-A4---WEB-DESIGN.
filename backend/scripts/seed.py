@@ -10,7 +10,9 @@ Data comes from ``scripts/seed_data.json`` (converted from ``js/mock-data.js``):
 * Concert ids equal the number in the frontend id (``"c3"`` -> 3) and are kept as-is.
 * Tier (zone) names match the section names in ``js/venues/<slug>-map.js`` exactly and
   the tier capacities of a concert add up to its ``ticketCapacity``.
-* Every tier gets ``capacity`` numbered seats (rows A, B, ... of ``SEATS_PER_ROW``).
+* Every tier gets ``capacity`` inventory rows (rows A, B, ... of ``SEATS_PER_ROW``).
+  Explicitly Seated tiers expose these labels to buyers; Standing tiers use the same
+  rows internally as quantity inventory without public seat assignments.
   Tiers marked ``soldOut`` in the mock data get their seats created as ``sold`` so the
   seat map shows them as unavailable; they have no tickets, so they are not counted as
   tickets sold or revenue.
@@ -47,6 +49,8 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
+
+from app.venue_catalog import booking_type as seed_booking_type
 
 DATA_FILE = Path(__file__).with_name("seed_data.json")
 SEATS_PER_ROW = 20
@@ -242,6 +246,7 @@ def seed(db, data: dict, *, sample_orders: bool = True, env: dict | None = None,
                     name=tier["name"],
                     price=tier["price"],
                     capacity=tier["capacity"],
+                    booking_type=seed_booking_type(spec["id"], tier["name"]),
                     color=tier.get("color"),
                 )
                 .on_conflict_do_nothing(constraint="uq_zones_concert_name")

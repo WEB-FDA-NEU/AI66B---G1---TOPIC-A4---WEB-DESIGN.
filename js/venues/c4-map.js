@@ -79,6 +79,7 @@ sections:[
 id:"vip",
 
 name:"OA VIP Soundcheck Package",
+bookingType:"standing",
 
 labelText:"VIP SOUNDCHECK",
 
@@ -112,6 +113,7 @@ y:290
 id:"floor",
 
 name:"General Floor Standing",
+bookingType:"standing",
 
 labelText:"FLOOR",
 
@@ -145,6 +147,7 @@ y:520
 id:"lower-left",
 
 name:"Lower Bowl Seated",
+bookingType:"seated",
 
 labelText:"LOWER LEFT",
 
@@ -178,6 +181,7 @@ y:520
 id:"lower-right",
 
 name:"Lower Bowl Seated",
+bookingType:"seated",
 
 labelText:"LOWER RIGHT",
 
@@ -211,6 +215,7 @@ y:520
 id:"upper-left",
 
 name:"Lower Bowl Seated",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -244,6 +249,7 @@ y:790
 id:"upper-right",
 
 name:"Lower Bowl Seated",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -277,6 +283,7 @@ y:790
 id:"back",
 
 name:"Lower Bowl Seated",
+bookingType:"seated",
 
 labelText:"BACK",
 

@@ -14,7 +14,7 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 The static frontend calls `http://localhost:8000/api` (override with `window.CONCERTLY_API_BASE`).
-If the API is not running, the ticket page falls back to the old zone + quantity mock flow.
+If the API cannot be reached, booking is disabled and a retry button is shown. New purchases never fall back to local mock orders. The old demo receipt reader remains only for saved legacy checkout sessions, clearly marked as demo and without admission QR codes.
 
 ## Authentication
 
@@ -34,12 +34,12 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 | Method & path | Purpose |
 | --- | --- |
 | `GET /concerts/{id}/seats` | Zones and seat availability (lapsed holds show as available) |
+| `POST /reservations` `{concert_id, seat_ids?, standing?: [{zone_id, quantity}]}` | Hold numbered seats and/or standing inventory for 5 min (all-or-nothing, max 8 combined) — **409 `seat_unavailable` / `standing_unavailable`** |
 | `GET /concerts` | Public concert catalogue for `on_sale` / `sold_out` shows plus IDs managed by the backend |
 | `GET /concerts/{id}` | Public details and ticket types for an on-sale / sold-out concert |
-| `POST /reservations` `{concert_id, seat_ids}` | Hold seats for 5 min (all-or-nothing, max 8) — **409 `seat_unavailable`** |
 | `GET /reservations/{id}` | Hold status and `seconds_left` |
 | `DELETE /reservations/{id}` | Release a hold |
-| `POST /checkout` `{reservation_id, payment_method}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
+| `POST /checkout` `{reservation_id, payment_method, buyer: {full_name, email, phone}}` | Mock payment → paid order + tickets. `payment_method`: `card`, `ewallet`, `bank_transfer`. Idempotent. **410 `reservation_expired`** |
 | `POST /auth/login`, `GET /auth/me` | Sign in (OAuth2 password form) / current user |
 | `GET /orders/me` (alias `/orders`), `GET /orders/{id}` | The caller's orders (someone else's order → 404) |
 | `POST /orders/{id}/cancel` | Cancel + mock full refund; frees seats. Allowed until 24 h before the show |
@@ -60,6 +60,8 @@ Role `staff`/`admin` is required for check-in; `admin` for everything under `/ap
 Dashboard rules (`app/services/admin.py`): revenue = `total_amount - refund_amount` of orders with
 `payment_status = 'paid'` (pending, failed and refunded orders count for nothing); tickets sold =
 tickets `valid` or `used`; upcoming = not started yet and `on_sale`/`sold_out`.
+
+Checkout requires valid buyer contact details, including a 2–150 character name, an email address, and a phone number with 8–15 digits. These fields are validated without overwriting the account or changing the database schema. Existing order IDs, ticket codes and QR payloads are preserved; concert prefixes are display labels only.
 
 Errors always look like `{"error": {"code", "message", ...}}`.
 
@@ -88,3 +90,46 @@ TEST_DATABASE_URL=postgresql+psycopg2://USER@localhost/concertly_test \
 
 `tests/test_concurrency.py` runs simultaneous bookings from many threads (same seat,
 overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
+
+## Standing and Seated (demo configuration)
+
+`app/venue_zones.json` explicitly classifies the 33 existing ticket tiers. The 11 SVG map files carry matching `bookingType` metadata. The polygon update adjusted only CENTER PREMIUM in c1/c5/c6 so it widens towards the stage; standing shapes and ticket prices are unchanged. See `../docs/standing-seated.md` for the complete concert/tier matrix.
+
+- Seated zones expose PostgreSQL seat IDs, rows, numbers and live availability. Reserve specific IDs via `seat_ids`.
+- Standing zones expose availability counts, never numbered seats. Reserve a zone and quantity via `standing`.
+- Both modes reuse the existing `seats` inventory rows, row locks, five-minute expiry, checkout, refund and QR lifecycle. Standing rows act as inventory units internally, not assigned seats. The zone booking_type column is persistent; existing installations require the explicit migration described below. Existing bookings/seat IDs are not rewritten.
+- HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 8 applies to the combined request.
+- `booking_type` is added to reservation items and tickets. Public standing `row`/`row_label`/`seat_number` are null. Existing IDs, stored row values, ticket codes and QR payloads are not rewritten.
+- New admin zones choose Standing/Seated explicitly. Renaming a zone never changes admission type. Clients omitting booking_type on edit preserve the stored type; new zones default to seated. Changing type is rejected with 409 booking_type_has_bookings when any ticket or occupied inventory exists.
+- Multiple SVG sections with the same ticket-tier name share that tier's inventory; the existing seats are allocated once across its SVG fragments for display. This configuration is not an assertion about the artists' real seating plans.
+
+For the current UI and executable QA commands, see [Current UI and QA](../docs/current-ui-qa.md). Historical UI reports describe earlier iterations.
+
+
+## PR #83 review: persistent admission type
+
+`zones.booking_type` is now the runtime source for reservation validation, seat map,
+tickets and check-in. `app/venue_zones.json` is used only when inserting demo seed
+zones. Admin concert zone input accepts optional `booking_type` (`seated`/`standing`);
+admin/public concert responses always include it. The admin ticket-type form has
+an Admission type selector. Omission/null on an existing zone preserves its value.
+
+For an **existing database**, deploy only after an operator applies
+`migrations/001_zone_booking_type.sql` using the database's approved connection.
+Do not re-run schema.sql as a migration or re-seed. The migration locks zones,
+adds the column, backfills the frozen legacy mapping for matching ID/name pairs,
+defaults other legacy zones to seated, and enforces allowed values. Re-running
+preserves non-null admin choices. It does not change seat/order/ticket IDs, QR or
+passwords. Back up the database and schedule the table lock appropriately before
+running it in a shared environment. A name already changed before migration has
+only the previous fallback seated contract; do not infer Standing from its name.
+
+This migration is **not auto-applied at application startup**, and the review work
+only executes it on a throwaway QA database. The running local database has not
+been migrated. Fresh databases get the column from schema.sql. New zones in seed
+get defaults from JSON; existing zones are not overwritten by a seed rerun.
+
+Presentation limit: the 11 existing SVG maps are unchanged. A newly created concert
+without a configured SVG can sell Standing from the category list, as verified in
+Chrome. Its Seated API inventory is valid, but detailed polygon selection still
+requires a venue map; this review does not invent a floor plan for new concerts.

@@ -77,6 +77,7 @@ sections:[
 id:"vip",
 
 name:"24K Magic VIP Experience",
+bookingType:"standing",
 
 labelText:"VIP EXPERIENCE",
 
@@ -110,6 +111,7 @@ y:280
 id:"center",
 
 name:"Gold Standing Pit",
+bookingType:"standing",
 
 labelText:"GOLD STANDING PIT",
 
@@ -143,6 +145,7 @@ y:530
 id:"left",
 
 name:"Silver Tribune",
+bookingType:"seated",
 
 labelText:"SILVER LEFT",
 
@@ -176,6 +179,7 @@ y:520
 id:"right",
 
 name:"Silver Tribune",
+bookingType:"seated",
 
 labelText:"SILVER RIGHT",
 
@@ -209,6 +213,7 @@ y:520
 id:"upper-left",
 
 name:"Silver Tribune",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -242,6 +247,7 @@ y:800
 id:"upper-right",
 
 name:"Silver Tribune",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -275,6 +281,7 @@ y:800
 id:"back",
 
 name:"Silver Tribune",
+bookingType:"seated",
 
 labelText:"BACK",
 

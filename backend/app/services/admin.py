@@ -138,6 +138,7 @@ def _concert_detail(db: Session, concert: Concert) -> dict:
                 "price": int(zone.price),
                 "capacity": zone.capacity,
                 "color": zone.color,
+                "booking_type": zone.booking_type,
             }
             for zone in db.execute(
                 select(Zone).where(Zone.concert_id == concert.id).order_by(Zone.id)
@@ -242,6 +243,7 @@ def create_concert(db: Session, body: AdminConcertInput) -> dict:
             price=item.price,
             capacity=item.capacity,
             color=item.color,
+            booking_type=item.booking_type or "seated",
         )
         db.add(zone)
         db.flush()
@@ -301,6 +303,7 @@ def update_concert(db: Session, concert_id: int, body: AdminConcertInput) -> dic
                 price=item.price,
                 capacity=item.capacity,
                 color=item.color,
+                booking_type=item.booking_type or "seated",
             )
             db.add(zone)
             db.flush()
@@ -309,6 +312,20 @@ def update_concert(db: Session, concert_id: int, body: AdminConcertInput) -> dic
                 for row, number in _seat_labels(item.capacity)
             )
         else:
+            if item.booking_type is not None and item.booking_type != zone.booking_type:
+                # Historical tickets must keep their admission contract, even after refund.
+                has_tickets = db.execute(
+                    select(Ticket.id).join(Seat, Seat.id == Ticket.seat_id)
+                    .where(Seat.zone_id == zone.id).limit(1)
+                ).first()
+                occupied = db.execute(
+                    select(Seat.id).where(Seat.zone_id == zone.id,
+                        (Seat.status != "available") | Seat.reservation_id.is_not(None))
+                    .with_for_update().limit(1)
+                ).first()
+                if has_tickets or occupied:
+                    raise conflict("booking_type_has_bookings", "Cannot change admission type while the zone has tickets or occupied inventory.")
+                zone.booking_type = item.booking_type
             zone.name = item.name
             zone.price = item.price
             zone.color = item.color

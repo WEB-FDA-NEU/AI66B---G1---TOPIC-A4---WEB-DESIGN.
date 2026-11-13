@@ -75,6 +75,7 @@ sections:[
 id:"vip",
 
 name:"Midnight VIP Pass",
+bookingType:"standing",
 
 labelText:"VIP PASS",
 
@@ -108,6 +109,7 @@ y:280
 id:"front-row",
 
 name:"Front Row Orchestra",
+bookingType:"seated",
 
 labelText:"FRONT ROW",
 
@@ -141,6 +143,7 @@ y:520
 id:"balcony-left",
 
 name:"Balcony Seated",
+bookingType:"seated",
 
 labelText:"BALCONY LEFT",
 
@@ -174,6 +177,7 @@ y:520
 id:"balcony-right",
 
 name:"Balcony Seated",
+bookingType:"seated",
 
 labelText:"BALCONY RIGHT",
 
@@ -207,6 +211,7 @@ y:520
 id:"upper-left",
 
 name:"Balcony Seated",
+bookingType:"seated",
 
 labelText:"UPPER LEFT",
 
@@ -240,6 +245,7 @@ y:800
 id:"upper-right",
 
 name:"Balcony Seated",
+bookingType:"seated",
 
 labelText:"UPPER RIGHT",
 
@@ -273,6 +279,7 @@ y:800
 id:"back",
 
 name:"Balcony Seated",
+bookingType:"seated",
 
 labelText:"BACK",
 

@@ -29,6 +29,7 @@ def _out(view: svc.ReservationView) -> ReservationOut:
                 "row_label": s.row_label,
                 "seat_number": s.seat_number,
                 "price": int(s.price),
+                "booking_type": s.booking_type,
             }
             for s in view.seats
         ],
@@ -37,7 +38,7 @@ def _out(view: svc.ReservationView) -> ReservationOut:
 
 @router.post("", response_model=ReservationOut, status_code=201)
 def create_reservation(body: HoldRequest, db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)):
-    return _out(svc.hold_seats(db, user.id, body.concert_id, body.seat_ids))
+    return _out(svc.hold_tickets(db, user.id, body.concert_id, body.seat_ids, [(s.zone_id, s.quantity) for s in body.standing]))
 
 
 @router.get("/{reservation_id}", response_model=ReservationOut)

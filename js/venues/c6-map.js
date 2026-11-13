@@ -77,6 +77,7 @@ sections:[
 id:"vip",
 
 name:"Karma Is My Boyfriend VIP",
+bookingType:"standing",
 
 labelText:"VIP EXPERIENCE",
 
@@ -110,6 +111,7 @@ y:280
 id:"center",
 
 name:"Lower Bowl Reserved",
+bookingType:"seated",
 
 labelText:"CENTER PREMIUM",
 
@@ -121,7 +123,7 @@ shape:"polygon",
 
 points:
 
-"350,390 850,390 900,680 300,680",
+"300,390 900,390 850,680 350,680",
 
 label:{
 
@@ -143,6 +145,7 @@ y:530
 id:"side-left",
 
 name:"Standard Floor GA",
+bookingType:"standing",
 
 labelText:"SIDE LEFT",
 
@@ -176,6 +179,7 @@ y:540
 id:"side-right",
 
 name:"Standard Floor GA",
+bookingType:"standing",
 
 labelText:"SIDE RIGHT",
 
@@ -209,6 +213,7 @@ y:540
 id:"upper-left",
 
 name:"Standard Floor GA",
+bookingType:"standing",
 
 labelText:"UPPER LEFT",
 
@@ -242,6 +247,7 @@ y:820
 id:"upper-right",
 
 name:"Standard Floor GA",
+bookingType:"standing",
 
 labelText:"UPPER RIGHT",
 
@@ -275,6 +281,7 @@ y:820
 id:"back",
 
 name:"Standard Floor GA",
+bookingType:"standing",
 
 labelText:"BACK STADIUM",
 
