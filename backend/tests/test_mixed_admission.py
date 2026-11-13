@@ -1,4 +1,4 @@
-"""Real PostgreSQL tests for mixed Standing/Seated admission without schema changes."""
+"""Real PostgreSQL tests for mixed Standing/Seated admission with persisted zone admission types."""
 from pathlib import Path
 import re
 
@@ -19,7 +19,7 @@ from tests.test_concurrency import race, wins, failures
 @pytest.fixture
 def mixed(db, concert):
     seated = Zone(concert_id=concert, name='Standard Tier 1', price=150, capacity=4)
-    standing = Zone(concert_id=concert, name='VIP Diamond Experience', price=350, capacity=3)
+    standing = Zone(concert_id=concert, name='VIP Diamond Experience', booking_type='standing', price=350, capacity=3)
     db.add_all([seated, standing]); db.flush()
     for zone, count in [(seated, 4), (standing, 3)]:
         db.add_all(Seat(zone_id=zone.id, row_label='A', seat_number=n) for n in range(1, count + 1))

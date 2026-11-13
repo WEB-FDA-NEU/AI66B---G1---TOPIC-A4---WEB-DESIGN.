@@ -7,7 +7,7 @@ phỏng, không giao dịch tiền thật. Các tính năng chưa có backend đ
 
 ## 1. Tài liệu và nguồn dữ liệu
 
-- [API Specification](api-spec.md): 22 cặp method/path, quyền, input, response và lỗi.
+- [API Specification](api-spec.md): 30 cặp method/path, quyền, input, response và lỗi.
 - [Business Rules](business-rules.md): giới hạn 6 vé, giữ chỗ và hủy/hoàn tiền.
 - [Dashboard Metrics](dashboard-metrics.md): công thức và kết quả đối chiếu số liệu QA.
 - [Seed Data](seed-data.md): dữ liệu demo; không tự seed lại database đang sử dụng.
@@ -15,8 +15,10 @@ phỏng, không giao dịch tiền thật. Các tính năng chưa có backend đ
 - [UI và QA hiện hành](current-ui-qa.md): ghi nhận kiểm thử trước đây, không thay thế
   source/OpenAPI hiện tại. Các báo cáo Seat Map khác là lịch sử triển khai.
 
-Home, Explore và thông tin giới thiệu concert chủ yếu lấy từ
-[js/mock-data.js](../js/mock-data.js). Hình venue/polygon nằm trong
+Sau tích hợp #81, Home/Explore/Detail lấy catalogue public từ API qua
+[js/public-catalog.js](../js/public-catalog.js), ghép với dữ liệu trình bày trong
+[js/mock-data.js](../js/mock-data.js). API lỗi có thể hiển thị preview local;
+preview không bảo đảm được mua vé. Hình venue/polygon nằm trong
 [js/venues](../js/venues). Tồn kho, reservation, order, ticket và quyền truy cập
 trong luồng API lấy từ PostgreSQL. Giá và trạng thái để đặt vé phải dựa trên API,
 không xem nội dung catalogue tĩnh là tồn kho trực tiếp.
@@ -153,14 +155,17 @@ Admin Dashboard, danh sách/chi tiết đơn và check-in đã gọi API. Các e
 staff/admin nhận ticket_code; `/api/admin/checkin` chỉ admin, nhận ticketId và
 concertId, kiểm tra đúng concert và chặn check-in trùng.
 
-**Quản lý concert/khu/giá trên UI chưa có API CRUD tương ứng.** Không xem màn hình
-Concert Management hoặc nút Save là bằng chứng đã lưu PostgreSQL. Catalogue public
-cũng chưa có API list/detail (chỉ có API seats). Dashboard “tickets remaining” còn
+**Quản lý concert/khu/giá đã có API CRUD từ #81**, có upload ảnh,
+public catalogue list/detail và form Admin lưu PostgreSQL. Admin chọn Standing/Seated
+tại mỗi hạng vé; đổi tên không đổi loại. Thiếu booking_type trên request sửa giữ
+loại cũ; khu mới mặc định Seated. Đổi loại khi có ticket hoặc inventory occupied
+trả 409 booking_type_has_bookings. Database cũ cần migration tường minh trước khi
+chạy code mới, xem [backend README](../backend/README.md). Dashboard “tickets remaining” còn
 hạn chế tính tồn kho, đã ghi nhận [#87](https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN./issues/87).
 
 ## 7. Trạng thái nghiệm thu Task #57
 
-- Tài liệu nêu rõ Register, concert CRUD và tự cấp ghế Seated chưa được triển khai;
+- Tài liệu nêu rõ Register và tự cấp ghế Seated chưa được triển khai; concert CRUD đã tích hợp;
   phân biệt backend mock payment với demo chỉ lưu local.
 - Method/path và các bảng model của API spec được đối chiếu với OpenAPI đang chạy
   và source; các chênh lệch Swagger/error handler được giữ trong API spec để developer xử lý.
@@ -168,3 +173,8 @@ hạn chế tính tồn kho, đã ghi nhận [#87](https://github.com/WEB-FDA-NE
   mật khẩu thật hoặc sửa database. Task này chỉ cập nhật hai file tài liệu.
 - Review TV2/TV3 của task API spec trước đó vẫn chưa có bằng chứng xác nhận;
   việc đối chiếu kỹ thuật này không thay thế phê duyệt liên thành viên.
+
+
+Cập nhật review #83 sau #81: dữ liệu loại vé nằm ở zones.booking_type; JSON chỉ
+khởi tạo seed. Các bằng chứng Task #57 ở trên giữ mốc lịch sử ban đầu, không
+khẳng định backend local đã được migrate hoặc đã triển khai bản code mới.

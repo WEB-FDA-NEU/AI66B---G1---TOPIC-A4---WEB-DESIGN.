@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS zones (
     capacity INTEGER NOT NULL,
     color VARCHAR(20),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    booking_type VARCHAR(10) NOT NULL DEFAULT 'seated',
+    CONSTRAINT ck_zones_booking_type CHECK (booking_type IN ('seated', 'standing')),
     CONSTRAINT ck_zones_price_nonnegative CHECK (price >= 0),
     CONSTRAINT ck_zones_capacity_positive CHECK (capacity > 0),
     CONSTRAINT uq_zones_concert_name UNIQUE (concert_id, name)
