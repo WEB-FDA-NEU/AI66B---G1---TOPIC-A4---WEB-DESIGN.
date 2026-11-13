@@ -97,10 +97,34 @@ overlapping seat sets, concurrent checkout / cancel / check-in / sweeper).
 
 - Seated zones expose PostgreSQL seat IDs, rows, numbers and live availability. Reserve specific IDs via `seat_ids`.
 - Standing zones expose availability counts, never numbered seats. Reserve a zone and quantity via `standing`.
-- Both modes reuse the existing `seats` inventory rows, row locks, five-minute expiry, checkout, refund and QR lifecycle. Standing rows act as inventory units internally, not assigned seats. No database schema changes or migration of existing bookings is required.
+- Both modes reuse the existing `seats` inventory rows, row locks, five-minute expiry, checkout, refund and QR lifecycle. Standing rows act as inventory units internally, not assigned seats. The zone booking_type column is persistent; existing installations require the explicit migration described below. Existing bookings/seat IDs are not rewritten.
 - HTTP reservation requests reject standing inventory IDs in `seat_ids`, and reject a seated zone in `standing`. The maximum of 8 applies to the combined request.
 - `booking_type` is added to reservation items and tickets. Public standing `row`/`row_label`/`seat_number` are null. Existing IDs, stored row values, ticket codes and QR payloads are not rewritten.
-- Unknown legacy zones retain their existing numbered-seat contract. Configure new zones explicitly before advertising them as Standing.
+- New admin zones choose Standing/Seated explicitly. Renaming a zone never changes admission type. Clients omitting booking_type on edit preserve the stored type; new zones default to seated. Changing type is rejected with 409 booking_type_has_bookings when any ticket or occupied inventory exists.
 - Multiple SVG sections with the same ticket-tier name share that tier's inventory; the existing seats are allocated once across its SVG fragments for display. This configuration is not an assertion about the artists' real seating plans.
 
 For the current UI and executable QA commands, see [Current UI and QA](../docs/current-ui-qa.md). Historical UI reports describe earlier iterations.
+
+
+## PR #83 review: persistent admission type
+
+`zones.booking_type` is now the runtime source for reservation validation, seat map,
+tickets and check-in. `app/venue_zones.json` is used only when inserting demo seed
+zones. Admin concert zone input accepts optional `booking_type` (`seated`/`standing`);
+admin/public concert responses always include it. The admin ticket-type form has
+an Admission type selector. Omission/null on an existing zone preserves its value.
+
+For an **existing database**, deploy only after an operator applies
+`migrations/001_zone_booking_type.sql` using the database's approved connection.
+Do not re-run schema.sql as a migration or re-seed. The migration locks zones,
+adds the column, backfills the frozen legacy mapping for matching ID/name pairs,
+defaults other legacy zones to seated, and enforces allowed values. Re-running
+preserves non-null admin choices. It does not change seat/order/ticket IDs, QR or
+passwords. Back up the database and schedule the table lock appropriately before
+running it in a shared environment. A name already changed before migration has
+only the previous fallback seated contract; do not infer Standing from its name.
+
+This migration is **not auto-applied at application startup**, and the review work
+only executes it on a throwaway QA database. The running local database has not
+been migrated. Fresh databases get the column from schema.sql. New zones in seed
+get defaults from JSON; existing zones are not overwritten by a seed rerun.

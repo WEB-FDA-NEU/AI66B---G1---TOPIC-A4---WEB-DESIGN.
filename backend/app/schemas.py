@@ -175,6 +175,8 @@ class AdminConcertStatsOut(BaseModel):
 
 
 class AdminConcertZoneInput(BaseModel):
+    # Omitted/null preserves existing type on edit; new zones default to seated.
+    booking_type: Optional[Literal["seated", "standing"]] = None
     id: Optional[int] = Field(default=None, ge=1)
     name: str = Field(min_length=1, max_length=100)
     price: int = Field(ge=0, le=999_999_999_999)
@@ -231,6 +233,7 @@ class AdminConcertInput(BaseModel):
 
 
 class AdminConcertZoneOut(BaseModel):
+    booking_type: Literal["seated", "standing"]
     id: int
     name: str
     price: int

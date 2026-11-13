@@ -1012,7 +1012,7 @@ textarea.form-input {
 /* Ticket type repeatable rows */
 .ticket-type-row {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr auto;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr auto;
     gap: var(--space-md);
     align-items: end;
     margin-bottom: var(--space-md);
