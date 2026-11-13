@@ -15,7 +15,7 @@ def test_dashboard_matches_read_only_snapshot(db):
     data = load_data()
     run_seed(db, data)
     # Execute the documented oracle itself, in a separate read-only snapshot.
-    queries = [q.strip() for q in SQL.read_text().split(';') if q.strip()]
+    queries = [q.strip() for q in SQL.read_text(encoding="utf-8").split(';') if q.strip()]
     with db.bind.connect() as conn:
         results = []
         for query in queries:
