@@ -6,7 +6,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from pathlib import Path
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import EXPIRY_SWEEP_INTERVAL
@@ -87,3 +88,15 @@ def health():
 
 for router in (auth.router, seats.router, reservations.router, orders.router, admin.router):
     app.include_router(router, prefix="/api")
+
+
+FRONTEND_DIR = Path(__file__).resolve().parents[2]
+for _folder in ("assets", "css", "js", "pages"):
+    _path = FRONTEND_DIR / _folder
+    if _path.exists():
+        app.mount(f"/{_folder}", StaticFiles(directory=_path), name=_folder)
+
+
+@app.get("/", include_in_schema=False)
+def root_index():
+    return FileResponse(FRONTEND_DIR / "index.html")
