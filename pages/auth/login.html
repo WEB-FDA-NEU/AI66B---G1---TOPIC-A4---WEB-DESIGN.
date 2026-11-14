@@ -49,6 +49,7 @@
         background: #222;
         color: #fff;
         outline: none;
+        box-sizing: border-box;
       }
       .input-group input:focus {
         border-color: #ff3399;
@@ -96,17 +97,17 @@
       <h2>Sign In</h2>
       <form onsubmit="handleLogin(event)">
         <div class="input-group">
-          <label for="username">Email</label>
+          <label for="username">Email or Phone Number</label>
           <input
-            type="email"
+            type="text"
             id="username"
             autocomplete="username"
-            placeholder="name@example.com"
+            placeholder="name@example.com or 0901234567"
             required
           />
         </div>
         <div class="input-group">
-          <label>Password</label>
+          <label for="password">Password</label>
           <input
             type="password"
             id="password"
@@ -160,8 +161,8 @@
       }
     </script>
     <script src="../../js/theme.js"></script>
-  <div id="site-footer" data-root="../../"></div>
-  <script src="../../js/navbar.js"></script>
-  <script src="../../js/footer.js"></script>
+    <div id="site-footer" data-root="../../"></div>
+    <script src="../../js/navbar.js"></script>
+    <script src="../../js/footer.js"></script>
   </body>
 </html>
