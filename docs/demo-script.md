@@ -8,9 +8,10 @@ docs/demo-script.md
 
 | Role | Person in charge | Responsibility |
 |---|---|---|
-| Main Presenter | [Member 1] | Introduction and system overview |
-| User Demo | [Member 2] | Login, browse concerts, select seats and book tickets |
-| Admin Demo | [Member 3] | Admin dashboard and booking management |
+| Main Presenter | [Member 1] | Introduction, system overview and conclusion |
+| User Demo (Part 1) | [Member 2] | User login, browse concerts and view concert details |
+| User Demo (Part 2) | [Member 5] | Select and hold seats, mock payment and display ticket QR code |
+| Admin Demo | [Member 3] | Admin dashboard, booking management and QR check-in |
 | Technical Support | [Member 4] | Prepare accounts, monitor deployment and handle technical issues |
 
 Replace the placeholders with actual team member names before the presentation.
@@ -22,9 +23,9 @@ Replace the placeholders with actual team member names before the presentation.
 | 00:00–01:00 | Member 1 | Introduce the project and its main purpose | Audience understands the system |
 | 01:00–02:00 | Member 2 | Open the deployed website and log in as a User | User account logs in successfully |
 | 02:00–03:00 | Member 2 | Browse the concert list and open concert details | Concert information is displayed |
-| 03:00–04:30 | Member 2 | Select an available seat and hold it | Seat is held successfully |
-| 04:30–05:30 | Member 2 | Show the countdown and complete mock payment | Booking is confirmed |
-| 05:30–06:30 | Member 2 | Open booking details and show the ticket QR code | Ticket information and QR code are displayed |
+| 03:00–04:30 | Member 5 | Select an available seat and hold it | Seat is held successfully |
+| 04:30–05:30 | Member 5 | Show the countdown and complete mock payment | Booking is confirmed |
+| 05:30–06:30 | Member 5 | Open booking details and show the ticket QR code | Ticket information and QR code are displayed |
 | 06:30–08:30 | Member 3 | Log in as Admin and show the dashboard and booking management | Admin functions are demonstrated |
 | 08:30–09:30 | Member 3 | Demonstrate ticket check-in using the QR code | Check-in result is displayed |
 | 09:30–10:00 | Member 1 | Summarize the main features and conclude | Demo is completed |
@@ -63,20 +64,7 @@ Prepare:
 
 Use pre-created data where possible. Do not depend on manually editing the production database during the presentation.
 
-## 4. Slide Preparation
-
-Prepare a short slide deck covering:
-
-1. Project introduction and objectives.
-2. Main system features.
-3. User booking workflow.
-4. Admin management workflow.
-5. System deployment and technologies.
-6. Conclusion.
-
-Keep slides short. Use the live deployed application to demonstrate actual functionality.
-
-## 5. Rehearsal Checklist
+## 4. Rehearsal Checklist
 
 Run the complete demo twice on the deployed application before presentation day.
 
@@ -103,7 +91,7 @@ Run the complete demo twice on the deployed application before presentation day.
 - [ ] Confirm that no manual database editing is needed.
 - [ ] Finish within 10 minutes.
 
-## 6. Before the Presentation
+## 5. Before the Presentation
 
 Approximately 5 minutes before the presentation:
 
@@ -112,10 +100,9 @@ Approximately 5 minutes before the presentation:
 - [ ] Check that the website loads correctly.
 - [ ] Check User and Admin login.
 - [ ] Keep the required browser tabs ready.
-- [ ] Prepare slides and the demo environment.
-- [ ] Ensure all team members know their presentation order.
+- [ ] Ensure all 5 team members know their presentation order and smooth handoff points.
 
-## 7. Backup Plan
+## 6. Backup Plan
 
 If a live function fails:
 
@@ -124,13 +111,13 @@ If a live function fails:
 - Do not manually modify production database records during the presentation.
 - The technical support member should investigate the issue without interrupting the main presenter.
 
-## 8. Acceptance Criteria
+## 7. Acceptance Criteria
 
-- [ ] A 10-minute demo script is available.
-- [ ] Each demo section has a clearly assigned presenter.
+- [ ] A 10-minute live web demo script is available (no slides needed).
+- [ ] Each demo section has a clearly assigned presenter across all 5 members.
 - [ ] User and Admin accounts are ready.
 - [ ] Concert, seat, booking and QR data are prepared.
-- [ ] Slides are ready.
 - [ ] The full demo succeeds twice consecutively on the deployed application.
 - [ ] Important functions do not depend on manual data changes during the presentation.
 - [ ] The deployed application is opened approximately 5 minutes before the demo.
+EOF
