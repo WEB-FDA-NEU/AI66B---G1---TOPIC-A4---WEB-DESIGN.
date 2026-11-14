@@ -523,3 +523,44 @@ def test_admin_concert_image_upload_stores_supported_image(client, db, admin, mo
     assert response.status_code == 200, response.text
     image_path = tmp_path / response.json()["url"].rsplit("/", 1)[1]
     assert image_path.read_bytes() == content
+
+
+
+def test_admin_update_zone_and_conflicts(client, db, admin, shop):
+    headers = bearer(db, admin)
+    created = client.post(
+        "/api/admin/concerts",
+        json=concert_payload(zones=[
+            {"name": "VIP", "price": 500, "capacity": 4},
+            {"name": "GA", "price": 200, "capacity": 4},
+        ]),
+        headers=headers,
+    ).json()
+    vip_id = created["zones"][0]["id"]
+
+    # 1. Update price and resize capacity up
+    res = client.put(f"/api/admin/zones/{vip_id}", json={"price": 600, "capacity": 6}, headers=headers)
+    assert res.status_code == 200, res.text
+    assert res.json()["price"] == 600 and res.json()["capacity"] == 6
+    assert scalar("SELECT count(*) FROM seats WHERE zone_id = :z", z=vip_id) == 6
+
+    # 2. Duplicate zone name within the same concert -> 409
+    dup = client.put(f"/api/admin/zones/{vip_id}", json={"name": " ga "}, headers=headers)
+    assert dup.status_code == 409
+    assert dup.json()["error"]["code"] == "duplicate_zone_name"
+
+    # 3. Occupy 3 seats: reducing capacity to 2 -> 409, changing booking_type -> 409
+    db.execute(text("UPDATE seats SET status = 'sold' WHERE zone_id = :z AND seat_number <= 3"), {"z": vip_id})
+    db.commit()
+    too_small = client.put(f"/api/admin/zones/{vip_id}", json={"capacity": 2}, headers=headers)
+    assert too_small.status_code == 409
+    assert too_small.json()["error"]["code"] == "capacity_below_occupied"
+
+    bad_type = client.put(f"/api/admin/zones/{vip_id}", json={"booking_type": "standing"}, headers=headers)
+    assert bad_type.status_code == 409
+    assert bad_type.json()["error"]["code"] == "booking_type_has_bookings"
+
+    # 4. DELETE concert with existing orders -> 409 concert_has_bookings
+    del_booked = client.delete(f"/api/admin/concerts/{shop['concert']}", headers=headers)
+    assert del_booked.status_code == 409
+    assert del_booked.json()["error"]["code"] == "concert_has_bookings"
