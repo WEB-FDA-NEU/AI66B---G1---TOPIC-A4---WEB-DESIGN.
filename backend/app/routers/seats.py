@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -13,8 +13,13 @@ router = APIRouter(tags=["seats"])
 
 
 @router.get("/concerts", response_model=PublicConcertCatalogOut)
-def list_concerts(db: Session = Depends(get_db)):
-    return catalog.list_concerts(db)
+def list_concerts(
+    search: Optional[str] = Query(default=None, max_length=100, description="Search by title, artist, venue, or city"),
+    status: Optional[str] = Query(default=None, pattern="^(on_sale|sold_out)$"),
+    sort: Optional[str] = Query(default=None, pattern="^(date|price-low|price-high)$"),
+    db: Session = Depends(get_db),
+):
+    return catalog.list_concerts(db, search=search, status=status, sort=sort)
 
 
 @router.get("/concerts/{concert_id}", response_model=AdminConcertOut)

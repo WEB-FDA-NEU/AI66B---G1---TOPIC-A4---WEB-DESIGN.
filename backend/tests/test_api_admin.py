@@ -414,6 +414,39 @@ def test_public_concert_catalog_reflects_admin_data(client, db, shop):
     assert client.get(f"/api/concerts/{draft_id}").status_code == 404
 
 
+def test_public_concert_catalog_search_filter_sort_and_validation(client, db, shop):
+    sold_out_id = next(
+        cid for cid in client.get("/api/concerts").json()["managed_ids"]
+        if db.get(Concert, cid).status == "sold_out"
+    )
+    z = Zone(concert_id=sold_out_id, name="Platinum", price=5000, capacity=2)
+    db.add(z)
+    db.commit()
+
+    # Search by title or artist
+    res_search = client.get("/api/concerts", params={"search": "Sold Out"}).json()["items"]
+    assert [c["id"] for c in res_search] == [sold_out_id]
+    assert client.get("/api/concerts", params={"search": "%"}).json()["items"] == []
+
+    # Filter by status
+    res_on_sale = client.get("/api/concerts", params={"status": "on_sale"}).json()["items"]
+    assert [c["id"] for c in res_on_sale] == [shop["concert"]]
+    res_sold_out = client.get("/api/concerts", params={"status": "sold_out"}).json()["items"]
+    assert [c["id"] for c in res_sold_out] == [sold_out_id]
+
+    # Sort by price-low (min zone price ascending) and price-high (max zone price descending)
+    low_ids = [c["id"] for c in client.get("/api/concerts", params={"sort": "price-low"}).json()["items"]]
+    high_ids = [c["id"] for c in client.get("/api/concerts", params={"sort": "price-high"}).json()["items"]]
+    assert low_ids == [shop["concert"], sold_out_id]
+    assert high_ids == [sold_out_id, shop["concert"]]
+
+    # Invalid status or sort returns 422 validation_error
+    for bad_params in ({"status": "draft"}, {"status": "invalid"}, {"sort": "popular"}):
+        bad = client.get("/api/concerts", params=bad_params)
+        assert bad.status_code == 422, bad_params
+        assert bad.json()["error"]["code"] == "validation_error"
+
+
 # ------------------------------------------------------------ concert management
 
 def concert_payload(**changes):
