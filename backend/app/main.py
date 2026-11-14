@@ -2,11 +2,12 @@ import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import EXPIRY_SWEEP_INTERVAL
@@ -16,6 +17,7 @@ from app.routers import admin, auth, orders, reservations, seats
 from app.services.reservations import expire_stale_holds
 
 log = logging.getLogger("concertly")
+FRONTEND_DIR = Path(__file__).resolve().parents[2]
 
 
 def _sweep_once() -> int:
@@ -43,7 +45,7 @@ async def lifespan(_: FastAPI):
         task.cancel()
 
 
-app = FastAPI(title="Concertly API", lifespan=lifespan)
+app = FastAPI(title="Concertly API", version="1.0.0", lifespan=lifespan)
 admin.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=admin.UPLOAD_DIR), name="uploads")
 
@@ -87,3 +89,14 @@ def health():
 
 for router in (auth.router, seats.router, reservations.router, orders.router, admin.router):
     app.include_router(router, prefix="/api")
+
+# Frontend: chỉ public đúng các thư mục này, đặt SAU tất cả route /api
+for folder in ("assets", "css", "js", "pages"):
+    folder_path = FRONTEND_DIR / folder
+    if folder_path.exists():
+        app.mount(f"/{folder}", StaticFiles(directory=folder_path), name=folder)
+
+
+@app.get("/", include_in_schema=False)
+def index():
+    return FileResponse(FRONTEND_DIR / "index.html")
