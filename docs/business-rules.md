@@ -226,3 +226,10 @@ Chưa có xác nhận TV2 trong issue tại thời điểm soạn. Tài liệu k
 - 17 test JavaScript và 5 test checkout/11 subtest đạt trong quá trình triển khai giới hạn 6 vé.
 - Không sửa HTML/CSS cho phần đồng bộ hủy; không reset hoặc thay đổi dữ liệu database ứng dụng. Các giao dịch kiểm thử dùng database QA riêng.
 - Phần triển khai/đối chiếu kỹ thuật của task đã hoàn tất; xác nhận TV2 là bước review bên ngoài, chưa được giả đánh dấu hoàn thành.
+
+
+## Account Registration & Password Policy (#47)
+
+- **Email uniqueness**: Emails are normalized to lowercase (`lower(email)`) and must be unique across all users (`409 email_taken` on duplicate or concurrent registration).
+- **Login identifier**: `POST /api/auth/login` authenticates by email address (case-insensitive) and password.
+- **Password complexity**: Both `pages/auth/register.html` and `POST /api/auth/register` require passwords to be 8–128 characters long and include at least one uppercase letter (`A-Z`), one digit (`0-9`), and one special character (`[^A-Za-z0-9]`).
