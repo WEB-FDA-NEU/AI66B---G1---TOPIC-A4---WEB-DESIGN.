@@ -15,6 +15,8 @@ from app.schemas import (
     AdminCheckInRequest,
     AdminConcertInput,
     AdminConcertOut,
+    AdminConcertZoneOut,
+    AdminZoneUpdateInput,
     AdminConcertStatsOut,
     AdminOrderDetailOut,
     AdminOrderPageOut,
@@ -87,6 +89,11 @@ def update_concert(concert_id: int, body: AdminConcertInput, db: Session = Depen
 @router.delete("/concerts/{concert_id}", status_code=204)
 def delete_concert(concert_id: int, db: Session = Depends(get_db)):
     svc.delete_concert(db, concert_id)
+
+
+@router.put("/zones/{zone_id}", response_model=AdminConcertZoneOut)
+def update_zone(zone_id: int, body: AdminZoneUpdateInput, db: Session = Depends(get_db)):
+    return svc.update_zone(db, zone_id, body)
 
 
 @router.get("/orders", response_model=AdminOrderPageOut)

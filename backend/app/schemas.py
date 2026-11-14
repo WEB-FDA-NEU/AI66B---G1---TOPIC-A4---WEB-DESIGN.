@@ -353,3 +353,21 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: AuthUserOut
+
+
+class AdminZoneUpdateInput(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    price: Optional[int] = Field(default=None, ge=0, le=999_999_999_999)
+    capacity: Optional[int] = Field(default=None, ge=1, le=20_000)
+    color: Optional[str] = Field(default=None, max_length=20)
+    booking_type: Optional[Literal["seated", "standing"]] = None
+
+    @field_validator("name")
+    @classmethod
+    def _trim_zone_name(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            raise ValueError("Zone name cannot be blank.")
+        return value

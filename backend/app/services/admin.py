@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import conflict, not_found
 from app.models import Concert, Order, Reservation, Seat, Ticket, User, Zone
-from app.schemas import AdminConcertInput
+from app.schemas import AdminConcertInput, AdminZoneUpdateInput
 from app.services.orders import order_detail, order_summary
 from app.services.txn import transactional
 from app.services.reservations import db_now
@@ -358,6 +358,70 @@ def update_concert(db: Session, concert_id: int, body: AdminConcertInput) -> dic
     _update_concert_fields(concert, body)
     db.flush()
     return _concert_detail(db, concert)
+
+
+@transactional
+def update_zone(db: Session, zone_id: int, body: AdminZoneUpdateInput) -> dict:
+    zone = db.execute(
+        select(Zone).where(Zone.id == zone_id).with_for_update()
+    ).scalar_one_or_none()
+    if zone is None:
+        raise not_found("Zone not found.")
+
+    if body.name is not None:
+        dup = db.execute(
+            select(Zone.id).where(
+                Zone.concert_id == zone.concert_id,
+                Zone.id != zone.id,
+                func.lower(Zone.name) == body.name.lower(),
+            ).limit(1)
+        ).first()
+        if dup is not None:
+            raise conflict("duplicate_zone_name", "Ticket type names must be unique.")
+        zone.name = body.name
+
+    if body.booking_type is not None and body.booking_type != zone.booking_type:
+        has_tickets = db.execute(
+            select(Ticket.id).join(Seat, Seat.id == Ticket.seat_id)
+            .where(Seat.zone_id == zone.id).limit(1)
+        ).first()
+        occupied = db.execute(
+            select(Seat.id).where(
+                Seat.zone_id == zone.id,
+                (Seat.status != "available") | Seat.reservation_id.is_not(None),
+            ).with_for_update().limit(1)
+        ).first()
+        if has_tickets or occupied:
+            raise conflict(
+                "booking_type_has_bookings",
+                "Cannot change admission type while the zone has tickets or occupied inventory.",
+            )
+        zone.booking_type = body.booking_type
+
+    if body.price is not None:
+        zone.price = body.price
+    if body.color is not None:
+        zone.color = body.color
+    if body.capacity is not None and body.capacity != zone.capacity:
+        other_cap = db.execute(
+            select(func.coalesce(func.sum(Zone.capacity), 0)).where(
+                Zone.concert_id == zone.concert_id,
+                Zone.id != zone.id,
+            )
+        ).scalar_one()
+        if int(other_cap) + body.capacity > 20_000:
+            raise conflict("capacity_limit_exceeded", "Total concert capacity cannot exceed 20,000 seats.")
+        _resize_zone_seats(db, zone, body.capacity)
+
+    db.flush()
+    return {
+        "id": zone.id,
+        "name": zone.name,
+        "price": int(zone.price),
+        "capacity": zone.capacity,
+        "color": zone.color,
+        "booking_type": zone.booking_type,
+    }
 
 
 @transactional
