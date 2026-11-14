@@ -1,3 +1,8 @@
+function safeHtml(val) {
+  if (typeof escapeHtml === "function") return escapeHtml(val);
+  return String(val ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
 const HOME_CONCERT_LIMIT = 4;
 
 // 1. Hero Carousel Controller with Sliding & Touch/Mouse Drag
@@ -44,10 +49,10 @@ function initHeroCarousel() {
       <div class="hero-slide" data-href="pages/concerts/detail.html?id=${concert.id}" style="--offer-accent: ${offer.accent}; --offer-tint: ${offer.tint}; background-image: linear-gradient(180deg, rgba(11, 11, 15, 0.15) 0%, rgba(11, 11, 15, 0.35) 45%, rgba(11, 11, 15, 0.85) 78%, var(--color-bg) 100%), url('${bannerUrl}'); background-position: center 20%;">
         <div class="container">
           <div class="hero-tags">
-            <span class="hero-tag">${categoryText}</span>
-            <span class="status-tag inline ${statusClass}">${statusText}</span>
+            <span class="hero-tag">${safeHtml(categoryText)}</span>
+            <span class="status-tag inline ${statusClass}">${safeHtml(statusText)}</span>
           </div>
-          <h1 class="hero-title">${titleText}</h1>
+          <h1 class="hero-title">${safeHtml(titleText)}</h1>
           <div class="hero-offer">
             <span class="offer-kicker">Limited-time offer</span>
             <strong>${offer.title}</strong>
@@ -234,17 +239,17 @@ function createConcertCardHTML(show, isHome = false) {
   return `
     <article class="card concert-card" data-href="${detailLink}" tabindex="0" role="link">
       <div class="card-media">
-        <img src="${posterUrl}" alt="${show.artist || show.title}" class="card-img" style="object-position: top center;" loading="lazy">
+        <img src="${safeHtml(posterUrl)}" alt="${safeHtml(show.artist || show.title)}" class="card-img" style="object-position: top center;" loading="lazy">
       </div>
       <div class="card-body">
         <div class="card-labels">
-          <span class="card-badge">${show.category || 'Concert'}</span>
-          <span class="status-tag ${statusClass}" title="${getStatusTagTitle(show.status)}">${show.status || 'Available'}</span>
+          <span class="card-badge">${safeHtml(show.category || 'Concert')}</span>
+          <span class="status-tag ${statusClass}" title="${safeHtml(getStatusTagTitle(show.status))}">${safeHtml(show.status || 'Available')}</span>
         </div>
-        <a href="${detailLink}" class="card-title">${show.title}</a>
-        <div class="card-meta">${show.artist} | ${show.date}</div>
+        <a href="${safeHtml(detailLink)}" class="card-title">${safeHtml(show.title)}</a>
+        <div class="card-meta">${safeHtml(show.artist)} | ${safeHtml(show.date)}</div>
         <div class="card-footer">
-          <span class="card-price">${show.priceRange || '$50 - $250'}</span>
+          <span class="card-price">${safeHtml(show.priceRange || '$50 - $250')}</span>
         </div>
       </div>
     </article>
