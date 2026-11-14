@@ -1,5 +1,16 @@
-// js/admin/utils.js
-// Small shared helpers for rendering MOCK_CONCERTS across the admin pages.
+// js/utils.js
+// Shared helpers and XSS protection (Task #52) for rendering concert data across pages.
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+window.escapeHtml = escapeHtml;
 
 const STATUS_BADGE_CLASS = {
   "Draft": "badge-gray",
@@ -32,7 +43,6 @@ function getConcertStatus(concert, now = new Date()) {
   return "On Sale";
 }
 
-// "2026-11-20", "20:00" -> "Nov 20, 2026 · 8:00 PM"
 function formatDateTime(dateStr, timeStr) {
   const d = new Date(`${dateStr}T${timeStr}`);
   const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -40,7 +50,6 @@ function formatDateTime(dateStr, timeStr) {
   return `${datePart} · ${timePart}`;
 }
 
-// "2026-11-20" -> "Nov 20, 2026"
 function formatDateShort(dateStr) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }

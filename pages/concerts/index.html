@@ -300,6 +300,7 @@
     </main>
 
     <!-- Scripts -->
+    <script src="../../js/utils.js"></script>
     <script src="../../js/mock-data.js"></script>
     <script src="../../js/api.js?v=admin-concert-crud-1"></script>
     <script src="../../js/public-catalog.js"></script>
@@ -394,17 +395,17 @@
             return `
         <article class="card concert-card" data-href="detail.html?id=${c.id}" tabindex="0" role="link">
           <div class="card-media">
-            <img src="${c.poster}" alt="${c.artist}" class="card-img" loading="lazy">
+            <img src="${escapeHtml(c.poster)}" alt="${escapeHtml(c.artist)}" class="card-img" loading="lazy">
           </div>
           <div class="card-body">
             <div class="card-labels">
-              <span class="card-badge">${c.category}</span>
-              <span class="status-tag ${statusClass}" title="${statusTitle}">${c.status}</span>
+              <span class="card-badge">${escapeHtml(c.category)}</span>
+              <span class="status-tag ${statusClass}" title="${escapeHtml(statusTitle)}">${escapeHtml(c.status)}</span>
             </div>
-            <a href="detail.html?id=${c.id}" class="card-title">${c.title}</a>
-            <div class="card-meta">${c.artist} | ${c.date}</div>
+            <a href="detail.html?id=${encodeURIComponent(c.id)}" class="card-title">${escapeHtml(c.title)}</a>
+            <div class="card-meta">${escapeHtml(c.artist)} | ${escapeHtml(c.date)}</div>
             <div class="card-footer">
-              <span class="card-price">${c.priceRange}</span>
+              <span class="card-price">${escapeHtml(c.priceRange)}</span>
             </div>
           </div>
         </article>

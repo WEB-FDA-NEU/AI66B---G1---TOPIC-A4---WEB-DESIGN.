@@ -304,6 +304,7 @@
     </main>
 
     <!-- Scripts -->
+    <script src="../../js/utils.js"></script>
     <script src="../../js/mock-data.js"></script>
     <script src="../../js/api.js?v=admin-concert-crud-1"></script>
     <script src="../../js/public-catalog.js"></script>
@@ -398,13 +399,13 @@
                 <div
                   style="font-weight: 700; font-size: var(--font-sm);"
                 >
-                  ${t.type}
+                  ${escapeHtml(t.type)}
                 </div>
 
                 <span
                   class="ticket-status status-${cleanStatusClass}"
                 >
-                  ${t.status}
+                  ${escapeHtml(t.status)}
                 </span>
               </div>
 
@@ -413,14 +414,14 @@
                 <div
                   style="font-weight: 800; font-size: var(--font-md); color: var(--color-primary); margin-bottom: 6px;"
                 >
-                  ${t.price}
+                  ${escapeHtml(t.price)}
                 </div>
 
                 <button
                   class="btn btn-secondary"
                   data-ticket-select
-                  data-ticket-type="${t.type}"
-                  data-ticket-price="${t.price}"
+                  data-ticket-type="${escapeHtml(t.type)}"
+                  data-ticket-price="${escapeHtml(t.price)}"
                   style="padding: 6px 14px; font-size: var(--font-xs);"
                   ${isSoldOut ? "disabled" : ""}
                 >
