@@ -21,12 +21,26 @@ const ConcertlyAPI = (() => {
     return devUserId ? { "X-User-Id": devUserId } : {};
   }
 
-  async function request(method, path, body, { form = false, multipart = false } = {}) {
+  function clearSession() {
+    [TOKEN_KEY, "concertlyUser", "userRole", "concertlyUserId"].forEach((key) => localStorage.removeItem(key));
+  }
+
+  function redirectToLoginOn401() {
+    if (typeof window === "undefined" || !window.location) return;
+    const pathname = window.location.pathname || "";
+    if (pathname.includes("/auth/login.html") || pathname.includes("/auth/register.html")) return;
+    const inPages = pathname.includes("/pages/");
+    const loginUrl = new URL(inPages ? "../auth/login.html" : "pages/auth/login.html", window.location.href);
+    loginUrl.searchParams.set("redirect", pathname + (window.location.search || ""));
+    window.location.replace(loginUrl.href);
+  }
+
+  async function request(method, path, body, { form = false, multipart = false, headers: extraHeaders = {}, redirectOn401 = false } = {}) {
     let response;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12000);
     try {
-      const headers = { ...authHeaders() };
+      const headers = { ...authHeaders(), ...extraHeaders };
       if (body && !multipart) headers["Content-Type"] = form ? "application/x-www-form-urlencoded" : "application/json";
       response = await fetch(base + path, {
         method,
@@ -44,8 +58,13 @@ const ConcertlyAPI = (() => {
     } finally {
       clearTimeout(timeout);
     }
+    if (response.status === 204) return null;
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
+      if (response.status === 401) {
+        clearSession();
+        if (redirectOn401) redirectToLoginOn401();
+      }
       const info = payload?.error || {};
       const error = new Error(info.message || `Request failed (${response.status})`);
       error.status = response.status;
@@ -56,7 +75,21 @@ const ConcertlyAPI = (() => {
     return payload;
   }
 
+  function apiFetch(path, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const isMultipart = typeof FormData !== "undefined" && options.body instanceof FormData;
+    const isForm = typeof URLSearchParams !== "undefined" && options.body instanceof URLSearchParams;
+    return request(method, normalizedPath, options.body, {
+      form: Boolean(options.form || isForm),
+      multipart: Boolean(options.multipart || isMultipart),
+      headers: options.headers,
+      redirectOn401: options.redirectOn401 !== false,
+    });
+  }
+
   return {
+    apiFetch,
     // Concert ids in the mock data look like "c3"; the backend uses the number 3.
     numericId: (mockId) => Number(String(mockId).replace(/^c/i, "")),
     seatMap: (concertId) => request("GET", `/concerts/${concertId}/seats`),
@@ -77,9 +110,7 @@ const ConcertlyAPI = (() => {
       localStorage.setItem("concertlyUser", session.user.full_name);
       localStorage.setItem("userRole", session.user.role);
     },
-    clearSession() {
-      [TOKEN_KEY, "concertlyUser", "userRole", "concertlyUserId"].forEach((key) => localStorage.removeItem(key));
-    },
+    clearSession,
 
     // Account pages
     myOrders: () => request("GET", "/orders/me"),
@@ -89,7 +120,12 @@ const ConcertlyAPI = (() => {
     ticket: (id) => request("GET", `/tickets/${encodeURIComponent(id)}`),
 
     // Public concert catalogue
-    concerts: () => request("GET", "/concerts"),
+    concerts: (params = {}) => {
+      const query = new URLSearchParams(
+        Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ""),
+      ).toString();
+      return request("GET", `/concerts${query ? `?${query}` : ""}`);
+    },
     concert: (id) => request("GET", `/concerts/${encodeURIComponent(id)}`),
 
     // Admin (role admin required)
@@ -120,3 +156,4 @@ const ConcertlyAPI = (() => {
 })();
 
 window.ConcertlyAPI = ConcertlyAPI;
+window.apiFetch = ConcertlyAPI.apiFetch;
