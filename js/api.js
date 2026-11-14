@@ -69,6 +69,7 @@ const ConcertlyAPI = (() => {
       request("POST", "/checkout", { reservation_id: reservationId, payment_method: paymentMethod, ...(buyer ? { buyer } : {}) }),
 
     // Session
+    register: (payload) => request("POST", "/auth/register", payload),
     login: (email, password) => request("POST", "/auth/login", { username: email, password }, { form: true }),
     me: () => request("GET", "/auth/me"),
     hasToken: () => Boolean(localStorage.getItem(TOKEN_KEY)),

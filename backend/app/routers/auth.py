@@ -1,14 +1,12 @@
-"""Minimal login against the PostgreSQL ``users`` table.
+"""Authentication endpoints (Task #47): registration, login, and current user profile."""
+import re
+from typing import Optional
 
-Same contract as the auth task (#47): ``POST /api/auth/login`` takes an OAuth2 password
-form (``username`` = e-mail, ``password``) and returns ``{access_token, token_type}``
-(plus the user, so the frontend can show the name and pick the right area). Tokens are
-the JWTs that ``app.deps`` verifies. Registration / password changes belong to #47.
-"""
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import func, select
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -23,21 +21,79 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 _DUMMY_HASH = bcrypt.hashpw(b"not-a-real-password", bcrypt.gensalt()).decode()
 
 
+class RegisterInput(BaseModel):
+    email: str = Field(max_length=255)
+    full_name: str = Field(min_length=2, max_length=150)
+    phone: Optional[str] = Field(default=None, max_length=20)
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("email", "full_name", mode="before")
+    @classmethod
+    def _strip_fields(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("email")
+    @classmethod
+    def _validate_email(cls, value: str) -> str:
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+            raise ValueError("Enter a valid email address.")
+        return value.lower()
+
+
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
 def _password_matches(password: str, password_hash: str) -> bool:
     try:
         return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
-    except ValueError:  # not a bcrypt hash (e.g. a placeholder): never matches
+    except ValueError:
         return False
 
 
 def _user_out(user: User) -> dict:
-    return {"id": user.id, "email": user.email, "full_name": user.full_name, "phone": user.phone, "role": user.role}
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "phone": user.phone,
+        "role": user.role,
+    }
+
+
+@router.post("/register", response_model=AuthUserOut, status_code=201)
+def register(body: RegisterInput, db: Session = Depends(get_db)):
+    email = body.email.strip().lower()
+    existing = db.execute(select(User).where(func.lower(User.email) == email)).scalar_one_or_none()
+    if existing is not None:
+        raise HTTPException(
+            409,
+            detail={"code": "email_taken", "message": "Email is already registered."},
+        )
+    user = User(
+        email=email,
+        password_hash=_hash_password(body.password),
+        full_name=body.full_name.strip(),
+        phone=body.phone.strip() if body.phone else None,
+        role="customer",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return _user_out(user)
 
 
 @router.post("/login", response_model=TokenOut)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    email = form.username.strip().lower()
-    user = db.execute(select(User).where(func.lower(User.email) == email)).scalar_one_or_none()
+    identifier = form.username.strip()
+    user = db.execute(
+        select(User).where(
+            or_(
+                func.lower(User.email) == identifier.lower(),
+                User.phone == identifier,
+            )
+        )
+    ).scalar_one_or_none()
     ok = _password_matches(form.password, user.password_hash if user else _DUMMY_HASH)
     if user is None or not ok:
         raise HTTPException(401, detail={"code": "invalid_credentials", "message": "Incorrect email or password."})

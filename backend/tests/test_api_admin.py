@@ -523,3 +523,43 @@ def test_admin_concert_image_upload_stores_supported_image(client, db, admin, mo
     assert response.status_code == 200, response.text
     image_path = tmp_path / response.json()["url"].rsplit("/", 1)[1]
     assert image_path.read_bytes() == content
+
+
+
+def test_register_and_login_flow(client, db):
+    reg = client.post(
+        "/api/auth/register",
+        json={
+            "email": "NewUser@Test.dev",
+            "full_name": "New User",
+            "phone": "0912345678",
+            "password": "StrongPassword!1",
+        },
+    )
+    assert reg.status_code == 201, reg.text
+    user_out = reg.json()
+    assert user_out["email"] == "newuser@test.dev"
+    assert user_out["role"] == "customer"
+
+    # Duplicate email returns 409
+    dup = client.post(
+        "/api/auth/register",
+        json={
+            "email": "newuser@test.dev",
+            "full_name": "Duplicate",
+            "password": "StrongPassword!1",
+        },
+    )
+    assert dup.status_code == 409
+    assert dup.json()["error"]["code"] == "email_taken"
+
+    # Login with registered email or phone
+    login_res = client.post(
+        "/api/auth/login",
+        data={"username": "newuser@test.dev", "password": "StrongPassword!1"},
+    )
+    assert login_res.status_code == 200
+    token = login_res.json()["access_token"]
+    me_res = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me_res.status_code == 200
+    assert me_res.json()["email"] == "newuser@test.dev"

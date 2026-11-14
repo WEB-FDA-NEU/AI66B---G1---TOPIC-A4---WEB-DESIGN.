@@ -63,6 +63,11 @@
         margin-bottom: 12px;
         display: none;
       }
+      #password-strength {
+        font-size: 12px;
+        margin-top: 6px;
+        font-weight: bold;
+      }
       .btn {
         width: 100%;
         padding: 12px;
@@ -99,12 +104,10 @@
     <div id="site-navbar" data-root="../../"></div>
     <div class="box">
       <h2>Create Account</h2>
-      <div id="reg-error" class="error-msg">
-        Passwords do not match! Please check again.
-      </div>
+      <div id="reg-error" class="error-msg"></div>
       <form onsubmit="handleRegister(event)">
         <div class="input-group">
-          <label>Full Name</label>
+          <label for="registerName">Full Name</label>
           <input
             type="text"
             id="registerName"
@@ -113,20 +116,25 @@
           />
         </div>
         <div class="input-group">
-          <label>Email Address</label>
-          <input type="email" placeholder="name@example.com" required />
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="name@example.com" required />
         </div>
         <div class="input-group">
-          <label>Password</label>
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel" id="phoneNumber" placeholder="0901234567" required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
           <input
             type="password"
             id="password"
             placeholder="Create a strong password"
             required
           />
+          <div id="password-strength"></div>
         </div>
         <div class="input-group">
-          <label>Confirm Password</label>
+          <label for="confirm-password">Confirm Password</label>
           <input
             type="password"
             id="confirm-password"
@@ -140,28 +148,92 @@
         Already have an account? <a href="login.html">Sign In</a>
       </div>
     </div>
+    <script src="../../js/api.js"></script>
     <script>
-      function handleRegister(e) {
+      const passwordInput = document.getElementById("password");
+      const strengthText = document.getElementById("password-strength");
+      const confirmPasswordInput = document.getElementById("confirm-password");
+
+      passwordInput.addEventListener("input", function () {
+        const val = passwordInput.value;
+        if (val.length === 0) {
+          strengthText.textContent = "";
+          return;
+        }
+        if (val.length < 8) {
+          strengthText.textContent = "Requirement: At least 8 characters";
+          strengthText.style.color = "#ff4d4d";
+        } else if (!/[A-Z]/.test(val)) {
+          strengthText.textContent = "Requirement: At least 1 uppercase letter";
+          strengthText.style.color = "#ffa64d";
+        } else if (!/[0-9]/.test(val)) {
+          strengthText.textContent = "Requirement: At least 1 number";
+          strengthText.style.color = "#ffa64d";
+        } else if (!/[^A-Za-z0-9]/.test(val)) {
+          strengthText.textContent = "Requirement: At least 1 special character (@, #, !, etc.)";
+          strengthText.style.color = "#ffa64d";
+        } else {
+          strengthText.textContent = "Strength: Strong!";
+          strengthText.style.color = "#2eb82e";
+        }
+      });
+
+      confirmPasswordInput.addEventListener("input", function () {
+        const errorBox = document.getElementById("reg-error");
+        if (confirmPasswordInput.value === "") {
+          errorBox.style.display = "none";
+          return;
+        }
+        if (confirmPasswordInput.value !== passwordInput.value) {
+          errorBox.textContent = "Passwords do not match! Please check again.";
+          errorBox.style.display = "block";
+        } else {
+          errorBox.style.display = "none";
+        }
+      });
+
+      async function handleRegister(e) {
         e.preventDefault();
-        const fullName = document.getElementById("registerName").value;
+        const fullName = document.getElementById("registerName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phoneNumber").value.trim();
         const pass = document.getElementById("password").value;
         const confirmPass = document.getElementById("confirm-password").value;
         const errorBox = document.getElementById("reg-error");
 
+        errorBox.style.display = "none";
+
+        if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) {
+          errorBox.textContent = "Please meet all password requirements before registering.";
+          errorBox.style.display = "block";
+          return;
+        }
         if (pass !== confirmPass) {
-          errorBox.style.display = "block"; // Hiển thị thông báo lỗi nếu mật khẩu không khớp
+          errorBox.textContent = "Passwords do not match! Please check again.";
+          errorBox.style.display = "block";
           return;
         }
 
-        errorBox.style.display = "none";
-        localStorage.setItem("concertlyUser", fullName);
-        alert("Account registered successfully!");
-        window.location.href = "login.html";
+        try {
+          await ConcertlyAPI.register({
+            email,
+            full_name: fullName,
+            phone,
+            password: pass,
+          });
+          window.location.href = "login.html";
+        } catch (error) {
+          errorBox.textContent =
+            error.code === "network"
+              ? "Cannot reach the Concertly server. Please try again later."
+              : error.message || "Registration failed. Please try again.";
+          errorBox.style.display = "block";
+        }
       }
     </script>
     <script src="../../js/footer.js"></script>
     <script src="../../js/theme.js"></script>
-  <div id="site-footer" data-root="../../"></div>
-  <script src="../../js/navbar.js"></script>
+    <div id="site-footer" data-root="../../"></div>
+    <script src="../../js/navbar.js"></script>
   </body>
 </html>
