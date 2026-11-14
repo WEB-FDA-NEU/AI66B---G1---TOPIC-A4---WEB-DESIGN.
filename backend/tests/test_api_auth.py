@@ -3,6 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
+from app.database import SessionLocal, get_db
 from app.main import app
 
 
@@ -51,19 +52,27 @@ def test_register_and_login_flow(client, db):
     assert me_res.json()["email"] == "newuser@test.dev"
 
 
-def test_register_handles_concurrent_integrity_error_as_409(client, db, monkeypatch):
-    def raise_integrity():
-        raise IntegrityError("INSERT INTO users ...", {}, Exception("uq_users_email_lower"))
+def test_register_handles_concurrent_integrity_error_as_409(client, db):
+    def failing_db():
+        session = SessionLocal()
 
-    monkeypatch.setattr(db, "commit", raise_integrity)
-    res = client.post(
-        "/api/auth/register",
-        json={
-            "email": "race@test.dev",
-            "full_name": "Race User",
-            "password": "StrongPassword!1",
-        },
-    )
+        def raise_integrity():
+            raise IntegrityError("INSERT INTO users ...", {}, Exception("uq_users_email_lower"))
+
+        session.commit = raise_integrity
+        try:
+            yield session
+        finally:
+            session.close()
+
+    app.dependency_overrides[get_db] = failing_db
+    try:
+        res = client.post(
+            "/api/auth/register",
+            json={"email": "race@test.dev", "full_name": "Race User", "password": "StrongPassword!1"},
+        )
+    finally:
+        app.dependency_overrides.pop(get_db, None)
     assert res.status_code == 409
     assert res.json()["error"]["code"] == "email_taken"
 
