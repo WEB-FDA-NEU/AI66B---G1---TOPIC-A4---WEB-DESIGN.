@@ -1,12 +1,17 @@
 // Thin client for the Concertly backend (backend/app). Used by ticket selection, checkout
 // and the account pages.
 //
-// Base URL: set window.CONCERTLY_API_BASE before this script to override.
+// Base URL: set window.CONCERTLY_API_BASE before this script to override. Otherwise pages
+// opened from localhost / 127.0.0.1 / file:// use the local API, and every other host (the
+// deployed site) uses the API deployed on Render (see docs/deploy.md).
 // Identity: the JWT from POST /auth/login, kept in localStorage "token", is sent as
 // "Authorization: Bearer ...". For local development without logging in, a backend started
 // with ALLOW_DEV_USER_HEADER=1 also accepts localStorage "concertlyUserId" as X-User-Id.
 const ConcertlyAPI = (() => {
-  const base = (window.CONCERTLY_API_BASE || "http://localhost:8000/api").replace(/\/$/, "");
+  const LOCAL_API = "http://localhost:8000/api";
+  const DEPLOYED_API = "https://concertly.onrender.com/api";
+  const isLocalPage = ["localhost", "127.0.0.1", "[::1]", ""].includes(window.location.hostname);
+  const base = (window.CONCERTLY_API_BASE || (isLocalPage ? LOCAL_API : DEPLOYED_API)).replace(/\/$/, "");
   const TOKEN_KEY = "token";
 
   function authHeaders() {
