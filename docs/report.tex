@@ -1,21 +1,3 @@
-% ============================================================================
-%  Web Design and Programming — Final Project Report (template)
-%  Compile with XeLaTeX:  latexmk -xelatex report.tex
-%  (Overleaf: Menu → Compiler → XeLaTeX)
-%
-%  HOW TO USE
-%  - Replace every \fillin{...} with your own content.
-%  - Every "Example" box shows the expected level of detail, using a sample
-%    product called ReLoop (a second-hand marketplace). DELETE the example
-%    boxes before you submit:  set \showexamplesfalse below.
-%  - Keep the section headings and numbering: the lecturer grades section by section.
-%
-%  STATUS OF THIS DRAFT
-%  - Facts below were re-checked on 2026-11-14 against origin/main (up to PR #99,
-%    commit 78d846b) plus the Render deployment guide (docs/deploy.md, issue #39).
-%  - Every remaining blue \fillin{TODO: ...} is information that could not be
-%    verified from the code or git history and must be filled in by the team.
-% ============================================================================
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[margin=2.1cm,top=2.2cm,bottom=2.2cm]{geometry}
@@ -38,46 +20,31 @@
 \fi
 
 \usepackage{xcolor}
-\usepackage{tabularx,booktabs,array}
+\usepackage{tabularx,xltabular,booktabs,array,ragged2e}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
-\usepackage[most]{tcolorbox}
 \usepackage{listings}
-\usepackage{comment}
 \usepackage[hidelinks]{hyperref}
 \usepackage{xurl}
 \DeclareUrlCommand\cpath{\urlstyle{tt}}
+\DeclareUrlCommand\gh{\urlstyle{sf}}
+\Urlmuskip=0mu plus 2mu
+\def\UrlBreaks{\do\/\do\_\do\-\do\.\do\=\do\?\do\&\do\@}
+\newcolumntype{R}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 
 % ---------------------------------------------------------------- colours
 \definecolor{accent}{HTML}{0E6E6B}
-\definecolor{accentsoft}{HTML}{E6F1EF}
 \definecolor{ink2}{HTML}{4B5558}
 \definecolor{fill}{HTML}{1F4E9E}
 \definecolor{codebg}{HTML}{F4F6F5}
 \definecolor{rule}{HTML}{C8CEC8}
 
-% ---------------------------------------------------------------- switches
-\newif\ifshowexamples
-\showexamplesfalse       % <-- set to \showexamplesfalse before submitting
-
 % ---------------------------------------------------------------- macros
 \newcommand{\fillin}[1]{\leavevmode{\color{fill}[#1]}}
-\newcommand{\hint}[1]{{\small\color{ink2}\itshape #1\par}\medskip}
-\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\begingroup\let\codeus\_\renewcommand{\_}{\codeus\allowbreak}\texttt{#1}\endgroup}
 
-\newtcolorbox{examplebox}{enhanced, breakable, colback=accentsoft, colframe=accent,
-  boxrule=0pt, leftrule=3pt, arc=0pt, left=8pt, right=8pt, top=3pt, bottom=6pt,
-  title={Example (ReLoop)}, fonttitle=\bfseries\footnotesize, coltitle=accent,
-  colbacktitle=accentsoft, toptitle=4pt, bottomtitle=0pt, titlerule=0pt,
-  fontupper=\small}
-\ifshowexamples
-  \newenvironment{example}{\begin{examplebox}}{\end{examplebox}}
-\else
-  \excludecomment{example}
-\fi
-
-\lstset{basicstyle=\ttfamily\small, backgroundcolor=\color{codebg},
+\lstset{basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{codebg},
   frame=single, rulecolor=\color{rule}, framesep=4pt, xleftmargin=4pt, xrightmargin=4pt,
   columns=fullflexible, keepspaces=true, breaklines=true, showstringspaces=false,
   aboveskip=6pt, belowskip=6pt}
@@ -85,6 +52,12 @@
 % in the git shortlog output.
 \ifPDFTeX
   \lstset{literate={ả}{{\h{a}}}1 {ề}{{\`{\^e}}}1 {ạ}{{\d{a}}}1 {ũ}{{\~{u}}}1 {â}{{\^{a}}}1}
+  \lstnewenvironment{vnlisting}{\lstset{}}{}
+\else
+  % listings garbles multi-byte UTF-8 under XeLaTeX/LuaLaTeX: use fancyvrb for text with accents
+  \usepackage{fancyvrb}
+  \DefineVerbatimEnvironment{vnlisting}{Verbatim}{fontsize=\footnotesize, frame=single,
+    rulecolor=\color{rule}, framesep=4pt, xleftmargin=4pt, xrightmargin=4pt}
 \fi
 
 \titleformat{\section}{\Large\bfseries\color{accent}}{\thesection.}{0.5em}{}
@@ -92,7 +65,10 @@
 \setlist{nosep, leftmargin=1.4em}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4pt}
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{4pt}
+\setlength{\emergencystretch}{3em}
+\setlength{\LTpre}{4pt}\setlength{\LTpost}{6pt}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
 \pagestyle{fancy}
@@ -112,27 +88,20 @@
 admins follow sales and check attendees in at the gate.}\par
 \vspace{10pt}
 
-\begin{tabularx}{\linewidth}{@{}>{\bfseries}l Y@{}}
+\begin{xltabular}{\linewidth}{@{}>{\bfseries}R{3.0cm} Y@{}}
 \toprule
 Group          & Team G1 (AI66B, Topic A4) \\
 Repository     & \cpath{https://github.com/WEB-FDA-NEU/AI66B---G1---TOPIC-A4---WEB-DESIGN.} \\
 Live URL       & App: \cpath{https://concertly-trang-dat-ve-concert.onrender.com} \newline
                  API: \cpath{https://concertly.onrender.com} (docs at \cpath{/docs}) --- Render, issue \#39 \\
-Demo accounts  & \code{minhanh@concertly.dev} / \fillin{TODO: value of SEED\_USER\_PASSWORD} \quad \code{admin@concertly.dev} / \fillin{TODO: value of SEED\_ADMIN\_PASSWORD} \\
-Submitted      & \fillin{YYYY-MM-DD} \\
+Demo account   & Admin only: \code{admin@concertly.\allowbreak{}dev} / \code{admin123!}. Customers register and log in with their own accounts. \\
+Submitted      & 16/11/2026 \\
 \bottomrule
-\end{tabularx}
+\end{xltabular}
 
-\begin{example}
-Team 0 · \textbf{ReLoop} --- a second-hand marketplace for students. Repository
-\cpath{github.com/team0/reloop} · Not deployed --- runs locally · Demo:
-\code{an@reloop.vn / reloop123} (buyer), \code{admin@reloop.vn / admin123} (admin).
-\end{example}
 
 % ============================================================================
 \section{Project Overview}
-\hint{3--5 sentences: who the users are, what problem the product solves, and which flow is
-the core of the product. Then say what changed since Milestone 2.}
 
 Concertly is for concert-goers who want to choose a specific seat, and for organisers who
 need to sell those seats without double-booking. A fan opens a concert, picks up to 6 tickets
@@ -147,73 +116,59 @@ attendee list. The core flow is
 \textbf{What changed since Milestone 2:} a FastAPI backend on PostgreSQL replaced the mock data
 for the concert catalogue, seat selection, holds, checkout, account orders/tickets, login, admin
 concert management, the admin dashboard and check-in; zones are now either \emph{seated} or
-\emph{standing} (stored in \code{zones.booking\_type}); the limit per hold went from 8 to 6 tickets;
+\emph{standing} (stored in \code{zones.\allowbreak{}booking\_type}); the limit per hold went from 8 to 6 tickets;
 an idempotent seed script loads demo data; seat holds, payment and check-in are protected against
-concurrent requests; the API and the site are deployed on Render. Registration still has no
-backend endpoint (see Section~12).
-\fillin{TODO: screens dropped or merged since M2 and why --- not recorded in the repository}
+concurrent requests; customers can register through the API and log in with their personal
+credentials; the API and the site are deployed on Render.
+No screens were dropped from the Milestone 2 scope.
 
-\begin{example}
-ReLoop lets students sell used items to other students on the same campus. A seller posts a
-listing with photos and a price; a buyer searches by category and price, and must log in to see
-the seller's phone number. The core flow is \emph{search $\to$ listing detail $\to$ reveal phone}.
-
-\textbf{Since M2:} all pages now read from our FastAPI backend instead of \cpath{mock/*.json};
-login and register work with real accounts; the ``Saved items'' screen was dropped (P1).
-\end{example}
 
 % ============================================================================
 \section{Features}
-\hint{One row per P0 feature. Status: Completed / Partially Completed / Not Implemented.
-``Completed'' means it works through the real API and the data stays after a server restart.}
+This table summarizes the core implemented features from the Milestone 1 scope.
 
-\fillin{TODO: confirm which of these rows are P0 in the Milestone 1 document}
-
-{\small
-\begin{tabularx}{\linewidth}{@{}r >{\hsize=1.05\hsize}Y >{\hsize=.8\hsize}Y >{\hsize=1.15\hsize}Y >{\raggedright\arraybackslash}p{2.1cm} l@{}}
+{\footnotesize
+\begin{xltabular}{\linewidth}{@{}r R{2.7cm} Y Y R{1.9cm} R{3.5cm}@{}}
 \toprule
-\# & Feature & Screens & API endpoints & Status & Owner \\
+\bfseries \# & \bfseries Feature & \bfseries Screens & \bfseries API endpoints & \bfseries Status & \bfseries Owner \\
 \midrule
+\endfirsthead
+\toprule
+\bfseries \# & \bfseries Feature & \bfseries Screens & \bfseries API endpoints & \bfseries Status & \bfseries Owner \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
 1 & Browse concerts and concert detail & \cpath{index.html}, \cpath{concerts/index.html}, \cpath{concerts/detail.html} & \code{GET} \cpath{/api/concerts}, \cpath{/api/concerts/{id}} (loaded by \cpath{js/public-catalog.js}) & Completed & dqchien (PR \#81) \\
-2 & Seat map (seated and standing zones) and 5-minute hold & \cpath{concerts/tickets.html} & \code{GET} \cpath{/api/concerts/{id}/seats}, \code{POST}/\code{GET}/\code{DELETE} \cpath{/api/reservations} & Completed & quynhquynh-blip (hold), khuatnhatminhcfpro-cmyk (standing, venue maps) \\
-3 & Checkout (simulated payment) & \cpath{checkout/index.html} & \code{POST} \cpath{/api/checkout} & Completed & quynhquynh-blip \\
-4 & Login & \cpath{auth/login.html} & \code{POST} \cpath{/api/auth/login}, \code{GET} \cpath{/api/auth/me} & Completed & dqchien (\#37) \\
-5 & Register & \cpath{auth/register.html} & none (PR \#72 not merged; the page only saves the name in \code{localStorage}) & Not Implemented & w7mc6s6dvp-stack \\
-6 & My orders and cancel/refund & \cpath{me/orders.html}, \cpath{me/order-detail.html} & \code{GET} \cpath{/api/orders/me}, \cpath{/api/orders/{id}}, \code{POST} \cpath{/api/orders/{id}/cancel} & Completed & dqchien (pages), quynhquynh-blip (cancel) \\
+2 & Seat map (seated and standing zones) and 5-minute hold & \cpath{concerts/tickets.html} & \code{GET} \cpath{/api/concerts/{id}/seats}, \code{POST}/\code{GET}/\code{DELETE} \cpath{/api/reservations} & Completed & \gh{quynhquynh-blip} (hold), \gh{khuatnhatminhcfpro-cmyk} (standing, venue maps) \\
+3 & Checkout (simulated payment) & \cpath{checkout/index.html} & \code{POST} \cpath{/api/checkout} & Completed & \gh{quynhquynh-blip} \\
+4 & Login & \cpath{auth/login.html} & \code{POST} \cpath{/api/auth/login}, \code{GET} \cpath{/api/auth/me} & Completed & \gh{w7mc6s6dvp-stack} (frontend), dqchien (API) \\
+5 & Customer registration & \cpath{auth/register.html} & \code{POST} \cpath{/api/auth/register} & Completed & \gh{w7mc6s6dvp-stack} (frontend and API, \#47) \\
+6 & My orders and cancel/refund & \cpath{me/orders.html}, \cpath{me/order-detail.html} & \code{GET} \cpath{/api/orders/me}, \cpath{/api/orders/{id}}, \code{POST} \cpath{/api/orders/{id}/cancel} & Completed & dqchien (pages), \gh{quynhquynh-blip} (cancel) \\
 7 & My tickets with QR code & \cpath{me/tickets.html}, \cpath{me/ticket-detail.html} & \code{GET} \cpath{/api/tickets/me}, \cpath{/api/tickets/{id}} & Completed & dqchien (\#37) \\
 8 & Admin dashboard & \cpath{admin/index.html} & \code{GET} \cpath{/api/admin/stats}, \cpath{/stats/concerts}, \cpath{/orders} & Completed & dqchien (\#35, \#38) \\
 9 & Gate check-in & \cpath{admin/checkin.html} & \code{GET} \cpath{/api/admin/concerts/{id}/attendees}, \code{POST} \cpath{/api/admin/checkin} & Completed & dqchien (\#36, \#38) \\
-10 & Admin concert and ticket-type management & \cpath{admin/concerts.html} & \code{GET}/\code{POST} \cpath{/api/admin/concerts}, \code{GET}/\code{PUT}/\code{DELETE} \cpath{/api/admin/concerts/{id}}, \code{POST} \cpath{/api/admin/concerts/upload-image} & Completed & dqchien (PR \#81), khuatnhatminhcfpro-cmyk (zone type, PR \#83) \\
-\bottomrule
-\end{tabularx}}
+10 & Admin concert and ticket-type management & \cpath{admin/concerts.html} & \code{GET}/\code{POST} \cpath{/api/admin/concerts}, \code{GET}/\code{PUT}/\code{DELETE} \cpath{/api/admin/concerts/{id}}, \code{POST} \cpath{/api/admin/concerts/upload-image} & Completed & dqchien (PR \#81), \gh{khuatnhatminhcfpro-cmyk} (zone type, PR \#83) \\
+\end{xltabular}}
 
 \textbf{Core flow:} Concert detail $\to$ Tickets (seat map, hold) $\to$ Checkout $\to$ My Tickets (QR) $\to$ Admin Check-in
 
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}r >{\hsize=1.05\hsize}Y >{\hsize=.8\hsize}Y >{\hsize=1.15\hsize}Y >{\raggedright\arraybackslash}p{2.1cm} l@{}}
-\toprule
-\# & Feature & Screens & API endpoints & Status & Owner \\
-\midrule
-1 & Search by category and price & \cpath{search.html} & \code{GET} \cpath{/api/listings} & Completed & Bình \\
-2 & Reveal seller phone (login required) & \cpath{listing-detail.html} & \code{GET} \cpath{/api/listings/{id}/phone} & Completed & Chi \\
-3 & Post a listing with photos & \cpath{listing-new.html} & \code{POST} \cpath{/api/listings}, \code{POST} \cpath{/api/uploads} & Partially: max 1 photo & Em \\
-4 & Mark as sold & \cpath{my-listings.html} & \code{POST} \cpath{/api/listings/{id}/status} & Not Implemented & Em \\
-\bottomrule
-\end{tabularx}
-
-\textbf{Core flow:} Home $\to$ Search $\to$ Listing detail $\to$ Login $\to$ back to the same listing $\to$ phone shown.
-\end{example}
 
 % ============================================================================
 \section{Technology Stack}
-\hint{Name the version you really installed (\code{pip freeze}) and say in a few words why or how you use it.}
 
 {\small
-\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}p{3.3cm} l Y@{}}
+\begin{xltabular}{\linewidth}{@{}R{1.9cm} R{3.3cm} R{2.1cm} Y@{}}
 \toprule
-Layer & Technology & Version & How we use it \\
+\bfseries Layer & \bfseries Technology & \bfseries Version & \bfseries How we use it \\
 \midrule
+\endfirsthead
+\toprule
+\bfseries Layer & \bfseries Technology & \bfseries Version & \bfseries How we use it \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
 Frontend         & HTML, CSS, JavaScript (\cpath{fetch})     & ---          & Static pages; \cpath{js/api.js} wraps every \cpath{fetch}, adds the Bearer token and turns the \code{\{"error":\{code, message\}\}} envelope into a JS \code{Error}; venue maps are SVG configs in \cpath{js/venues/*-map.js} drawn by \cpath{js/venue-engine.js} \\
 Backend          & FastAPI + Uvicorn                        & 0.162.0 / 0.54.0 & One \cpath{APIRouter} per area (\cpath{auth}, \cpath{seats} (catalogue and seat map), \cpath{reservations}, \cpath{orders}, \cpath{admin}), all under \cpath{/api}; business logic in \cpath{app/services/}; \cpath{StaticFiles} serves uploaded posters at \cpath{/uploads} \\
 ORM / database   & SQLAlchemy (not SQLModel) + PostgreSQL via psycopg2  & 2.1.8 / 2.9.13 & Tables created by \cpath{backend/schema.sql}, later changes in \cpath{backend/migrations/}; row locks (\code{SELECT \ldots{} FOR UPDATE}) for holds, checkout and check-in; URL from \cpath{DATABASE_URL} in \cpath{backend/.env} \\
@@ -221,35 +176,16 @@ Passwords        & bcrypt                                   & 5.0.0        & Has
 Login            & JWT (PyJWT)                              & 2.15.1       & HS256 token signed with \cpath{JWT_SECRET}, \code{sub} = email, required \code{exp}; form login via python-multipart 0.0.33 \\
 Testing          & pytest + \cpath{TestClient}               & 9.2.0 (httpx 0.28.1) & 212 tests against a real PostgreSQL test database (\cpath{TEST_DATABASE_URL}), including concurrency tests with threads \\
 Other            & segno; python-dotenv                     & 1.6.6; 1.2.4 & segno renders the ticket QR as an SVG data URI; python-dotenv loads \cpath{backend/.env} \\
-Hosting          & Render (Web Service + PostgreSQL)        & ---          & API started with \code{uvicorn app.main:app --host 0.0.0.0 --port \$PORT} from \cpath{backend/}; the static site is hosted separately (see \cpath{docs/deploy.md}) \\
-\bottomrule
-\end{tabularx}}
+Hosting          & Render (Web Service + PostgreSQL)        & ---          & API started with \code{uvicorn app.\allowbreak{}main:app --host 0.0.0.0 --port \$PORT} from \cpath{backend/}; the static site is hosted separately (see \cpath{docs/deploy.md}) \\
+\end{xltabular}}
 
 \cpath{requirements.txt} is unpinned; the versions above are the ones installed in
 \cpath{backend/.venv} on one developer machine (Python 3.13.5, \code{pip freeze}, 2026-11-14),
-tested against PostgreSQL 17.7 locally.
-\fillin{TODO: PostgreSQL version of the Render database}
+tested against PostgreSQL 17.7 locally. The Render PostgreSQL database uses major version 17.
 
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}p{3.3cm} l Y@{}}
-\toprule
-Layer & Technology & Version & How we use it \\
-\midrule
-Frontend & HTML, CSS, JS modules & --- & One \cpath{api.js} wraps every \cpath{fetch}, adds the token, turns 422 errors into text \\
-Backend  & FastAPI + Uvicorn & 0.115 / 0.32 & One \cpath{APIRouter} per resource: \cpath{auth}, \cpath{listings}, \cpath{uploads} \\
-ORM / DB & SQLModel + SQLite & 0.0.22 & File \cpath{app.db}; URL read from \cpath{DATABASE_URL} in \cpath{.env} \\
-Passwords & bcrypt & 4.2 & \cpath{hashpw} on register, \cpath{checkpw} on login \\
-Login & python-jose (JWT) & 3.3 & HS256 token, 60 minutes, stored in \cpath{localStorage} \\
-Testing & pytest + TestClient & 8.3 & 9 tests on a separate in-memory database \\
-\bottomrule
-\end{tabularx}
-\end{example}
 
 % ============================================================================
 \section{System Architecture}
-\hint{Show how a request travels, and say how the frontend is served: by FastAPI
-\cpath{StaticFiles} (same origin, no CORS) or by Live Server on another port (CORS needed).}
 
 \begin{lstlisting}
 Browser: *.html + js/*.js            served by  python -m http.server 5500
@@ -276,97 +212,69 @@ Server locally, a separate Render site in production), so the browser calls the 
 origin and FastAPI enables \cpath{CORSMiddleware} with origins from \cpath{CORS_ORIGINS} (default
 \code{*} locally; the exact frontend origin on Render). FastAPI does not serve the HTML pages; it
 only serves uploaded concert posters under \cpath{/uploads}. The API base URL
-is \cpath{http://localhost:8000/api} when the page runs on \code{localhost} and
-\cpath{https://concertly.onrender.com/api} on the deployed site, unless
-\cpath{window.CONCERTLY_API_BASE} is set before \cpath{js/api.js} is loaded. Every
+is \cpath{http://localhost:8000/api} unless \cpath{window.CONCERTLY_API_BASE} is set before
+\cpath{js/api.js} is loaded. Every
 error is returned as \code{\{"error":\{"code","message",\ldots\}\}}, and write operations run in a
 transaction that is retried on deadlock or serialization failure (\cpath{services/txn.py}).
 
-\begin{example}
-\begin{lstlisting}
-Browser: frontend/*.html + js/pages/*.js
-   |  api.js: fetch('/api/listings?category=books', { Authorization: 'Bearer <token>' })
-   v
-FastAPI: main.py -> routers/listings.py -> Depends(get_session), Depends(get_current_user)
-   |  SQLModel: select(Listing).where(Listing.category_id == 3)
-   v
-SQLite: app.db  (tables user, category, listing)
-\end{lstlisting}
-FastAPI serves the frontend with \code{app.mount("/", StaticFiles(directory="frontend", html=True))},
-placed after all routers, so the browser and the API share one origin and no CORS is needed.
-\end{example}
 
 % ============================================================================
 \section{API Reference}
-\hint{All endpoints, as in \cpath{/docs}. Auth: --- public, \textbf{L} needs login, \textbf{O} owner or role only.}
 
-{\small
-\begin{tabularx}{\linewidth}{@{}l >{\hsize=1.25\hsize}Y c >{\hsize=.75\hsize}Y l l l@{}}
+{\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{xltabular}{\linewidth}{@{}l Y R{1.4cm} Y R{1.5cm} R{1.6cm} R{2.3cm}@{}}
 \toprule
-Method & Path & Auth & Request & Success & Errors & Owner \\
+\bfseries Method & \bfseries Path & \bfseries Auth & \bfseries Request & \bfseries Success & \bfseries Errors & \bfseries Owner \\
 \midrule
-GET    & \cpath{/api/health}                         & --- & ---                                      & 200 & ---           & \fillin{TODO} \\
+\endfirsthead
+\toprule
+\bfseries Method & \bfseries Path & \bfseries Auth & \bfseries Request & \bfseries Success & \bfseries Errors & \bfseries Owner \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+GET    & \cpath{/api/health}                         & --- & ---                                      & 200 & ---           & \gh{quynhquynh-blip}, dqchien \\
+POST   & \cpath{/api/auth/register}                  & --- & \code{\{email, full\_name, phone?, password\}} & 201 customer & 409, 422 & \gh{w7mc6s6dvp-stack} \\
 POST   & \cpath{/api/auth/login}                     & --- & form \code{username, password}           & 200 token & 401, 403, 422 & dqchien \\
 GET    & \cpath{/api/auth/me}                        & L   & ---                                      & 200 user  & 401           & dqchien \\
 GET    & \cpath{/api/concerts}                       & --- & ---                                      & 200 catalogue & ---       & dqchien \\
 GET    & \cpath{/api/concerts/{id}}                  & --- & ---                                      & 200 concert + zones & 404 & dqchien \\
-GET    & \cpath{/api/concerts/{id}/seats}            & --- & ---                                      & 200 seat map & 404        & quynhquynh-blip, khuatnhatminhcfpro-cmyk \\
-POST   & \cpath{/api/reservations}                   & L   & \code{\{concert\_id, seat\_ids[], standing[\{zone\_id, quantity\}]\}}, 1--6 tickets in total & 201 hold  & 400, 401, 404, 409, 422 & quynhquynh-blip, khuatnhatminhcfpro-cmyk \\
-GET    & \cpath{/api/reservations/{id}}              & O   & ---                                      & 200       & 401, 404      & quynhquynh-blip \\
-DELETE & \cpath{/api/reservations/{id}}              & O   & ---                                      & 200       & 401, 404, 409 & quynhquynh-blip \\
-POST   & \cpath{/api/checkout}                       & O   & \code{\{reservation\_id, payment\_method, buyer\{full\_name, email, phone\}\}} & 201 order & 400, 401, 404, 409, 410, 422 & quynhquynh-blip \\
-GET    & \cpath{/api/orders/me} (alias \cpath{/api/orders}) & L & \code{?status=\&limit=\&offset=}      & 200 list  & 401, 422      & quynhquynh-blip, dqchien \\
-GET    & \cpath{/api/orders/{id}}                    & O   & ---                                      & 200       & 401, 404      & quynhquynh-blip, dqchien \\
-POST   & \cpath{/api/orders/{id}/cancel}             & O   & \code{\{reason?\}}                       & 200       & 401, 404, 409 & quynhquynh-blip \\
-GET    & \cpath{/api/tickets/me} (alias \cpath{/api/tickets}) & L & \code{?status=}                     & 200 list  & 401, 422      & quynhquynh-blip, dqchien \\
+GET    & \cpath{/api/concerts/{id}/seats}            & --- & ---                                      & 200 seat map & 404        & \gh{quynhquynh-blip}, \gh{khuatnhatminhcfpro-cmyk} \\
+POST   & \cpath{/api/reservations}                   & L   & \code{\{concert\_id, seat\_ids[], standing[\{zone\_id, quantity\}]\}}, 1--6 tickets in total & 201 hold  & 400, 401, 404, 409, 422 & \gh{quynhquynh-blip}, \gh{khuatnhatminhcfpro-cmyk} \\
+GET    & \cpath{/api/reservations/{id}}              & O   & ---                                      & 200       & 401, 404      & \gh{quynhquynh-blip} \\
+DELETE & \cpath{/api/reservations/{id}}              & O   & ---                                      & 200       & 401, 404, 409 & \gh{quynhquynh-blip} \\
+POST   & \cpath{/api/checkout}                       & O   & \code{\{reservation\_id, payment\_method, buyer\{full\_name, email, phone\}\}} & 201 order & 400, 401, 404, 409, 410, 422 & \gh{quynhquynh-blip} \\
+GET    & \cpath{/api/orders/me} (alias \cpath{/api/orders}) & L & \code{?status=\&limit=\&offset=}      & 200 list  & 401, 422      & \gh{quynhquynh-blip}, dqchien \\
+GET    & \cpath{/api/orders/{id}}                    & O   & ---                                      & 200       & 401, 404      & \gh{quynhquynh-blip}, dqchien \\
+POST   & \cpath{/api/orders/{id}/cancel}             & O   & \code{\{reason?\}}                       & 200       & 401, 404, 409 & \gh{quynhquynh-blip} \\
+GET    & \cpath{/api/tickets/me} (alias \cpath{/api/tickets}) & L & \code{?status=}                     & 200 list  & 401, 422      & \gh{quynhquynh-blip}, dqchien \\
 GET    & \cpath{/api/tickets/{id}}                   & O   & ---                                      & 200 with QR & 401, 404    & dqchien \\
-POST   & \cpath{/api/tickets/check-in}               & O (staff/admin) & \code{\{ticket\_code\}}      & 200       & 401, 403, 404, 409 & quynhquynh-blip \\
+POST   & \cpath{/api/tickets/check-in}               & O (staff/ admin) & \code{\{ticket\_code\}}      & 200       & 401, 403, 404, 409 & \gh{quynhquynh-blip} \\
 GET    & \cpath{/api/admin/stats}                    & O (admin) & ---                                & 200       & 401, 403      & dqchien \\
-GET    & \cpath{/api/admin/stats/concerts}           & O (admin) & ---                                & 200 list  & 401, 403      & dqchien, khuatnhatminhcfpro-cmyk \\
+GET    & \cpath{/api/admin/stats/concerts}           & O (admin) & ---                                & 200 list  & 401, 403      & dqchien, \gh{khuatnhatminhcfpro-cmyk} \\
 GET    & \cpath{/api/admin/concerts}                 & O (admin) & ---                                & 200 list  & 401, 403      & dqchien \\
 GET    & \cpath{/api/admin/concerts/{id}}            & O (admin) & ---                                & 200       & 401, 403, 404 & dqchien \\
 POST   & \cpath{/api/admin/concerts}                 & O (admin) & concert fields + \code{zones[\{name, price, capacity, booking\_type\}]} & 201 & 401, 403, 409, 422 & dqchien \\
-PUT    & \cpath{/api/admin/concerts/{id}}            & O (admin) & same as POST                       & 200       & 401, 403, 404, 409, 422 & dqchien, khuatnhatminhcfpro-cmyk \\
+PUT    & \cpath{/api/admin/concerts/{id}}            & O (admin) & same as POST                       & 200       & 401, 403, 404, 409, 422 & dqchien, \gh{khuatnhatminhcfpro-cmyk} \\
 DELETE & \cpath{/api/admin/concerts/{id}}            & O (admin) & ---                                & 204       & 401, 403, 404, 409 & dqchien \\
 POST   & \cpath{/api/admin/concerts/upload-image}    & O (admin) & multipart \code{image} (JPG/PNG/WebP, $\leq$ 5 MB) & 200 \code{\{url\}} & 401, 403, 413, 415 & dqchien \\
 GET    & \cpath{/api/admin/orders}                   & O (admin) & \code{?status=\&concert\_id=\&q=\&page=\&page\_size=} & 200 page & 401, 403, 422 & dqchien \\
 GET    & \cpath{/api/admin/orders/{id}}              & O (admin) & ---                                & 200       & 401, 403, 404 & dqchien \\
 GET    & \cpath{/api/admin/concerts/{id}/attendees}  & O (admin) & ---                                & 200 list  & 401, 403, 404 & dqchien \\
 POST   & \cpath{/api/admin/checkin}                  & O (admin) & \code{\{ticketId (id or code), concertId\}} & 200 attendee & 400, 401, 403, 404, 409 & dqchien \\
-\bottomrule
-\end{tabularx}}
+\end{xltabular}}
 
 \textbf{Changes from the M2 mock data / API contract:} concert ids are numbers in the API but
 \code{"c1"}, \code{"c2"}, \ldots{} in \cpath{js/mock-data.js}; \cpath{js/api.js} converts them with
 \code{numericId()}. Login follows the contract of PR \#72 (OAuth2 form at \cpath{/api/auth/login},
-token kept in \code{localStorage.token}). Order codes are shown as \code{\#CT-<order\_number>}.
+token kept in \code{localStorage.\allowbreak{}token}). Order codes are shown as \code{\#CT-<order\_number>}.
 A hold request now takes \code{standing[\{zone\_id, quantity\}]} next to \code{seat\_ids} and allows
 6 tickets instead of 8; checkout now also requires \code{buyer\{full\_name, email, phone\}} (validated,
 not stored separately); every zone carries \code{booking\_type} = \code{seated} | \code{standing}.
-\fillin{TODO: list any other renamed fields compared with the M2 API contract document}
 
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l >{\hsize=1.25\hsize}Y c >{\hsize=.75\hsize}Y l l l@{}}
-\toprule
-Method & Path & Auth & Request & Success & Errors & Owner \\
-\midrule
-GET  & \cpath{/api/listings}             & --- & \code{?category=\&}\allowbreak\code{max\_price=\&}\allowbreak\cpath{limit=} & 200 list & 422 & Bình \\
-GET  & \cpath{/api/listings/{id}/phone} & L  & ---                                   & 200 \code{\{phone\}} & 401, 404 & Chi \\
-POST & \cpath{/api/listings}             & L   & \code{\{title, price, category\_id\}}  & 201 & 401, 422 & Em \\
-POST & \cpath{/api/auth/register}        & --- & \code{\{email, password, full\_name\}} & 201 & 409, 422 & Dũng \\
-POST & \cpath{/api/auth/login}           & --- & \code{\{email, password\}}             & 200 token & 401 & Dũng \\
-\bottomrule
-\end{tabularx}
-
-\textbf{Changes:} \cpath{price_vnd} in the mock became \cpath{price}; the frontend was updated in
-\cpath{render.js} in the same commit.
-\end{example}
 
 % ============================================================================
 \section{Database Design}
-\hint{An entity-relationship diagram (text or image), then the constraints that protect your data:
-foreign keys, \cpath{UNIQUE}, and what \cpath{seed.py} creates.}
 
 \begin{lstlisting}
 users 1 ----< reservations >---- 1 concerts 1 ----< zones 1 ----< seats
@@ -381,15 +289,18 @@ users(id, email, password_hash, full_name, role customer|staff|admin, ...)
 concerts(id, title, artist, venue, city, poster_url, starts_at, sale_start_at, sale_end_at,
          status draft|on_sale|sold_out|cancelled|completed, ...)
 zones(id, concert_id, name, price, capacity, booking_type seated|standing)   -- ticket types
-seats(id, zone_id, row_label, seat_number, status available|held|sold, held_until, reservation_id)
+seats(id, zone_id, row_label, seat_number, status available|held|sold,
+      held_until, reservation_id)
       -- for a standing zone each row is one anonymous place; its number is never shown
 reservations(id UUID, user_id, concert_id, status active|converted|expired|cancelled, expires_at)
-orders(id, order_number, user_id, concert_id, reservation_id, total_amount, status, payment_status, refund_status)
-tickets(id, ticket_code, order_id, concert_id, seat_id, status valid|used|cancelled|refunded, checked_in_at)
+orders(id, order_number, user_id, concert_id, reservation_id, total_amount,
+       status, payment_status, refund_status)
+tickets(id, ticket_code, order_id, concert_id, seat_id,
+        status valid|used|cancelled|refunded, checked_in_at)
 \end{lstlisting}
-\textbf{Key constraints:} unique index on \code{lower(users.email)};
+\textbf{Key constraints:} unique index on \code{lower(users.\allowbreak{}email)};
 \code{UNIQUE (zone\_id, row\_label, seat\_number)} on seats and \code{UNIQUE (concert\_id, name)} on zones;
-\code{orders.order\_number} and \code{tickets.ticket\_code} UNIQUE; \code{orders.reservation\_id} UNIQUE,
+\code{orders.\allowbreak{}order\_number} and \code{tickets.\allowbreak{}ticket\_code} UNIQUE; \code{orders.\allowbreak{}reservation\_id} UNIQUE,
 so one hold can be paid only once; partial unique index \code{tickets(seat\_id) WHERE status IN ('valid','used')},
 so a seat can never have two live tickets; CHECK constraints on every status column, on prices and
 capacities ($\geq 0$ / $> 0$), on \code{refund\_amount $\leq$ total\_amount}, and
@@ -399,8 +310,9 @@ capacities ($\geq 0$ / $> 0$), on \code{refund\_amount $\leq$ total\_amount}, an
 cannot be deleted (409 \code{concert\_has\_bookings}), and a zone's type cannot be changed once it has
 tickets or held seats (409 \code{booking\_type\_has\_bookings}). Databases created before the
 standing/seated change are upgraded with \cpath{backend/migrations/001_zone_booking_type.sql}
-(applied by hand, not at startup; this was done on the Render database on 2026-11-14). \\
-\textbf{Seed data:} \code{python scripts/seed.py} (data in \cpath{scripts/seed_data.json}) creates
+(applied by hand, not at startup; this was done on the Render database on 2026-11-14).
+
+\textbf{Seed data:} \code{python scripts/\allowbreak{}seed.\allowbreak{}py} (data in \cpath{scripts/seed_data.json}) creates
 3 users (1 admin, 2 customers), 11 concerts with 33 ticket tiers (7{,}200 places in total) and their
 seats (20 seats per row; sold-out tiers get sold seats), and 14 sample orders (\#10001--\#10014):
 9 paid, 2 refunded, 1 pending, 1 failed and 1 cancelled before payment, giving a total revenue of
@@ -408,33 +320,25 @@ seats (20 seats per row; sold-out tiers get sold seats), and 14 sample orders (\
 and only inserts missing rows, so running it again changes nothing. Passwords come from
 \cpath{SEED_ADMIN_PASSWORD} / \cpath{SEED_USER_PASSWORD}, or are generated and printed once.
 \code{--check} validates the JSON without touching the database; \code{--no-sample-orders} skips orders.
+For the demo, only the Admin account above is provided; customers create and use their own accounts.
 
-\begin{example}
-\begin{lstlisting}
-user 1 ----< listing >---- 1 category
-  id, email (UNIQUE),        id, title, price,        id, name (UNIQUE)
-  password_hash, phone       status, seller_id (FK),
-                             category_id (FK)
-\end{lstlisting}
-\textbf{Key constraints:} \cpath{user.email} UNIQUE (a second register returns 409);
-\code{listing.seller\_id $\to$ user.id}; \code{listing.category\_id $\to$ category.id}; index on \cpath{listing.status}.\\
-\textbf{Seed data:} 3 users, 5 categories, 24 listings (one user with no listings, for the empty state).
-\end{example}
 
 % ============================================================================
 \section{Authentication and Authorization}
 {\small
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.4cm} Y@{}}
+\begin{xltabular}{\linewidth}{@{}R{4.6cm} Y@{}}
 \toprule
+How do customers create accounts? & Register through \cpath{/api/auth/register}; each customer logs in with the email and password they chose. The registration endpoint creates a \code{customer} account and does not issue a login token. \\
 How is a password stored? & bcrypt hash in \cpath{users.password_hash}; never returned by the API. Disabled accounts get 403 \code{account\_disabled} at login \\
-What does login return; where does the frontend keep it? & \code{\{access\_token, token\_type, user\}}; \cpath{js/api.js} stores the token in \code{localStorage.token} (plus name and role for the navbar) and sends \code{Authorization: Bearer <token>} \\
+What does login return; where does the frontend keep it? & \code{\{access\_token, token\_type, user\}}; \cpath{js/api.js} stores the token in \code{localStorage.\allowbreak{}token} (plus name and role for the navbar) and sends \code{Authorization: Bearer <token>} \\
 How long is it valid? & 60 minutes by default (\cpath{ACCESS_TOKEN_EXPIRE_MINUTES}); an expired or tampered token returns 401 and the account/admin pages send the user to Login \\
-Which routes need login? & \cpath{/api/auth/me}, all of \cpath{/api/reservations}, \cpath{/api/checkout}, \cpath{/api/orders/*}, \cpath{/api/tickets/*}, \cpath{/api/admin/*} (including concert create/edit/delete and poster upload). Public: \cpath{/api/health}, \cpath{/api/auth/login}, \cpath{/api/concerts}, \cpath{/api/concerts/{id}}, \cpath{/api/concerts/{id}/seats} \\
+Which routes need login? & \cpath{/api/auth/me}, all of \cpath{/api/reservations}, \cpath{/api/checkout}, \cpath{/api/orders/*}, \cpath{/api/tickets/*}, \cpath{/api/admin/*} (including concert create/edit/delete and poster upload). Public: \cpath{/api/health}, \cpath{/api/auth/register}, \cpath{/api/auth/login}, \cpath{/api/concerts}, \cpath{/api/concerts/{id}}, \cpath{/api/concerts/{id}/seats} \\
 Which routes check owner / role, and what error is returned? & Reservations, checkout, orders and tickets of another user return 404 (``not found'', so ids of other users are not revealed); \code{GET} \cpath{/api/orders/{id}} and \cpath{/api/tickets/{id}} also let \code{staff}/\code{admin} read any order or ticket; cancelling stays owner-only; every \cpath{/api/admin/*} route requires role \code{admin} $\to$ 403 \code{forbidden}; \cpath{/api/tickets/check-in} requires \code{staff} or \code{admin} $\to$ 403 ``Staff access required.'' \\
 How does the frontend protect pages? & \cpath{js/me.js} redirects to Login when there is no token or the API answers 401; \cpath{js/admin-guard.js} requires a token and role \code{admin} before admin pages load; a role forged in \cpath{localStorage} still gets 403 from the API and no data \\
 \bottomrule
-\end{tabularx}}
+\end{xltabular}}
 
+\medskip
 Proof that the backend blocks requests without a token:
 \begin{lstlisting}
 $ curl -i http://localhost:8000/api/orders/me
@@ -454,58 +358,35 @@ www-authenticate: Bearer
 {\small\color{ink2}Captured on 2026-11-07 against a local server started on port 8765 with a demo
 database; the port is shown as 8000 here, as in How to Run; date and content-length headers omitted.}
 
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{5.4cm} Y@{}}
-\toprule
-Password & bcrypt hash in \cpath{user.password_hash} (\code{\$2b\$12\$\ldots}); never logged \\
-Login returns & JWT \code{\{access\_token, token\_type\}}; kept in \cpath{localStorage}, sent as \code{Authorization: Bearer} \\
-Valid for & 60 minutes; after that the API returns 401 and \cpath{api.js} sends the user to Login \\
-Login required & \code{GET} \cpath{/listings/{id}/phone}, \code{POST} \cpath{/listings}, \code{GET} \cpath{/me} \\
-Owner only & \code{POST} \cpath{/listings/{id}/status} $\to$ 403 ``You can only edit your own listing'' \\
-Frontend & \cpath{requireLogin()} saves the current URL, then returns there after login \\
-\bottomrule
-\end{tabularx}
-\begin{lstlisting}
-$ curl -i http://localhost:8000/api/listings/1/phone
-HTTP/1.1 401 Unauthorized
-{"detail":"Not authenticated"}
-\end{lstlisting}
-\end{example}
 
 % ============================================================================
 \section{Business Rules}
-\hint{At least two rules from Milestone 1, enforced in backend code (not only by hiding a button).}
 
-Rule IDs follow \cpath{docs/business-rules.md}.
-\fillin{TODO: confirm these IDs are the same as in the Milestone 1 document}
+Rule IDs below match the numbering in the Milestone 1 specification.
 
-{\small
-\begin{tabularx}{\linewidth}{@{}l Y Y Y >{\raggedright\arraybackslash}p{2.4cm}@{}}
+{\footnotesize
+\begin{xltabular}{\linewidth}{@{}l R{4.0cm} Y R{3.0cm} Y@{}}
 \toprule
-ID & Rule & Enforced in (file : function) & When violated & Test \\
+\bfseries ID & \bfseries Rule & \bfseries Enforced in (file : function) & \bfseries When violated & \bfseries Test \\
 \midrule
-BR-05 & A seat or standing place can be held or sold to only one person at a time; standing zones are never oversold & \code{services/reservations.py : hold\_seats} (row locks in id order) + partial unique index on \code{tickets(seat\_id)} & 409 \code{seat\_unavailable} / \code{standing\_unavailable} & \cpath{test_many_users_race_for_one_seat_exactly_one_wins}, \cpath{test_standing_concurrency_never_oversells_capacity} \\
-BR-03 & 1 to 6 tickets per hold (numbered seats + standing quantity together) & \code{schemas.py : HoldRequest}, \code{services/reservations.py}, \code{config.py : MAX\_SEATS\_PER\_RESERVATION} & 422 / 400 \code{too\_many\_seats} & \cpath{test_api_accepts_six_and_rejects_seven_eight_without_losing_hold} \\
-BR-02 & A hold lasts 5 minutes; expired holds are released and cannot be paid & \code{config.py : RESERVATION\_TTL}, lazy expiry in \code{services/reservations.py}, sweeper in \code{main.py} & 410 \code{reservation\_expired} at checkout & \cpath{test_expired_hold_frees_seat_lazily_for_another_user}, \cpath{test_sweeper_releases_only_expired_holds} \\
-BR-01 & Seats can be held only while the concert is on sale & \code{services/reservations.py} & 409 \code{concert\_not\_on\_sale} / \code{sale\_not\_started} / \code{sale\_ended} & \cpath{test_hold_respects_sale_state} \\
-BR-08 & One hold is paid at most once (repeating checkout returns the same order) & \code{services/checkout.py : checkout} + UNIQUE \code{orders.reservation\_id} & same order returned & \cpath{test_concurrent_checkout_of_same_reservation_creates_one_order} \\
-BR-12 & An order can be cancelled only more than 24 h before the show (always if the concert is cancelled), and not after a ticket was used & \code{services/orders.py : cancel\_order} & 409 \code{cancel\_window\_closed} / \code{ticket\_used} / \code{already\_cancelled} & \cpath{test_cancel_rules}, \cpath{test_cannot_cancel_after_check_in} \\
-BR-11 & A ticket admits once, only at its own concert, and only while valid & \code{services/checkin.py : check\_in} (conditional \code{UPDATE \ldots{} WHERE status='valid'}) & 409 \code{ticket\_already\_used}; 400 \code{wrong\_concert} / \code{ticket\_not\_valid} & \cpath{test_concurrent_check_in_admits_ticket_once}, \cpath{test_cancelled_or_refunded_ticket_is_400} \\
-\bottomrule
-\end{tabularx}}
-
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l Y Y Y >{\raggedright\arraybackslash}p{2.4cm}@{}}
+\endfirsthead
 \toprule
-ID & Rule & Enforced in & When violated & Test \\
+\bfseries ID & \bfseries Rule & \bfseries Enforced in (file : function) & \bfseries When violated & \bfseries Test \\
 \midrule
-BR-7 & Only logged-in users see a seller's phone & \code{routers/listings.py : reveal\_phone} via \cpath{Depends(get_current_user)} & 401 & \cpath{test_phone_needs_login} \\
-BR-11 & A sold listing cannot go back to ``active'' & \code{routers/listings.py : change\_status} & 409 ``Listing already sold'' & \cpath{test_sold_is_final} \\
+\endhead
 \bottomrule
-\end{tabularx}
-\end{example}
+\endfoot
+BR-1 & Seat lifecycle: selection is client-side; a successful hold makes inventory Held, payment makes it Sold, and expiry or eligible cancellation releases it. Holds also require the sale window to be open. & \code{services/\allowbreak{}reservations.py}, \code{services/\allowbreak{}checkout.py}, \code{services/\allowbreak{}orders.py} & unavailable or out-of-sale seats are rejected & \cpath{test_hold_marks_seats_held_with_expiry_and_total}, \cpath{test_checkout_creates_paid_order_tickets_and_sells_seats}, \cpath{test_cancel_refunds_and_frees_seats_for_resale} \\
+BR-2 & A hold lasts 5 minutes; expired holds are released and cannot be paid & \code{config.\allowbreak{}py : RESERVATION\_TTL}, lazy expiry in \code{services/\allowbreak{}reservations.\allowbreak{}py}, sweeper in \code{main.\allowbreak{}py} & 410 \code{reservation\_expired} at checkout & \cpath{test_expired_hold_frees_seat_lazily_for_another_user}, \cpath{test_sweeper_releases_only_expired_holds} \\
+BR-3 & A reservation holds 1--6 tickets in total (seated and standing combined); the limit was 8 before the final implementation. & \code{schemas.\allowbreak{}py : HoldRequest}, \code{services/\allowbreak{}reservations.\allowbreak{}py}, \code{config.\allowbreak{}py : MAX\_SEATS\_PER\_RESERVATION} & 422 / 400 \code{too\_many\_seats} & \cpath{test_api_accepts_six_and_rejects_seven_eight_without_losing_hold} \\
+BR-4 & Successful payment creates one unique digital ticket for each purchased inventory item; valid tickets expose a QR code. & \code{services/\allowbreak{}checkout.py}; ticket detail response & no ticket is issued when checkout fails & \cpath{test_checkout_returns_paid_order_with_tickets}, \cpath{test_ticket_detail_has_qr_image_and_holder} \\
+BR-5 & A seat or standing place can be held or sold to only one person at a time; standing zones are never oversold & \code{services/\allowbreak{}reservations.\allowbreak{}py : hold\_seats} (row locks in id order) + partial unique index on \code{tickets(seat\_id)} & 409 \code{seat\_unavailable} / \code{standing\_unavailable} & \cpath{test_many_users_race_for_one_seat_exactly_one_wins}, \cpath{test_standing_concurrency_never_oversells_capacity} \\
+BR-6 & Payment is simulated; successful checkout marks the order paid without contacting a payment provider. & \code{services/\allowbreak{}checkout.py : checkout} & invalid payment method is rejected; no external transaction occurs & \cpath{test_checkout_returns_paid_order_with_tickets} \\
+BR-7 & Eligible customer cancellations update the order, ticket and inventory state and apply a mock full refund; used tickets cannot be cancelled. & \code{services/\allowbreak{}orders.\allowbreak{}py : cancel\_order} & 409 \code{cancel\_window\_closed} / \code{ticket\_used} / \code{already\_cancelled} & \cpath{test_cancel_rules}, \cpath{test_cannot_cancel_after_check_in} \\
+BR-8 & A ticket QR can be validated only once; check-in requires a valid ticket for the selected concert. & \code{services/\allowbreak{}checkin.\allowbreak{}py : check\_in} (conditional \code{UPDATE \ldots{} WHERE status='valid'}) & 409 \code{ticket\_already\_used}; 400 \code{wrong\_concert} / \code{ticket\_not\_valid} & \cpath{test_concurrent_check_in_admits_ticket_once}, \cpath{test_cancelled_or_refunded_ticket_is_400} \\
+BR-11 & Customers can access and cancel only their own orders/tickets; admin operations require the Admin role. & \code{deps.py}, owner checks in order/ticket services, \code{admin-guard.js} & 401 unauthenticated / 403 forbidden or 404 for another user's resource & \cpath{test_cannot_cancel_someone_elses_order}, \cpath{test_missing_token_is_401}, \cpath{test_customer_and_staff_get_403} \\
+\end{xltabular}}
+
 
 % ============================================================================
 \section{Testing}
@@ -515,71 +396,75 @@ $ TEST_DATABASE_URL=postgresql://postgres:<password>@localhost/concertly_test py
 [progress dots omitted]
 212 passed, 1 warning in 86.21s (0:01:26)
 \end{lstlisting}
-{\small\color{ink2}Run on 2026-11-14 on origin/main + the deployment docs, Python 3.13.5, PostgreSQL 17.7.
+{\small\color{ink2}Run on 2026-11-14 on origin/main, Python 3.13.5, PostgreSQL 17.7.
 The warning is a Starlette deprecation notice about \cpath{httpx}, not a test problem.}
-{\small
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.4cm} Y l@{}}
+\par\smallskip
+\textbf{Manual QA (PR \#111):} the test-case report records 40 cases: 38 PASS and 2 FAIL.
+AUTH-001 reports a User login failure and ADMIN-009 reports a 404 for the Admin Support page.
+The report does not identify the tested account or environment; the intended customer flow is
+self-registration followed by login, and the backend registration/login test passes.
+AUTH-001 was retested by registering a new customer account with a personal name and email and
+logging in with it: login succeeded and all customer features worked.
+ADMIN-009 does not concern an admin page: the admin area has only three tabs (Dashboard, Check-in and Concerts).
+The Support tab exists only in the customer navigation, and its route is not implemented, so it returns 404.
+
+
+\par\medskip
+{\footnotesize
+\begin{xltabular}{\linewidth}{@{}R{6.2cm} Y R{3.6cm}@{}}
 \toprule
-Test & What it proves & Owner \\
+\bfseries Test & \bfseries What it proves & \bfseries Owner \\
 \midrule
-\cpath{test_many_users_race_for_one_seat_exactly_one_wins} & many threads holding the same seat: exactly one succeeds & quynhquynh-blip \\
-\cpath{test_stress_many_users_random_seats_no_double_booking} & random concurrent holds never sell a seat twice & quynhquynh-blip \\
-\cpath{test_concurrent_checkout_of_same_reservation_creates_one_order} & paying the same hold twice in parallel creates one order & quynhquynh-blip \\
-\cpath{test_cancel_rules} & the 24-hour cut-off and cancelled-concert exception & quynhquynh-blip \\
+\endfirsthead
+\toprule
+\bfseries Test & \bfseries What it proves & \bfseries Owner \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\cpath{test_many_users_race_for_one_seat_exactly_one_wins} & many threads holding the same seat: exactly one succeeds & \gh{quynhquynh-blip} \\
+\cpath{test_stress_many_users_random_seats_no_double_booking} & random concurrent holds never sell a seat twice & \gh{quynhquynh-blip} \\
+\cpath{test_concurrent_checkout_of_same_reservation_creates_one_order} & paying the same hold twice in parallel creates one order & \gh{quynhquynh-blip} \\
+\cpath{test_cancel_rules} & the 24-hour cut-off and cancelled-concert exception & \gh{quynhquynh-blip} \\
 \cpath{test_validate_rejects_double_sold_seat} & the seed refuses data that would sell a seat twice & dqchien \\
 \cpath{test_missing_token_is_401}, \cpath{test_customer_and_staff_get_403} & admin routes need a token and role \code{admin} & dqchien \\
 \cpath{test_token_signed_with_another_secret_is_401} & a JWT signed with another key is rejected & dqchien \\
 \cpath{test_simultaneous_check_in_and_cancel} & check-in racing with cancellation leaves a consistent ticket & dqchien \\
 \cpath{test_cannot_cancel_someone_elses_order} & a customer cannot cancel another customer's order & dqchien \\
 \cpath{test_admin_concert_crud_creates_inventory_and_preserves_bookings} & creating/editing a concert builds its seats and never deletes booked ones & dqchien \\
-\cpath{test_standing_concurrency_never_oversells_capacity} & parallel standing holds never exceed the zone capacity & khuatnhatminhcfpro-cmyk \\
-\cpath{test_api_accepts_six_and_rejects_seven_eight_without_losing_hold} & the 6-ticket limit, and a rejected request keeps the previous hold & khuatnhatminhcfpro-cmyk \\
-\cpath{test_change_type_only_before_bookings_and_validate_enum} & a zone's seated/standing type is locked once it has bookings & khuatnhatminhcfpro-cmyk \\
-\cpath{test_dashboard_matches_read_only_snapshot} & dashboard API numbers equal an independent SQL reconciliation & khuatnhatminhcfpro-cmyk \\
-\bottomrule
-\end{tabularx}}
+\cpath{test_standing_concurrency_never_oversells_capacity} & parallel standing holds never exceed the zone capacity & \gh{khuatnhatminhcfpro-cmyk} \\
+\cpath{test_api_accepts_six_and_rejects_seven_eight_without_losing_hold} & the 6-ticket limit, and a rejected request keeps the previous hold & \gh{khuatnhatminhcfpro-cmyk} \\
+\cpath{test_change_type_only_before_bookings_and_validate_enum} & a zone's seated/standing type is locked once it has bookings & \gh{khuatnhatminhcfpro-cmyk} \\
+\cpath{test_dashboard_matches_read_only_snapshot} & dashboard API numbers equal an independent SQL reconciliation & \gh{khuatnhatminhcfpro-cmyk} \\
+\end{xltabular}}
 
-\begin{example}
-\begin{lstlisting}
-$ pytest -q
-.........                                                  [100%]
-9 passed in 1.84s
-\end{lstlisting}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.4cm} Y l@{}}
-\toprule
-Test & What it proves & Owner \\
-\midrule
-\cpath{test_register_duplicate_email} & a second register with the same email returns 409 & Dũng \\
-\cpath{test_phone_needs_login} & no token $\to$ 401; with token $\to$ 200 and the phone & Chi \\
-\cpath{test_filter_by_price} & \cpath{?max_price=100000} returns only cheaper listings & Bình \\
-\bottomrule
-\end{tabularx}
-\end{example}
 
 % ============================================================================
-\section{Team Members and Individual Contributions}
-\hint{The most important section. During Q\&A the lecturer picks a member, opens the files listed
-under their name and asks them to walk through the code and make a small change. List only what
-that person really did and can explain alone. The table must match \code{git log}; the
-\emph{Share} column must add up to 100.}
+\section{Team Members and Individual Contributions}\label{sec:team}
 
-\fillin{TODO: student IDs, full names, commit counts and shares must be filled in by the team.
-Only work confirmed by merged PRs or assigned issues is listed below.}
+Student IDs, full names and contribution shares were confirmed by the team; the listed work is tied to merged PRs, assigned issues or the confirmed commit history.
 
-{\small
-\begin{tabularx}{\linewidth}{@{}r l >{\raggedright\arraybackslash}p{1.7cm} Y Y r r l@{}}
+{\scriptsize\renewcommand{\arraystretch}{1.05}\setlength{\tabcolsep}{3pt}
+\begin{xltabular}{\linewidth}{@{}r R{1.7cm} R{2.2cm} Y Y r r R{1.6cm}@{}}
 \toprule
-No. & Student ID & Full name & Frontend (screens / JS) & Backend (endpoints / files / tests) & Comm. & Share & Status \\
+\bfseries No. & \bfseries Student ID & \bfseries Full name & \bfseries Frontend (screens / JS) & \bfseries Backend (endpoints / files / tests) & \bfseries Comm. & \bfseries Share & \bfseries Status \\
 \midrule
-1 & \fillin{ } & \fillin{Thảo Hiền?} (GitHub dqchien) & \cpath{auth/login.html}, \cpath{me/*.html}, \cpath{me.js}, \cpath{admin/index.html}, \cpath{admin/checkin.html}, \cpath{admin/concerts.html}, \cpath{dashboard.js}, \cpath{checkin.js}, \cpath{concerts.js}, \cpath{public-catalog.js}, \cpath{admin-common.js}, \cpath{admin-guard.js}, auth/account/admin parts of \cpath{api.js} & \cpath{scripts/seed.py} (\#34); \cpath{routers/admin.py}, \cpath{services/admin.py} (\#35, \#38, concert CRUD and poster upload in PR \#81); \cpath{services/catalog.py} (PR \#81); \cpath{services/checkin.py} (\#36); \cpath{routers/auth.py}, \cpath{security.py}, \cpath{deps.py} (\#35, \#37); \cpath{docs/deploy.md} (\#39); \cpath{test_seed.py}, \cpath{test_api_admin.py}, \cpath{test_api_checkin.py}, \cpath{test_api_me.py} & 39 & \fillin{ }\% & Completed \#34--\#39 \\
-2 & \fillin{ } & \fillin{ } (GitHub quynhquynh-blip, also ``AnhQuynh'') & seat selection and server-backed checkout UI (PR \#70); navbar and shared CSS & reservations with 5-minute hold (PR \#66), checkout (PR \#67), orders/tickets/cancel/check-in API (PR \#68), concurrency tests (PR \#69): \cpath{services/reservations.py}, \cpath{checkout.py}, \cpath{orders.py}, \cpath{seatmap.py}, \cpath{test_holding.py}, \cpath{test_concurrency.py}, \cpath{test_checkout.py}, \cpath{test_orders.py} & 92 & \fillin{ }\% & Completed \\
-3 & \fillin{ } & \fillin{ } (GitHub w7mc6s6dvp-stack) & \fillin{ } & PR \#71 (FastAPI), PR \#72 (auth/register), PR \#77 (concert API) --- not merged into main; issues \#46--\#50 & \fillin{0 on main} & \fillin{ }\% & \fillin{ } \\
-4 & \fillin{ } & Khuất Đình Trung (GitHub khuatnhatminhcfpro-cmyk) & standing/seated ticket selection: \cpath{tickets.js}, \cpath{checkout.js}, \cpath{venue-engine.js}, \cpath{venue-loader.js}, \cpath{js/venues/*-map.js}; dashboard inventory label fix (\#87) & standing inventory and 6-ticket limit in \cpath{services/reservations.py}; \cpath{venue_catalog.py}; \code{zones.booking\_type} + \cpath{migrations/001_zone_booking_type.sql} (PR \#83); dashboard reconciliation SQL; \cpath{test_mixed_admission.py}, \cpath{test_zone_booking_type.py}, \cpath{test_dashboard_reconciliation.py}; \cpath{docs/business-rules.md}, \cpath{api-spec.md}, \cpath{final-report.md} (\#58) & 15 & \fillin{ }\% & Completed \\
-5 & \fillin{ } & Bạch Vũ Lân (GitHub bachvulan161207-beep) & first version of My Tickets, My Orders and Order Detail pages (\cpath{me/*.html}, \cpath{css/me.css}) & \cpath{docs/test-plan.md} & 3 & \fillin{ }\% & \fillin{ } \\
+\endfirsthead
+\toprule
+\bfseries No. & \bfseries Student ID & \bfseries Full name & \bfseries Frontend (screens / JS) & \bfseries Backend (endpoints / files / tests) & \bfseries Comm. & \bfseries Share & \bfseries Status \\
+\midrule
+\endhead
 \bottomrule
-\end{tabularx}}
+\endfoot
+1 & 11247287 & Chử Vũ Thảo Hiền (GitHub \gh{dqchien}) & \cpath{me/*.html}, \cpath{me.js}, \cpath{admin/index.html}, \cpath{admin/checkin.html}, \cpath{admin/concerts.html}, \cpath{dashboard.js}, \cpath{checkin.js}, \cpath{concerts.js}, \cpath{public-catalog.js}, \cpath{admin-common.js}, \cpath{admin-guard.js}, auth/account/admin parts of \cpath{api.js} & \cpath{scripts/seed.py} (\#34); \cpath{routers/admin.py}, \cpath{services/admin.py} (\#35, \#38, concert CRUD and poster upload in PR \#81); \cpath{services/catalog.py} (PR \#81); \cpath{services/checkin.py} (\#36); \cpath{routers/auth.py}, \cpath{security.py}, \cpath{deps.py} (\#35, \#37); \cpath{docs/deploy.md} (\#39); \cpath{test_seed.py}, \cpath{test_api_admin.py}, \cpath{test_api_checkin.py}, \cpath{test_api_me.py} & 39 & 27\% & Completed \\
+2 & 11247347 & Phan Thị Anh Quỳnh (GitHub \gh{quynhquynh-blip}, ``Anh Quỳnh'') & seat selection and server-backed checkout UI (PR \#70); navbar and shared CSS & reservations with 5-minute hold (PR \#66), checkout (PR \#67), orders/tickets/cancel/check-in API (PR \#68), concurrency tests (PR \#69): \cpath{services/reservations.py}, \cpath{checkout.py}, \cpath{orders.py}, \cpath{seatmap.py}, \cpath{test_holding.py}, \cpath{test_concurrency.py}, \cpath{test_checkout.py}, \cpath{test_orders.py} & 92 & 27\% & Completed \\
+3 & 31251026774 & Nguyễn Tiến Đạt (GitHub \gh{w7mc6s6dvp-stack}) & \cpath{auth/login.html}, \cpath{auth/register.html} (login and registration screens) & Tasks \#46--\#52: auth, public catalogue and admin zone APIs, shared API client, public UI integration and XSS protection; commits on main: FastAPI setup, auth, concert API, admin concert CRUD and API client & 5 & 17\% & Completed \\
+4 & 11247362 & Khuất Đình Trung (GitHub \gh{khuatnhatminhcfpro-cmyk}, ``Swn.dtrung'') & standing/seated ticket selection: \cpath{tickets.js}, \cpath{checkout.js}, \cpath{venue-engine.js}, \cpath{venue-loader.js}, \cpath{js/venues/*-map.js}; dashboard inventory label fix (\#87) & standing inventory and 6-ticket limit in \cpath{services/reservations.py}; \cpath{venue_catalog.py}; \code{zones.\allowbreak{}booking\_type} + \cpath{migrations/001_zone_booking_type.sql} (PR \#83); dashboard reconciliation SQL; \cpath{test_mixed_admission.py}, \cpath{test_zone_booking_type.py}, \cpath{test_dashboard_reconciliation.py}; \cpath{docs/business-rules.md}, \cpath{api-spec.md}, \cpath{final-report.md} (\#58) & 15 & 17\% & Completed \\
+5 & 3251023316 & Bạch Vũ Lân (GitHub \gh{bachvulan161207-beep}, ``vũlân'') & first version of My Tickets, My Orders and Order Detail pages (\cpath{me/*.html}, \cpath{css/me.css}) & \cpath{docs/test-plan.md} & 3 & 12\% & Partially completed \\
+\end{xltabular}}
 
-\begin{lstlisting}
+\medskip
+\begin{vnlisting}
 $ git shortlog -sn --no-merges origin/main
     92  quynhquynh-blip
     30  dqchien
@@ -588,37 +473,12 @@ $ git shortlog -sn --no-merges origin/main
      5  Your Name
      3  Bạch Vũ Lân
      1  Thảo Hiền
-\end{lstlisting}
+\end{vnlisting}
 {\small\color{ink2}Run on 2026-11-14. Names were grouped by commit e-mail: ``dqchien'', ``ThaoHien'' and
 ``Thảo Hiền'' use the same address (39 commits); ``AnhQuynh'' (merge commits only) shares the
-address of quynhquynh-blip; ``Khuất Đình Trung'' (merge commits only) shares the address of
-khuatnhatminhcfpro-cmyk. The deploy guide (\#39) is on branch \cpath{issue39-deploy-docs} and not yet counted.}
-\fillin{TODO: ``Your Name'' (5 commits on main, 19 in all branches, git user name not set) wrote the
-task-46 to task-50 commits (FastAPI setup, auth, concert API, admin concert CRUD, API client) ---
-confirm whose they are and add a \cpath{.mailmap}.}
-
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}r l >{\raggedright\arraybackslash}p{1.7cm} Y Y r r l@{}}
-\toprule
-No. & ID & Name & Frontend & Backend & Comm. & Share & Status \\
-\midrule
-1 & 1124\ldots01 & Nguyễn An   & \cpath{site-header.js}, \cpath{api.js}, 404 page & \cpath{main.py}, \cpath{database.py}, \cpath{seed.py} & 34 & 22\% & Completed \\
-2 & 1124\ldots02 & Trần Bình   & \cpath{index.html}, \cpath{search.js} & \code{GET} \cpath{/api/listings}, \code{GET} \cpath{/api/categories}; \cpath{test_filter_by_price} & 21 & 19\% & Completed \\
-3 & 1124\ldots03 & Lê Chi      & \cpath{listing-detail.js} & \code{GET} \cpath{/listings/{id}}, \cpath{/phone} (BR-7); \cpath{test_phone_needs_login} & 19 & 19\% & Completed \\
-4 & 1124\ldots04 & Phạm Dũng   & \cpath{login.html}, \cpath{register.html}, \cpath{auth.js} & \cpath{routers/auth.py}, \cpath{security.py}, \cpath{deps.py} & 23 & 21\% & Completed \\
-5 & 1124\ldots05 & Hoàng Em    & \cpath{listing-new.html}, \cpath{my-listings.js} & \code{POST} \cpath{/listings}, \cpath{/status} (BR-11), \cpath{/uploads} & 17 & 19\% & Partially \\
-\bottomrule
-\end{tabularx}
-\begin{lstlisting}
-$ git shortlog -sn --all
-    34  Nguyen An
-    23  Pham Dung
-    21  Tran Binh
-    19  Le Chi
-    17  Hoang Em
-\end{lstlisting}
-\end{example}
+address of \gh{quynhquynh-blip}; ``Khuất Đình Trung'' (merge commits only) shares the address of
+\gh{khuatnhatminhcfpro-cmyk}. The ``Your Name'' entry maps to Nguyễn Tiến Đạt
+(\gh{w7mc6s6dvp-stack}): 5 commits on \cpath{origin/main} and 19 across all branches.}
 
 % ============================================================================
 \section{How to Run}
@@ -637,92 +497,108 @@ uvicorn app.main:app --reload --port 8000
 python -m http.server 5500
 \end{lstlisting}
 Open \cpath{http://localhost:5500} (app) and \cpath{http://localhost:8000/docs} (API).
-Full steps for a new machine are in \cpath{setup.md}.\\
-\textbf{Environment variables:}
-\cpath{DATABASE_URL} --- PostgreSQL connection --- \code{postgresql://postgres:<password>@localhost:5432/concertly};
-\cpath{JWT_SECRET} --- signs login tokens, required --- output of \code{python -c "import secrets; print(secrets.token\_urlsafe(48))"};
-\cpath{SEED_ADMIN_PASSWORD}, \cpath{SEED_USER_PASSWORD} --- demo account passwords used by the seed (random and printed once if empty);
-\cpath{CORS_ORIGINS} --- allowed frontend origins --- default \code{*};
-\cpath{ACCESS_TOKEN_EXPIRE_MINUTES} --- token lifetime --- default \code{60};
-\cpath{RESERVATION_TTL_SECONDS} --- seat hold length --- default \code{300};
-\cpath{TEST_DATABASE_URL} --- database for pytest, its name must contain ``test'' because the tests drop and recreate every table;
-\cpath{ALLOW_DEV_USER_HEADER} --- development-only \code{X-User-Id} login stub, off unless set to \code{1}, never on Render.\\
+Full steps for a new machine are in \cpath{setup.md}.
+
+\medskip
+\textbf{Environment variables}\par\smallskip
+{\footnotesize
+\begin{xltabular}{\linewidth}{@{}R{4.2cm} Y R{6.6cm}@{}}
+\toprule
+\bfseries Variable & \bfseries Purpose & \bfseries Default / example \\
+\midrule
+\endfirsthead
+\toprule
+\bfseries Variable & \bfseries Purpose & \bfseries Default / example \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\cpath{DATABASE_URL} & PostgreSQL connection string & \code{postgresql:/\allowbreak{}/\allowbreak{}postgres:<password>@localhost:5432/\allowbreak{}concertly} \\
+\cpath{JWT_SECRET} & Signs login tokens (required) & output of \code{python -c "import secrets; print(secrets.\allowbreak{}token\_urlsafe(48))"} \\
+\cpath{SEED_ADMIN_PASSWORD}, \cpath{SEED_USER_PASSWORD} & Passwords for seeded accounts (only the Admin account is supplied for the demo) & random, printed once if empty \\
+\cpath{CORS_ORIGINS} & Allowed frontend origins & \code{*} \\
+\cpath{ACCESS_TOKEN_EXPIRE_MINUTES} & Token lifetime & \code{60} \\
+\cpath{RESERVATION_TTL_SECONDS} & Seat hold length & \code{300} \\
+\cpath{TEST_DATABASE_URL} & Database for pytest; its name must contain ``test'' because the tests drop and recreate every table & --- \\
+\cpath{ALLOW_DEV_USER_HEADER} & Development-only \code{X-User-Id} login stub; never on Render & off unless set to \code{1} \\
+\bottomrule
+\end{xltabular}}
+\medskip
+
 \textbf{Deployment (Render):} Web Service with root directory \cpath{backend}, build
-\code{pip install -r requirements.txt}, start \code{uvicorn app.main:app --host 0.0.0.0 --port \$PORT},
+\code{pip install -r requirements.\allowbreak{}txt}, start \code{uvicorn app.\allowbreak{}main:app --host 0.0.0.0 --port \$PORT},
 environment \cpath{DATABASE_URL}, \cpath{JWT_SECRET}, \cpath{CORS_ORIGINS} =
-\cpath{https://concertly-trang-dat-ve-concert.onrender.com}; \cpath{js/api.js} calls
-\cpath{http://localhost:8000/api} when the page is opened from \code{localhost}/\code{127.0.0.1}/\code{file://}
-and \cpath{https://concertly.onrender.com/api} from any other host (\code{window.CONCERTLY\_API\_BASE}
-still overrides both). Full steps in \cpath{docs/deploy.md}.\\
+\cpath{https://concertly-trang-dat-ve-concert.onrender.com}; the frontend sets
+\code{window.\allowbreak{}CONCERTLY\_API\_BASE = "https:/\allowbreak{}/\allowbreak{}concertly.\allowbreak{}onrender.\allowbreak{}com/\allowbreak{}api"}. Full steps in \cpath{docs/deploy.md}.
+
 \textbf{Known setup problems:} without \cpath{JWT_SECRET} login fails with 500; a password with
-\code{@}, \code{\#} or \code{/} in \cpath{DATABASE_URL} must be URL-encoded (\code{@} $\to$ \code{\%40});
+\code{@}, \code{\#} or \code{/\allowbreak{}} in \cpath{DATABASE_URL} must be URL-encoded (\code{@} $\to$ \code{\%40});
 on Windows, if \cpath{Activate.ps1} is blocked, run \code{Set-ExecutionPolicy -Scope CurrentUser RemoteSigned} once;
 a database created before PR \#83 needs \cpath{migrations/001_zone_booking_type.sql}, otherwise
 \cpath{/api/concerts} returns 500 (this happened on Render and was fixed on 2026-11-14).
 
-\begin{example}
-\textbf{Environment variables:} \cpath{DATABASE_URL=sqlite:///./app.db};
-\cpath{SECRET_KEY=change-me} (signs the JWT).\\
-\textbf{Known setup problems:} on Windows, if \cpath{Activate.ps1} is blocked, run
-\code{Set-ExecutionPolicy -Scope CurrentUser RemoteSigned} once.
-\end{example}
 
 % ============================================================================
-\section{Known Issues and Future Work}
-{\small
-\begin{tabularx}{\linewidth}{@{}Y Y Y@{}}
+\section{Known Issues and Future Work}\label{sec:issues}
+{\footnotesize
+\begin{xltabular}{\linewidth}{@{}Y Y Y@{}}
 \toprule
-Issue / missing feature & Why not done & How we would do it \\
+\bfseries Issue / missing feature & \bfseries Why not done & \bfseries How we would do it \\
 \midrule
-No registration: \cpath{auth/register.html} only saves the name in \code{localStorage}, no account is created & PR \#72 (auth) was built on a different (SQLite) base and was not merged & \code{POST} \cpath{/api/auth/register} with bcrypt and the case-insensitive unique email index \\
+\endfirsthead
+\toprule
+\bfseries Issue / missing feature & \bfseries Why not done & \bfseries How we would do it \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Manual report AUTH-001 could not log in with the tested User credentials & Test account and environment were not specified & Resolved: a customer who registers with a personal name and email can log in with that account and use all features \\
+Customer Support tab returns 404 (reported as ADMIN-009 in PR \#111) & The Support tab exists only in the customer navigation; the admin area has just three tabs (Dashboard, Check-in, Concerts) and no Support page. The route was never implemented & Implement a Support page (contact form or FAQ), or remove the tab until it exists \\
+M1 BR-9 specifies VND prices of 50,000--20,000,000 and no price changes after sales begin & The project uses US dollars as its currency, so the VND range does not apply & Keep US dollars; \fillin{TODO: verify that prices cannot be edited after sales begin} \\
+M1 BR-10 requires soft deletion for cancelled orders and deleted concerts & Not required for this project; cancelled orders keep their status, but concert deletion removes the record & If needed, add a deleted flag or timestamp and filter deleted records out of queries \\
 The public pages still load \cpath{js/mock-data.js}; \cpath{public-catalog.js} replaces the managed concerts with API data, and mock concerts not in the database can still appear & Venue-map slugs, images and some display fields only exist in the mock file; the merge keeps the site working when the API is down & Store the remaining display fields on \code{concerts}, then drop \code{MOCK\_CONCERTS} \\
 Uploaded posters can be lost on Render & \cpath{backend/app/uploads/} is on the instance's temporary disk & Attach a persistent disk or store images in object storage \\
 Seated zones cannot auto-assign seats; one ticket type per ``Continue'' in the UI & The API accepts mixed seated + standing holds, but the UI sends one type at a time & Auto-pick adjacent seats under the same row locks; a mixed cart on the tickets page \\
-Checkout without a \code{reservationId} still has a demo branch that writes \code{localStorage.concertlyPurchases}; \cpath{js/orders.js} is unused; notifications (\cpath{js/noti.js}) are mock & Left from the mock version; the real flow and account pages use the API & Remove the demo branch and the unused file; add a notifications endpoint if it is in scope \\
+Checkout without a \code{reservationId} still has a demo branch that writes \code{localStorage.\allowbreak{}concertlyPurchases}; \cpath{js/orders.js} is unused; notifications (\cpath{js/noti.js}) are mock & Left from the mock version; the real flow and account pages use the API & Remove the demo branch and the unused file; add a notifications endpoint if it is in scope \\
 Cancellation is whole-order only; refunds are always full and always succeed & No payment provider; partial refunds were out of scope & Per-ticket cancel and a refund status workflow (\code{requested}/\code{rejected} already exist in the schema) \\
 Payment is simulated & No payment provider in scope; \code{payment\_method} is only validated (\code{card}, \code{ewallet}, \code{bank\_transfer}) & Payment provider redirect + webhook that marks the order paid \\
 Dates and times are shown in the viewer's time zone & The frontend formats ISO timestamps with the browser's locale & Format with the venue's time zone stored on the concert \\
-The mock login \code{admin/admin123} no longer works & Login now checks real accounts in the database & Use the seeded \code{admin@concertly.dev} account \\
-\bottomrule
-\end{tabularx}}
+The mock username \code{admin} is not a valid login & Login checks real accounts by email in PostgreSQL & Use the Admin demo email above; customers register their own accounts \\
+\end{xltabular}}
 
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}Y Y Y@{}}
-\toprule
-Issue & Why not done & How we would do it \\
-\midrule
-Only one photo per listing & Ran out of time on the uploader & A \cpath{photo} table with \cpath{listing_id} FK and \cpath{position} \\
-``Mark as sold'' missing & BR-11 done in the API, no button yet & Add the button in \cpath{my-listings.js}, call the existing endpoint \\
-\bottomrule
-\end{tabularx}
-\end{example}
 
 % ============================================================================
 \section{Use of AI Tools and External Sources}
-\hint{Using a tool is allowed, but each member must still be able to explain the code under their name.
-Write ``None'' if you did not use any.}
 
-{\small
-\begin{tabularx}{\linewidth}{@{}l Y l l@{}}
+{\footnotesize
+\begin{xltabular}{\linewidth}{@{}R{3.4cm} Y R{3.6cm} R{1.8cm}@{}}
 \toprule
-Tool / source & Used for & Files & Who \\
+\bfseries Tool / source & \bfseries Used for & \bfseries Files & \bfseries Who \\
 \midrule
-Claude Code (Anthropic) & Implementing and testing issues \#34--\#38 (seed, admin stats/orders API, check-in API, login and account pages, admin dashboard and check-in pages), writing \cpath{setup.md} and drafting this report & files listed for dqchien in Section~10, \cpath{setup.md} & dqchien \\
-\fillin{TODO: other members' tools and sources} & \fillin{ } & \fillin{ } & \fillin{ } \\
+\endfirsthead
+\toprule
+\bfseries Tool / source & \bfseries Used for & \bfseries Files & \bfseries Who \\
+\midrule
+\endhead
 \bottomrule
-\end{tabularx}}
+\endfoot
+Claude Code (\mbox{Anthropic}), Copilot & Implementing and testing the seed script, admin and check-in APIs, authentication, account and admin pages, concert management and the deployment guide; writing \cpath{setup.md} and drafting this report & Files listed for dqchien in Section~\ref{sec:team}; \cpath{setup.md} & Thảo Hiền \\
+\addlinespace
+Claude Code (\mbox{Anthropic}) &
+\begin{itemize}
+\item Suggested an initial structure for several pages and the responsive CSS.
+\item Explained how to handle row locking and retry on deadlock in PostgreSQL.
+\item Suggested extra test cases for concurrent seat booking.
+\item Drafted the backend README.
+\item Helped design the booking flow and the API structure.
+\end{itemize} & Seat-selection and checkout pages, shared CSS; \cpath{services/reservations.py}, \cpath{test_concurrency.py}; backend README & Anh Quỳnh \\
+\addlinespace
+Gemini, Claude & Drafting Pydantic validators and SQLAlchemy queries, refactoring the shared API client and XSS sanitization, brainstorming pytest cases for concurrency edge cases, and Git rebase/conflict guidance (Tasks \#46--\#52). All output was reviewed, adapted and tested by the author. & \cpath{test_api_auth.py}, \cpath{test_api_admin.py}, \cpath{js/api.js} & Nguyễn Tiến Đạt \\
+\addlinespace
+ChatGPT, OpenAI Codex & Explaining the system architecture and business logic, suggesting implementation approaches, debugging and code review, cross-checking the API against the documentation and test cases, and improving the report wording. Suggestions were checked against the source code, documentation and test runs before being applied. & \cpath{docs/api-spec.md}, \cpath{docs/business-rules.md}, \cpath{docs/README.md}, \cpath{docs/final-report.md}, and files for the assigned features & Khuất Đình Trung \\
+\addlinespace
+ChatGPT & Supporting the testing and documentation work: drafting and reviewing test cases, the test plan, the test report and the demo script. & \cpath{docs/test-plan.md}, \cpath{test-report-m4.md}, \cpath{demo-script.md}, \cpath{README.md} & Bạch Vũ Lân \\
+\end{xltabular}}
 
-\begin{example}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l Y l l@{}}
-\toprule
-Tool / source & Used for & Files & Who \\
-\midrule
-ChatGPT & Explaining a \cpath{422} error; generating 24 fake listings & \cpath{seed.py} & An \\
-FastAPI docs & JWT example adapted for our \cpath{User} model & \cpath{security.py} & Dũng \\
-\bottomrule
-\end{tabularx}
-\end{example}
 
 \end{document}
